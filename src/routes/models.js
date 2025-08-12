@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Model = require('../models/Model');
-const auth = require('../middleware/auth'); // If directory is lowercase
+const auth = require('../middleware/auth'); // Consistent with lowercase middleware directory
 const { query, body, validationResult } = require('express-validator');
 const cloudinary = require('../config/cloudinary');
 const upload = require('../middleware/multer');
@@ -62,13 +62,13 @@ router.get('/:id', async (req, res) => {
   } catch (error) {
     console.error('Error fetching model by ID:', error);
     res.status(500).json({ message: 'Server error' });
-  }
+    }
 });
 
 // Admin: Add a model
 router.post(
   '/',
-  authMiddleware,
+  auth, // Fixed to use 'auth' instead of 'authMiddleware'
   upload.single('image'),
   [
     body('name').notEmpty().withMessage('Name is required'),
@@ -137,7 +137,7 @@ router.post(
 // Admin: Update a model
 router.put(
   '/:id',
-  authMiddleware,
+  auth, // Fixed to use 'auth' instead of 'authMiddleware'
   upload.single('image'),
   [
     body('name').optional().notEmpty().withMessage('Name cannot be empty'),
@@ -214,7 +214,7 @@ router.put(
 // Admin: Add portfolio image
 router.post(
   '/:id/portfolio',
-  authMiddleware,
+  auth, // Fixed to use 'auth' instead of 'authMiddleware'
   upload.single('image'),
   async (req, res) => {
     try {
@@ -254,7 +254,7 @@ router.post(
 // Admin: Delete portfolio image
 router.delete(
   '/:id/portfolio/:imageIndex',
-  authMiddleware,
+  auth, // Fixed to use 'auth' instead of 'authMiddleware'
   async (req, res) => {
     try {
       const model = await Model.findById(req.params.id);
@@ -280,28 +280,32 @@ router.delete(
 );
 
 // Admin: Delete a model
-router.delete('/:id', authMiddleware, async (req, res) => {
-  try {
-    const model = await Model.findById(req.params.id);
-    if (!model) {
-      return res.status(404).json({ message: 'Model not found' });
-    }
-    // Delete main image
-    if (model.imagePublicId) {
-      await cloudinary.uploader.destroy(model.imagePublicId).catch(err => console.error('Error deleting main image:', err));
-    }
-    // Delete portfolio images
-    for (const image of model.portfolioImages) {
-      if (image.public_id) {
-        await cloudinary.uploader.destroy(image.public_id).catch(err => console.error('Error deleting portfolio image:', err));
+router.delete(
+  '/:id',
+  auth, // Fixed to use 'auth' instead of 'authMiddleware'
+  async (req, res) => {
+    try {
+      const model = await Model.findById(req.params.id);
+      if (!model) {
+        return res.status(404).json({ message: 'Model not found' });
       }
+      // Delete main image
+      if (model.imagePublicId) {
+        await cloudinary.uploader.destroy(model.imagePublicId).catch(err => console.error('Error deleting main image:', err));
+      }
+      // Delete portfolio images
+      for (const image of model.portfolioImages) {
+        if (image.public_id) {
+          await cloudinary.uploader.destroy(image.public_id).catch(err => console.error('Error deleting portfolio image:', err));
+        }
+      }
+      await Model.findByIdAndDelete(req.params.id);
+      res.json({ message: 'Model deleted' });
+    } catch (error) {
+      console.error('Error deleting model:', error);
+      res.status(500).json({ message: error.message || 'Server error' });
     }
-    await Model.findByIdAndDelete(req.params.id);
-    res.json({ message: 'Model deleted' });
-  } catch (error) {
-    console.error('Error deleting model:', error);
-    res.status(500).json({ message: error.message || 'Server error' });
   }
-});
+);
 
 module.exports = router;
