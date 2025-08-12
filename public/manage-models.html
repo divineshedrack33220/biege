@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beige | Manage Models</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#faf6f0',
+                            100: '#f5ede1',
+                            200: '#ebdbc3',
+                            300: '#dfc39d',
+                            400: '#d2a16d',
+                            500: '#c8854a',
+                            600: '#ba6f3f',
+                            700: '#9b5835',
+                            800: '#7d4730',
+                            900: '#663b29',
+                            950: '#361e15',
+                        },
+                        secondary: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                            950: '#020617',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .sidebar {
+            transition: width 0.3s ease, box-shadow 0.3s ease;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+            box-shadow: 1px 0 10px rgba(0, 0, 0, 0.05);
+        }
+        .sidebar-collapsed {
+            width: 60px;
+        }
+        .sidebar-collapsed .sidebar-text {
+            display: none;
+        }
+        .sidebar-collapsed .logo-text {
+            display: none;
+        }
+        .sidebar-collapsed .nav-item {
+            justify-content: center;
+        }
+        .content-area {
+            transition: margin-left 0.3s ease;
+            background-color: #f8fafc;
+        }
+        .content-expanded {
+            margin-left: 60px;
+        }
+        .card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            animation: cardEnter 0.4s ease-out forwards;
+        }
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        @keyframes cardEnter {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .modal {
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            backdrop-filter: blur(2px);
+        }
+        .modal-enter {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        .modal-enter-active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .modal-exit {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .modal-exit-active {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        .alert {
+            animation: slideIn 0.3s ease-out;
+            border-radius: 6px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        .form-input, .form-file {
+            border: 1px solid #e2e8f0;
+            padding: 0.375rem 0.75rem;
+            border-radius: 6px;
+            width: 100%;
+            font-size: 0.8125rem;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .form-input:focus, .form-file:focus {
+            outline: none;
+            border-color: #c8854a;
+            box-shadow: 0 0 0 3px rgba(200, 133, 74, 0.2);
+        }
+        .form-button {
+            background-color: #c8854a;
+            color: white;
+            padding: 0.375rem 0.75rem;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 0.8125rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+        }
+        .form-button:hover {
+            background-color: #ba6f3f;
+            transform: translateY(-1px);
+        }
+        .form-button:disabled {
+            background-color: #e2e8f0;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .spinner {
+            display: inline-block;
+            width: 0.875rem;
+            height: 0.875rem;
+            border: 2px solid #c8854a;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        .tooltip {
+            position: relative;
+        }
+        .tooltip:hover:after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #1e293b;
+            color: white;
+            padding: 0.375rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.6875rem;
+            font-weight: 500;
+            white-space: nowrap;
+            z-index: 10;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+            margin-bottom: 6px;
+        }
+        .portfolio-image {
+            animation: imageFadeIn 0.3s ease-out;
+        }
+        .model-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .photo-thumbnail {
+            object-fit: cover;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .photo-thumbnail:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+        @keyframes imageFadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        .details-collapse {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .details-collapse.open {
+            max-height: 600px;
+        }
+        header {
+            background: linear-gradient(90deg, #ffffff 0%, #f8fafc 100%);
+            box-shadow: 0 1px 8px rgba(0, 0, 0, 0.05);
+        }
+        .nav-item {
+            border-radius: 6px;
+            margin: 0 6px;
+            transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+        }
+        .nav-item:hover {
+            transform: translateX(3px);
+        }
+        .nav-item.active {
+            background-color: #faf6f0;
+            color: #c8854a;
+            font-weight: 600;
+        }
+        .carousel-container {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+        }
+        .carousel-slide {
+            display: flex;
+            transition: transform 0.3s ease-in-out;
+        }
+        .carousel-image {
+            width: 100%;
+            max-height: 70vh;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+        .carousel-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .carousel-nav:hover {
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+        .carousel-prev {
+            left: 1rem;
+        }
+        .carousel-next {
+            right: 1rem;
+        }
+        .carousel-counter {
+            position: absolute;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <!-- Sidebar -->
+    <div class="sidebar fixed top-0 left-0 h-screen bg-white shadow-md z-50 w-56 flex flex-col">
+        <div class="p-3 flex items-center justify-between border-b border-gray-200">
+            <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-primary-500 flex items-center justify-center text-white font-bold text-sm">
+                    B
+                </div>
+                <span class="logo-text ml-2 text-lg font-semibold">Beige Admin</span>
+            </div>
+            <button id="sidebar-toggle" class="text-gray-500 hover:text-gray-700" aria-label="Toggle Sidebar">
+                <i class="fas fa-bars text-sm"></i>
+            </button>
+        </div>
+        <div class="flex-1 overflow-y-auto py-3">
+             <nav>
+                <div class="px-3 mb-3">
+                    <p class="sidebar-text text-xs font-semibold text-gray-500 uppercase tracking-wider">Dashboard</p>
+                </div>
+                <ul>
+                    <li>
+                        <a href="admin.html" data-section="overview-section" class="nav-item flex items-center px-3 py-2 text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-colors">
+                            <i class="fas fa-tachometer-alt w-5 text-center"></i>
+                            <span class="sidebar-text ml-2 text-sm">Overview</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="manage-models.html" data-section="models-section" class="nav-item flex items-center px-3 py-2 text-gray-700 bg-primary-50 text-primary-600 active">
+                            <i class="fas fa-users w-5 text-center"></i>
+                            <span class="sidebar-text ml-2 text-sm">Models</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="manage-bookings.html" data-section="bookings-section" class="nav-item flex items-center px-3 py-2 text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-colors">
+                            <i class="fas fa-calendar-check w-5 text-center"></i>
+                            <span class="sidebar-text ml-2 text-sm">Bookings</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="manage-applications.html" data-section="applications-section" class="nav-item flex items-center px-3 py-2 text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-colors">
+                            <i class="fas fa-envelope w-5 text-center"></i>
+                            <span class="sidebar-text ml-2 text-sm">Applications</span>
+                        </a>
+                    </li>
+                </ul>
+                <div class="px-3 mt-4 mb-3">
+                    <p class="sidebar-text text-xs font-semibold text-gray-500 uppercase tracking-wider">Content</p>
+                </div>
+                <ul>
+                     <li>
+                        <a href="manage-about-companies.html" data-section="team-section" class="nav-item flex items-center px-3 py-2 text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-colors">
+                            <i class="fas fa-user-tie w-5 text-center"></i>
+                            <span class="sidebar-text ml-2 text-sm">About & Companies</span>
+                        </a>
+                    </li>
+                  
+                    <li>
+                        <a href="manage-team-members.html" data-section="team-section" class="nav-item flex items-center px-3 py-2 text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-colors">
+                            <i class="fas fa-user-tie w-5 text-center"></i>
+                            <span class="sidebar-text ml-2 text-sm">Team</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="manage-newsletter-subscribers.html" data-section="newsletter-section" class="nav-item flex items-center px-3 py-2 text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-colors">
+                            <i class="fas fa-newspaper w-5 text-center"></i>
+                            <span class="sidebar-text ml-2 text-sm">Newsletter</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        <div class="p-3 border-t border-gray-200 flex items-center">
+            <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                <i class="fas fa-user text-gray-500 text-sm"></i>
+            </div>
+            <div class="sidebar-text ml-2">
+                <p class="text-sm font-medium">Admin User</p>
+                <p class="text-xs text-gray-500">Super Admin</p>
+            </div>
+            <button id="logout-btn" class="sidebar-text ml-auto text-gray-500 hover:text-gray-700" aria-label="Logout">
+                <i class="fas fa-sign-out-alt text-sm"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content-area ml-56 min-h-screen">
+        <!-- Top Navigation -->
+        <header class="bg-white shadow-sm py-3 px-4 flex items-center justify-between sticky top-0 z-40">
+            <div class="flex items-center">
+                <h1 class="text-lg font-bold text-gray-900" id="dashboard-title">Manage Models</h1>
+            </div>
+            <div class="flex items-center space-x-3">
+                <button class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors" aria-label="Notifications">
+                    <i class="fas fa-bell text-sm"></i>
+                </button>
+                <button class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors" aria-label="Messages">
+                    <i class="fas fa-envelope text-sm"></i>
+                </button>
+                <div class="relative">
+                    <button id="user-menu-button" class="flex items-center space-x-1 focus:outline-none" aria-label="User Menu">
+                        <div class="w-6 h-6 rounded-full bg-primary-500 flex items-center justify-center text-white font-medium text-xs">
+                            A
+                        </div>
+                        <span class="hidden md:inline-block text-sm font-medium">Admin User</span>
+                        <i class="fas fa-chevron-down text-xs"></i>
+                    </button>
+                    <div id="user-menu" class="hidden absolute right-0 mt-1 w-40 bg-white rounded-lg shadow-lg py-1 z-50">
+                        <a href="#" class="block px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-colors">Your Profile</a>
+                        <a href="#" class="block px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-colors">Settings</a>
+                        <a href="#" id="menu-logout" class="block px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-colors">Sign out</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Dashboard Content -->
+        <main class="p-4">
+            <div id="dashboard">
+                <!-- Models Section -->
+                <div id="models-section">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-base font-semibold text-gray-900">Models</h2>
+                        <button id="add-model-btn" class="form-button" aria-label="Add New Model">Add Model</button>
+                    </div>
+                    <div id="model-loading" class="text-center text-xs py-3 hidden">
+                        <span class="spinner"></span> Loading...
+                    </div>
+                    <p id="model-error" class="text-red-500 text-xs py-2 hidden"></p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="model-grid"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add/Edit Model Modal -->
+    <div id="model-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-xl max-h-[85vh] overflow-y-auto">
+            <div class="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+                <h3 class="text-base font-semibold text-gray-900" id="model-modal-title">Add Model</h3>
+                <button id="close-model-modal" class="text-gray-500 hover:text-gray-700" aria-label="Close Modal">
+                    <i class="fas fa-times text-sm"></i>
+                </button>
+            </div>
+            <div class="p-4">
+                <form id="model-form" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <input type="hidden" id="model-id">
+                    <input type="hidden" id="model-image-public-id">
+                    <div>
+                        <label for="model-name" class="block text-xs font-medium text-gray-700 mb-1">Model Name</label>
+                        <input type="text" id="model-name" placeholder="Model Name" class="form-input" aria-label="Model Name" required>
+                    </div>
+                    <div>
+                        <label for="model-category" class="block text-xs font-medium text-gray-700 mb-1">Category</label>
+                        <select id="model-category" class="form-input" aria-label="Model Category" required>
+                            <option value="beauty">Beauty</option>
+                            <option value="bridal">Bridal</option>
+                            <option value="fashion">Fashion</option>
+                            <option value="brand">Brand</option>
+                            <option value="makeup">Makeup</option>
+                            <option value="Light Skin">Light Skin</option>
+                            <option value="Dark Skin">Dark Skin</option>
+                            <option value="Caramel Skin">Caramel Skin</option>
+                            <option value="Brown Skin">Brown Skin</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="model-image" class="block text-xs font-medium text-gray-700 mb-1">Main Image</label>
+                        <input type="file" id="model-image" accept="image/*" class="form-file" aria-label="Main Image">
+                    </div>
+                    <div>
+                        <label for="model-height" class="block text-xs font-medium text-gray-700 mb-1">Height</label>
+                        <input type="text" id="model-height" placeholder="Height (e.g., 5'9\")" class="form-input" aria-label="Height">
+                    </div>
+                    <div>
+                        <label for="model-measurements" class="block text-xs font-medium text-gray-700 mb-1">Measurements</label>
+                        <input type="text" id="model-measurements" placeholder="Measurements (e.g., 86-61-89 cm)" class="form-input" aria-label="Measurements">
+                    </div>
+                    <div>
+                        <label for="model-hair" class="block text-xs font-medium text-gray-700 mb-1">Hair Color</label>
+                        <input type="text" id="model-hair" placeholder="Hair Color" class="form-input" aria-label="Hair Color">
+                    </div>
+                    <div>
+                        <label for="model-eyes" class="block text-xs font-medium text-gray-700 mb-1">Eye Color</label>
+                        <input type="text" id="model-eyes" placeholder="Eye Color" class="form-input" aria-label="Eye Color">
+                    </div>
+                    <div>
+                        <label for="model-location" class="block text-xs font-medium text-gray-700 mb-1">Location</label>
+                        <input type="text" id="model-location" placeholder="Location" class="form-input" aria-label="Location">
+                    </div>
+                    <div>
+                        <label for="model-instagram" class="block text-xs font-medium text-gray-700 mb-1">Instagram URL (optional)</label>
+                        <input type="url" id="model-instagram" placeholder="Instagram URL" class="form-input" aria-label="Instagram URL">
+                    </div>
+                    <div>
+                        <label for="model-tiktok" class="block text-xs font-medium text-gray-700 mb-1">TikTok URL (optional)</label>
+                        <input type="url" id="model-tiktok" placeholder="TikTok URL" class="form-input" aria-label="TikTok URL">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label for="model-description" class="block text-xs font-medium text-gray-700 mb-1">Description</label>
+                        <textarea id="model-description" placeholder="Description" class="form-input" rows="3" aria-label="Model Description"></textarea>
+                    </div>
+                    <div class="md:col-span-2 flex justify-end space-x-3">
+                        <button type="button" id="cancel-model" class="px-3 py-1.5 border border-gray-300 rounded-md text-xs font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
+                        <button type="submit" id="model-submit" class="form-button">Save Model</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Portfolio Image Modal -->
+    <div id="portfolio-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-sm">
+            <div class="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+                <h3 class="text-base font-semibold text-gray-900">Add Portfolio Image</h3>
+                <button id="close-portfolio-modal" class="text-gray-500 hover:text-gray-700" aria-label="Close Modal">
+                    <i class="fas fa-times text-sm"></i>
+                </button>
+            </div>
+            <div class="p-4">
+                <form id="portfolio-form" class="space-y-3">
+                    <input type="hidden" id="portfolio-model-id">
+                    <div>
+                        <label for="portfolio-image" class="block text-xs font-medium text-gray-700 mb-1">Portfolio Image</label>
+                        <input type="file" id="portfolio-image" accept="image/*" class="form-file" aria-label="Portfolio Image" required>
+                    </div>
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" id="cancel-portfolio" class="px-3 py-1.5 border border-gray-300 rounded-md text-xs font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
+                        <button type="submit" id="portfolio-submit" class="form-button">Add Image</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Photo Modal -->
+    <div id="photo-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full">
+            <div class="p-4 flex justify-between items-center border-b border-gray-200">
+                <h3 class="text-base font-semibold text-gray-900">Portfolio Images</h3>
+                <button id="close-photo-modal" class="text-gray-500 hover:text-gray-700" aria-label="Close Photo Modal">
+                    <i class="fas fa-times text-sm"></i>
+                </button>
+            </div>
+            <div class="p-4">
+                <div class="carousel-container">
+                    <div id="carousel-slide" class="carousel-slide"></div>
+                    <button id="carousel-prev" class="carousel-nav carousel-prev hidden" aria-label="Previous Photo">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button id="carousel-next" class="carousel-nav carousel-next hidden" aria-label="Next Photo">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                    <div id="carousel-counter" class="carousel-counter"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Alert -->
+    <div id="success-alert" class="fixed top-3 right-3 z-50 hidden">
+        <div class="bg-green-50 border-l-4 border-green-500 p-3">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-check-circle text-green-500 text-sm"></i>
+                </div>
+                <div class="ml-2">
+                    <p id="success-message" class="text-xs font-medium text-green-700">Action completed successfully!</p>
+                </div>
+                <div class="ml-auto pl-2">
+                    <button id="close-success-alert" class="text-green-500 hover:text-green-700" aria-label="Close Success Alert">
+                        <i class="fas fa-times text-sm"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Alert -->
+    <div id="error-alert" class="fixed top-3 right-3 z-50 hidden">
+        <div class="bg-red-50 border-l-4 border-red-500 p-3">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-circle text-red-500 text-sm"></i>
+                </div>
+                <div class="ml-2">
+                    <p id="error-message" class="text-xs font-medium text-red-700">An error occurred.</p>
+                </div>
+                <div class="ml-auto pl-2">
+                    <button id="close-error-alert" class="text-red-500 hover:text-red-700" aria-label="Close Error Alert">
+                        <i class="fas fa-times text-sm"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmation-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-sm">
+            <div class="p-4">
+                <div class="flex items-center justify-center w-10 h-10 mx-auto bg-red-100 rounded-full">
+                    <i class="fas fa-exclamation text-red-600 text-base"></i>
+                </div>
+                <div class="mt-2 text-center">
+                    <h3 id="confirmation-title" class="text-base font-semibold text-gray-900">Confirm Action</h3>
+                    <div class="mt-1">
+                        <p id="confirmation-message" class="text-xs text-gray-500">Are you sure you want to perform this action?</p>
+                    </div>
+                </div>
+            </div>
+            <div class="px-4 py-2 flex flex-row-reverse">
+                <button id="confirm-action" type="button" class="px-3 py-1.5 rounded-md border border-transparent shadow-sm bg-red-600 text-xs font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 ml-2">Confirm</button>
+                <button id="cancel-action" type="button" class="px-3 py-1.5 rounded-md border border-gray-300 shadow-sm bg-white text-xs font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function decodeToken(token) {
+            if (!token) {
+                console.error('No token provided for decoding');
+                return false;
+            }
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                console.log('Token payload:', payload);
+                const exp = payload.exp * 1000;
+                const now = Date.now();
+                console.log('Token expires at:', new Date(exp).toLocaleString());
+                console.log('Current time:', new Date(now).toLocaleString());
+                return exp > now;
+            } catch (error) {
+                console.error('Error decoding token:', error);
+                return false;
+            }
+        }
+
+        const token = localStorage.getItem('token');
+        const dashboard = document.getElementById('dashboard');
+        const modelError = document.getElementById('model-error');
+        const modelLoading = document.getElementById('model-loading');
+        const sidebar = document.querySelector('.sidebar');
+        const contentArea = document.querySelector('.content-area');
+        const userMenuButton = document.getElementById('user-menu-button');
+        const userMenu = document.getElementById('user-menu');
+        const modelModal = document.getElementById('model-modal');
+        const portfolioModal = document.getElementById('portfolio-modal');
+        const modelForm = document.getElementById('model-form');
+        const portfolioForm = document.getElementById('portfolio-form');
+
+        // Initial token check
+        if (!token || !decodeToken(token)) {
+            console.log('No valid token found, redirecting to login');
+            window.location.href = 'index.html';
+        } else {
+            console.log('Token is valid');
+            dashboard.classList.remove('hidden');
+            loadModels();
+        }
+
+        // Sidebar toggle
+        document.getElementById('sidebar-toggle').addEventListener('click', () => {
+            sidebar.classList.toggle('sidebar-collapsed');
+            contentArea.classList.toggle('content-expanded');
+        });
+
+        // User menu toggle
+        userMenuButton.addEventListener('click', () => {
+            userMenu.classList.toggle('hidden');
+        });
+
+        // Logout handlers
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            console.log('Logging out, clearing token');
+            localStorage.removeItem('token');
+            window.location.href = 'index.html';
+        });
+
+        document.getElementById('menu-logout').addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log('Logging out via menu, clearing token');
+            localStorage.removeItem('token');
+            window.location.href = 'index.html';
+            userMenu.classList.add('hidden');
+        });
+
+        // Modal controls
+        document.getElementById('add-model-btn').addEventListener('click', () => {
+            document.getElementById('model-modal-title').textContent = 'Add Model';
+            document.getElementById('model-form').reset();
+            document.getElementById('model-id').value = '';
+            document.getElementById('model-image-public-id').value = '';
+            modelModal.classList.remove('hidden');
+            modelModal.classList.add('modal-enter-active');
+            setTimeout(() => modelModal.classList.remove('modal-enter-active'), 200);
+            document.getElementById('model-name').focus();
+        });
+
+        document.getElementById('close-model-modal').addEventListener('click', () => {
+            modelModal.classList.add('modal-exit-active');
+            setTimeout(() => {
+                modelModal.classList.add('hidden');
+                modelModal.classList.remove('modal-exit-active');
+            }, 200);
+        });
+
+        document.getElementById('cancel-model').addEventListener('click', () => {
+            modelModal.classList.add('modal-exit-active');
+            setTimeout(() => {
+                modelModal.classList.add('hidden');
+                modelModal.classList.remove('modal-exit-active');
+            }, 200);
+        });
+
+        document.getElementById('close-portfolio-modal').addEventListener('click', () => {
+            portfolioModal.classList.add('modal-exit-active');
+            setTimeout(() => {
+                portfolioModal.classList.add('hidden');
+                portfolioModal.classList.remove('modal-exit-active');
+            }, 200);
+        });
+
+        document.getElementById('cancel-portfolio').addEventListener('click', () => {
+            portfolioModal.classList.add('modal-exit-active');
+            setTimeout(() => {
+                portfolioModal.classList.add('hidden');
+                portfolioModal.classList.remove('modal-exit-active');
+            }, 200);
+        });
+
+        // Photo modal close
+        document.getElementById('close-photo-modal').addEventListener('click', () => {
+            const photoModal = document.getElementById('photo-modal');
+            photoModal.classList.add('modal-exit-active');
+            setTimeout(() => {
+                photoModal.classList.add('hidden');
+                photoModal.classList.remove('modal-exit-active');
+            }, 200);
+        });
+
+        // Close modals on outside click
+        modelModal.addEventListener('click', (e) => {
+            if (e.target === modelModal) {
+                modelModal.classList.add('modal-exit-active');
+                setTimeout(() => {
+                    modelModal.classList.add('hidden');
+                    modelModal.classList.remove('modal-exit-active');
+                }, 200);
+            }
+        });
+
+        portfolioModal.addEventListener('click', (e) => {
+            if (e.target === portfolioModal) {
+                portfolioModal.classList.add('modal-exit-active');
+                setTimeout(() => {
+                    portfolioModal.classList.add('hidden');
+                    portfolioModal.classList.remove('modal-exit-active');
+                }, 200);
+            }
+        });
+
+        document.getElementById('photo-modal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('photo-modal')) {
+                const photoModal = document.getElementById('photo-modal');
+                photoModal.classList.add('modal-exit-active');
+                setTimeout(() => {
+                    photoModal.classList.add('hidden');
+                    photoModal.classList.remove('modal-exit-active');
+                }, 200);
+            }
+        });
+
+        // Keyboard navigation for modals
+        modelModal.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                modelModal.classList.add('modal-exit-active');
+                setTimeout(() => {
+                    modelModal.classList.add('hidden');
+                    modelModal.classList.remove('modal-exit-active');
+                }, 200);
+            }
+        });
+
+        portfolioModal.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                portfolioModal.classList.add('modal-exit-active');
+                setTimeout(() => {
+                    portfolioModal.classList.add('hidden');
+                    portfolioModal.classList.remove('modal-exit-active');
+                }, 200);
+            }
+        });
+
+        document.getElementById('photo-modal').addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const photoModal = document.getElementById('photo-modal');
+                photoModal.classList.add('modal-exit-active');
+                setTimeout(() => {
+                    photoModal.classList.add('hidden');
+                    photoModal.classList.remove('modal-exit-active');
+                }, 200);
+            } else if (e.key === 'ArrowLeft') {
+                showPrevPhoto();
+            } else if (e.key === 'ArrowRight') {
+                showNextPhoto();
+            }
+        });
+
+        let currentPhotoIndex = 0;
+        let photos = [];
+
+        function showPhotoModal(photoArray, startIndex = 0) {
+            if (!Array.isArray(photoArray) || photoArray.length === 0) {
+                console.error('Invalid photo array:', photoArray);
+                return;
+            }
+            photos = photoArray.map(p => p.url); // Extract URLs from portfolioImages
+            currentPhotoIndex = Math.min(Math.max(startIndex, 0), photos.length - 1);
+            const photoModal = document.getElementById('photo-modal');
+            const carouselSlide = document.getElementById('carousel-slide');
+            const carouselPrev = document.getElementById('carousel-prev');
+            const carouselNext = document.getElementById('carousel-next');
+            const carouselCounter = document.getElementById('carousel-counter');
+
+            carouselSlide.innerHTML = '';
+            photos.forEach((photo, index) => {
+                const img = document.createElement('img');
+                img.src = photo;
+                img.alt = `Portfolio Image ${index + 1}`;
+                img.className = 'carousel-image';
+                carouselSlide.appendChild(img);
+            });
+
+            updateCarousel();
+            carouselSlide.style.transform = `translateX(-${currentPhotoIndex * 100}%)`;
+            carouselPrev.classList.toggle('hidden', photos.length <= 1);
+            carouselNext.classList.toggle('hidden', photos.length <= 1);
+            carouselCounter.textContent = `${currentPhotoIndex + 1} / ${photos.length}`;
+
+            photoModal.classList.remove('hidden');
+            photoModal.classList.add('modal-enter-active');
+            setTimeout(() => photoModal.classList.remove('modal-enter-active'), 200);
+
+            // Swipe detection
+            let touchStartX = 0;
+            let touchEndX = 0;
+
+            carouselSlide.addEventListener('touchstart', (e) => {
+                touchStartX = e.changedTouches[0].screenX;
+            });
+
+            carouselSlide.addEventListener('touchend', (e) => {
+                touchEndX = e.changedTouches[0].screenX;
+                if (touchEndX < touchStartX - 50) {
+                    showNextPhoto();
+                } else if (touchEndX > touchStartX + 50) {
+                    showPrevPhoto();
+                }
+            });
+        }
+
+        function showPrevPhoto() {
+            if (currentPhotoIndex > 0) {
+                currentPhotoIndex--;
+                updateCarousel();
+            }
+        }
+
+        function showNextPhoto() {
+            if (currentPhotoIndex < photos.length - 1) {
+                currentPhotoIndex++;
+                updateCarousel();
+            }
+        }
+
+        function updateCarousel() {
+            const carouselSlide = document.getElementById('carousel-slide');
+            const carouselPrev = document.getElementById('carousel-prev');
+            const carouselNext = document.getElementById('carousel-next');
+            const carouselCounter = document.getElementById('carousel-counter');
+
+            carouselSlide.style.transform = `translateX(-${currentPhotoIndex * 100}%)`;
+            carouselPrev.classList.toggle('hidden', currentPhotoIndex === 0);
+            carouselNext.classList.toggle('hidden', currentPhotoIndex === photos.length - 1);
+            carouselCounter.textContent = `${currentPhotoIndex + 1} / ${photos.length}`;
+        }
+
+        document.getElementById('carousel-prev').addEventListener('click', showPrevPhoto);
+        document.getElementById('carousel-next').addEventListener('click', showNextPhoto);
+
+        async function loadModels() {
+            modelLoading.classList.remove('hidden');
+            modelError.classList.add('hidden');
+            try {
+                const token = localStorage.getItem('token');
+                console.log('Sending request with token for models:', token);
+                if (!token) {
+                    throw new Error('No token found in localStorage');
+                }
+                const response = await fetch('/api/models?page=1&limit=100', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!response.ok) {
+                    const data = await response.json().catch(() => ({}));
+                    if (response.status === 401) {
+                        console.log('Unauthorized request, clearing token');
+                        localStorage.removeItem('token');
+                        window.location.href = 'index.html';
+                        return;
+                    }
+                    throw new Error(data.message || `HTTP error: ${response.status}`);
+                }
+                const data = await response.json();
+                if (!data.models || !Array.isArray(data.models)) {
+                    throw new Error('Invalid API response format');
+                }
+                const modelGrid = document.getElementById('model-grid');
+                modelGrid.innerHTML = '';
+                data.models.forEach((model, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'card bg-white rounded-lg overflow-hidden';
+                    div.style.animationDelay = `${index * 0.05}s`;
+                    div.innerHTML = `
+                        <div class="relative">
+                            <img src="${model.imageUrl}" alt="${model.name}" class="model-image w-full h-48 object-cover" loading="lazy">
+                            <div class="absolute top-1 right-1 flex space-x-1">
+                                <button onclick="editModel('${model._id}', '${model.name}', '${model.category}', '${model.imageUrl}', '${model.imagePublicId || ''}', '${model.description || ''}', '${model.height || ''}', '${model.measurements || ''}', '${model.hair || ''}', '${model.eyes || ''}', '${model.location || ''}', '${model.socialLinks?.instagram || ''}', '${model.socialLinks?.tiktok || ''}')" class="tooltip text-white bg-primary-500 hover:bg-primary-600 p-1.5 rounded-full" data-tooltip="Edit Model" aria-label="Edit Model">
+                                    <i class="fas fa-edit text-xs"></i>
+                                </button>
+                                <button onclick="deleteModel('${model._id}', '${model.imagePublicId || ''}')" class="tooltip text-white bg-red-500 hover:bg-red-600 p-1.5 rounded-full" data-tooltip="Delete Model" aria-label="Delete Model">
+                                    <i class="fas fa-trash text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="p-3">
+                            <h4 class="text-sm font-semibold truncate">${model.name}</h4>
+                            <p class="text-xs text-gray-500">${model.category.charAt(0).toUpperCase() + model.category.slice(1)}</p>
+                            <button onclick="toggleDetails(this)" class="text-blue-500 hover:text-blue-700 text-xs mt-1" aria-label="Toggle Model Details">View Details</button>
+                            <div class="details-collapse mt-1">
+                                <ul class="text-xs space-y-1">
+                                    <li><i class="fas fa-ruler-vertical mr-1 text-primary-500"></i><strong>Height:</strong> ${model.height || 'N/A'}</li>
+                                    <li><i class="fas fa-tape mr-1 text-primary-500"></i><strong>Measurements:</strong> ${model.measurements || 'N/A'}</li>
+                                    <li><i class="fas fa-hair mr-1 text-primary-500"></i><strong>Hair:</strong> ${model.hair || 'N/A'}</li>
+                                    <li><i class="fas fa-eye mr-1 text-primary-500"></i><strong>Eyes:</strong> ${model.eyes || 'N/A'}</li>
+                                    <li><i class="fas fa-map-marker-alt mr-1 text-primary-500"></i><strong>Location:</strong> ${model.location || 'N/A'}</li>
+                                    <li><i class="fab fa-instagram mr-1 text-primary-500"></i><strong>Instagram:</strong> ${model.socialLinks?.instagram ? `<a href="${model.socialLinks.instagram}" target="_blank" class="text-blue-500 hover:underline">Link</a>` : 'N/A'}</li>
+                                    <li><i class="fab fa-tiktok mr-1 text-primary-500"></i><strong>TikTok:</strong> ${model.socialLinks?.tiktok ? `<a href="${model.socialLinks.tiktok}" target="_blank" class="text-blue-500 hover:underline">Link</a>` : 'N/A'}</li>
+                                    <li><i class="fas fa-info-circle mr-1 text-primary-500"></i><strong>Description:</strong> ${model.description || 'N/A'}</li>
+                                </ul>
+                            </div>
+                            <div class="mt-2">
+                                <p class="text-xs font-medium">Portfolio Images: <span class="text-blue-500 hover:underline cursor-pointer" onclick='showPhotoModal(${JSON.stringify(model.portfolioImages)})'>View ${model.portfolioImages?.length || 0} photo(s)</span></p>
+                                ${model.portfolioImages?.length > 0 ? `
+                                    <div class="grid grid-cols-3 gap-2 mt-1">
+                                        ${model.portfolioImages.map((img, i) => `
+                                            <div class="relative">
+                                                <img src="${img.url}" alt="Portfolio ${i + 1}" class="photo-thumbnail w-full h-20 object-cover" onclick='showPhotoModal(${JSON.stringify(model.portfolioImages)}, ${i})'>
+                                                <button onclick="deletePortfolioImage('${model._id}', ${i})" class="absolute top-0.5 right-0.5 text-red-500 hover:text-red-700 text-xs tooltip" data-tooltip="Delete Image" aria-label="Delete Portfolio Image">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                ` : '<p class="text-xs text-gray-500">No portfolio images</p>'}
+                                <button onclick="setPortfolioModelId('${model._id}')" class="text-blue-500 hover:text-blue-700 text-xs mt-1 tooltip" data-tooltip="Add Portfolio Image" aria-label="Add Portfolio Image">
+                                    <i class="fas fa-plus mr-1"></i>Add Image
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    modelGrid.appendChild(div);
+                });
+            } catch (error) {
+                modelError.textContent = error.message || 'Error loading models';
+                modelError.classList.remove('hidden');
+            } finally {
+                modelLoading.classList.add('hidden');
+            }
+        }
+
+        function toggleDetails(button) {
+            const details = button.nextElementSibling;
+            details.classList.toggle('open');
+            button.textContent = details.classList.contains('open') ? 'Hide Details' : 'View Details';
+        }
+
+        function validateFile(file, maxSizeMB = 5) {
+            const maxSize = maxSizeMB * 1024 * 1024; // Convert MB to bytes
+            if (!file) return 'No file selected';
+            if (!file.type.startsWith('image/')) return 'File must be an image';
+            if (file.size > maxSize) return `File size exceeds ${maxSizeMB}MB`;
+            return null;
+        }
+
+        modelForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitButton = document.getElementById('model-submit');
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<span class="spinner"></span> Saving...';
+            modelError.classList.add('hidden');
+            try {
+                const token = localStorage.getItem('token');
+                console.log('Sending model form with token:', token);
+                if (!token) {
+                    throw new Error('No token found in localStorage');
+                }
+                const id = document.getElementById('model-id').value;
+                const name = document.getElementById('model-name').value.trim();
+                const category = document.getElementById('model-category').value;
+                const imageFile = document.getElementById('model-image').files[0];
+                const imagePublicId = document.getElementById('model-image-public-id').value;
+                const height = document.getElementById('model-height').value.trim();
+                const measurements = document.getElementById('model-measurements').value.trim();
+                const hair = document.getElementById('model-hair').value.trim();
+                const eyes = document.getElementById('model-eyes').value.trim();
+                const location = document.getElementById('model-location').value.trim();
+                const instagram = document.getElementById('model-instagram').value.trim();
+                const tiktok = document.getElementById('model-tiktok').value.trim();
+                const description = document.getElementById('model-description').value.trim();
+
+                if (!name) throw new Error('Model name is required');
+                if (!category || !['beauty', 'bridal', 'fashion', 'brand', 'makeup', 'Light Skin', 'Dark Skin', 'Caramel Skin', 'Brown Skin'].includes(category)) {
+                    throw new Error('Invalid category');
+                }
+                if (!id && !imageFile) throw new Error('Main image is required for new models');
+                if (imageFile) {
+                    const fileError = validateFile(imageFile);
+                    if (fileError) throw new Error(fileError);
+                }
+                if (instagram && !/^https?:\/\/(www\.)?instagram\.com\/.+$/.test(instagram)) {
+                    throw new Error('Valid Instagram URL is required');
+                }
+                if (tiktok && !/^https?:\/\/(www\.)?tiktok\.com\/.+$/.test(tiktok)) {
+                    throw new Error('Valid TikTok URL is required');
+                }
+
+                const formData = new FormData();
+                formData.append('name', name);
+                formData.append('category', category);
+                if (imageFile) formData.append('image', imageFile);
+                if (imagePublicId) formData.append('imagePublicId', imagePublicId);
+                if (description) formData.append('description', description);
+                if (height) formData.append('height', height);
+                if (measurements) formData.append('measurements', measurements);
+                if (hair) formData.append('hair', hair);
+                if (eyes) formData.append('eyes', eyes);
+                if (location) formData.append('location', location);
+                if (instagram || tiktok) {
+                    formData.append('socialLinks', JSON.stringify({ instagram: instagram || undefined, tiktok: tiktok || undefined }));
+                }
+
+                const method = id ? 'PUT' : 'POST';
+                const url = id ? `/api/models/${id}` : '/api/models';
+                const response = await fetch(url, {
+                    method,
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+                if (!response.ok) {
+                    const data = await response.json();
+                    if (response.status === 401) {
+                        console.log('Unauthorized request, clearing token');
+                        localStorage.removeItem('token');
+                        window.location.href = 'index.html';
+                        return;
+                    }
+                    throw new Error(data.message || (data.errors ? data.errors.map(e => e.msg).join(', ') : 'Error saving model'));
+                }
+                modelModal.classList.add('modal-exit-active');
+                setTimeout(() => {
+                    modelModal.classList.add('hidden');
+                    modelModal.classList.remove('modal-exit-active');
+                }, 200);
+                modelForm.reset();
+                document.getElementById('model-id').value = '';
+                document.getElementById('model-image-public-id').value = '';
+                loadModels();
+                document.getElementById('success-message').textContent = 'Model saved successfully!';
+                document.getElementById('success-alert').classList.remove('hidden');
+                setTimeout(() => document.getElementById('success-alert').classList.add('hidden'), 3000);
+            } catch (error) {
+                modelError.textContent = error.message;
+                modelError.classList.remove('hidden');
+                document.getElementById('error-message').textContent = error.message;
+                document.getElementById('error-alert').classList.remove('hidden');
+                setTimeout(() => document.getElementById('error-alert').classList.add('hidden'), 3000);
+            } finally {
+                submitButton.disabled = false;
+                submitButton.innerHTML = 'Save Model';
+            }
+        });
+
+        portfolioForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitButton = document.getElementById('portfolio-submit');
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<span class="spinner"></span> Adding...';
+            modelError.classList.add('hidden');
+            try {
+                const token = localStorage.getItem('token');
+                console.log('Sending portfolio form with token:', token);
+                if (!token) {
+                    throw new Error('No token found in localStorage');
+                }
+                const modelId = document.getElementById('portfolio-model-id').value;
+                const imageFile = document.getElementById('portfolio-image').files[0];
+
+                if (!modelId) throw new Error('Please select a model to add a portfolio image');
+                if (!imageFile) throw new Error('Portfolio image is required');
+                const fileError = validateFile(imageFile);
+                if (fileError) throw new Error(fileError);
+
+                const formData = new FormData();
+                formData.append('image', imageFile);
+
+                const response = await fetch(`/api/models/${modelId}/portfolio`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+                if (!response.ok) {
+                    const data = await response.json();
+                    if (response.status === 401) {
+                        console.log('Unauthorized request, clearing token');
+                        localStorage.removeItem('token');
+                        window.location.href = 'index.html';
+                        return;
+                    }
+                    throw new Error(data.message || (data.errors ? data.errors.map(e => e.msg).join(', ') : 'Error adding portfolio image'));
+                }
+                portfolioModal.classList.add('modal-exit-active');
+                setTimeout(() => {
+                    portfolioModal.classList.add('hidden');
+                    portfolioModal.classList.remove('modal-exit-active');
+                }, 200);
+                portfolioForm.reset();
+                document.getElementById('portfolio-model-id').value = '';
+                loadModels();
+                document.getElementById('success-message').textContent = 'Portfolio image added successfully!';
+                document.getElementById('success-alert').classList.remove('hidden');
+                setTimeout(() => document.getElementById('success-alert').classList.add('hidden'), 3000);
+            } catch (error) {
+                modelError.textContent = error.message;
+                modelError.classList.remove('hidden');
+                document.getElementById('error-message').textContent = error.message;
+                document.getElementById('error-alert').classList.remove('hidden');
+                setTimeout(() => document.getElementById('error-alert').classList.add('hidden'), 3000);
+            } finally {
+                submitButton.disabled = false;
+                submitButton.innerHTML = 'Add Image';
+            }
+        });
+
+        function editModel(id, name, category, imageUrl, imagePublicId, description, height, measurements, hair, eyes, location, instagram, tiktok) {
+            document.getElementById('model-modal-title').textContent = 'Edit Model';
+            document.getElementById('model-id').value = id;
+            document.getElementById('model-name').value = name;
+            document.getElementById('model-category').value = category;
+            document.getElementById('model-image-public-id').value = imagePublicId;
+            document.getElementById('model-height').value = height;
+            document.getElementById('model-measurements').value = measurements;
+            document.getElementById('model-hair').value = hair;
+            document.getElementById('model-eyes').value = eyes;
+            document.getElementById('model-location').value = location;
+            document.getElementById('model-instagram').value = instagram;
+            document.getElementById('model-tiktok').value = tiktok;
+            document.getElementById('model-description').value = description;
+            modelModal.classList.remove('hidden');
+            modelModal.classList.add('modal-enter-active');
+            setTimeout(() => modelModal.classList.remove('modal-enter-active'), 200);
+            document.getElementById('model-name').focus();
+        }
+
+        async function deleteModel(id, imagePublicId) {
+            const confirmationModal = document.getElementById('confirmation-modal');
+            const confirmButton = document.getElementById('confirm-action');
+            const cancelButton = document.getElementById('cancel-action');
+            document.getElementById('confirmation-title').textContent = 'Delete Model';
+            document.getElementById('confirmation-message').textContent = 'Are you sure you want to delete this model? This action cannot be undone.';
+            confirmationModal.classList.remove('hidden');
+            confirmationModal.classList.add('modal-enter-active');
+            setTimeout(() => confirmationModal.classList.remove('modal-enter-active'), 200);
+
+            confirmButton.onclick = async () => {
+                try {
+                    const token = localStorage.getItem('token');
+                    console.log('Deleting model with token:', token);
+                    if (!token) {
+                        throw new Error('No token found in localStorage');
+                    }
+                    const response = await fetch(`/api/models/${id}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!response.ok) {
+                        const data = await response.json();
+                        if (response.status === 401) {
+                            console.log('Unauthorized request, clearing token');
+                            localStorage.removeItem('token');
+                            window.location.href = 'index.html';
+                            return;
+                        }
+                        throw new Error(data.message || 'Error deleting model');
+                    }
+                    loadModels();
+                    document.getElementById('success-message').textContent = 'Model deleted successfully!';
+                    document.getElementById('success-alert').classList.remove('hidden');
+                    setTimeout(() => document.getElementById('success-alert').classList.add('hidden'), 3000);
+                } catch (error) {
+                    document.getElementById('error-message').textContent = error.message;
+                    document.getElementById('error-alert').classList.remove('hidden');
+                    setTimeout(() => document.getElementById('error-alert').classList.add('hidden'), 3000);
+                } finally {
+                    confirmationModal.classList.add('modal-exit-active');
+                    setTimeout(() => {
+                        confirmationModal.classList.add('hidden');
+                        confirmationModal.classList.remove('modal-exit-active');
+                    }, 200);
+                }
+            };
+
+            cancelButton.onclick = () => {
+                confirmationModal.classList.add('modal-exit-active');
+                setTimeout(() => {
+                    confirmationModal.classList.add('hidden');
+                    confirmationModal.classList.remove('modal-exit-active');
+                }, 200);
+            };
+        }
+
+        async function deletePortfolioImage(modelId, index) {
+            const confirmationModal = document.getElementById('confirmation-modal');
+            const confirmButton = document.getElementById('confirm-action');
+            const cancelButton = document.getElementById('cancel-action');
+            document.getElementById('confirmation-title').textContent = 'Delete Portfolio Image';
+            document.getElementById('confirmation-message').textContent = 'Are you sure you want to delete this portfolio image? This action cannot be undone.';
+            confirmationModal.classList.remove('hidden');
+            confirmationModal.classList.add('modal-enter-active');
+            setTimeout(() => confirmationModal.classList.remove('modal-enter-active'), 200);
+
+            confirmButton.onclick = async () => {
+                try {
+                    const token = localStorage.getItem('token');
+                    console.log('Deleting portfolio image with token:', token);
+                    if (!token) {
+                        throw new Error('No token found in localStorage');
+                    }
+                    const response = await fetch(`/api/models/${modelId}/portfolio/${index}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!response.ok) {
+                        const data = await response.json();
+                        if (response.status === 401) {
+                            console.log('Unauthorized request, clearing token');
+                            localStorage.removeItem('token');
+                            window.location.href = 'index.html';
+                            return;
+                        }
+                        throw new Error(data.message || 'Error deleting portfolio image');
+                    }
+                    loadModels();
+                    document.getElementById('success-message').textContent = 'Portfolio image deleted successfully!';
+                    document.getElementById('success-alert').classList.remove('hidden');
+                    setTimeout(() => document.getElementById('success-alert').classList.add('hidden'), 3000);
+                } catch (error) {
+                    document.getElementById('error-message').textContent = error.message;
+                    document.getElementById('error-alert').classList.remove('hidden');
+                    setTimeout(() => document.getElementById('error-alert').classList.add('hidden'), 3000);
+                } finally {
+                    confirmationModal.classList.add('modal-exit-active');
+                    setTimeout(() => {
+                        confirmationModal.classList.add('hidden');
+                        confirmationModal.classList.remove('modal-exit-active');
+                    }, 200);
+                }
+            };
+
+            cancelButton.onclick = () => {
+                confirmationModal.classList.add('modal-exit-active');
+                setTimeout(() => {
+                    confirmationModal.classList.add('hidden');
+                    confirmationModal.classList.remove('modal-exit-active');
+                }, 200);
+            };
+        }
+
+        function setPortfolioModelId(modelId) {
+            document.getElementById('portfolio-model-id').value = modelId;
+            portfolioModal.classList.remove('hidden');
+            portfolioModal.classList.add('modal-enter-active');
+            setTimeout(() => portfolioModal.classList.remove('modal-enter-active'), 200);
+            document.getElementById('portfolio-image').focus();
+        }
+
+        document.getElementById('close-success-alert').addEventListener('click', () => {
+            document.getElementById('success-alert').classList.remove('hidden');
+        });
+
+        document.getElementById('close-error-alert').addEventListener('click', () => {
+            document.getElementById('error-alert').classList.add('hidden');
+        });
+    </script>
+</body>
+</html>
