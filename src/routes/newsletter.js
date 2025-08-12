@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const Newsletter = require('../models/Newsletter');
-const authMiddleware = require('../Middleware/auth');
+const auth = require('../middleware/auth'); // If directory is lowercase
 const { body, validationResult } = require('express-validator');
 
 // Public: Subscribe to newsletter
