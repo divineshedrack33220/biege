@@ -1,7 +1,6 @@
-// src/routes/about.js
 const express = require('express');
 const router = express.Router();
-const About = require('../models/about'); // fixed folder name
+const About = require('../models/About');
 const Company = require('../models/Company');
 const auth = require('../middleware/auth');
 const upload = require('../middleware/multer');
@@ -41,6 +40,7 @@ router.put(
     try {
       const { id, text } = req.body;
       let about;
+
       if (id) {
         about = await About.findByIdAndUpdate(id, { text }, { new: true, runValidators: true });
         if (!about) {
@@ -50,6 +50,7 @@ router.put(
         about = new About({ text });
         await about.save();
       }
+
       res.json({ id: about._id, text: about.text });
     } catch (error) {
       console.error('Error updating about:', error);
@@ -134,10 +135,7 @@ router.put(
 
     try {
       const { name, link, logoPublicId } = req.body;
-      const updateData = {
-        name,
-        link: link || undefined
-      };
+      const updateData = { name, link: link || undefined };
 
       if (req.file) {
         if (logoPublicId) {
