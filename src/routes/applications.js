@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Application = require('../models/Application');
-const authMiddleware = require('../Middleware/auth');
+const auth = require('../middleware/auth'); // If directory is lowercase
 const { check, validationResult } = require('express-validator');
 const cloudinary = require('../config/cloudinary');
 const multer = require('multer');
