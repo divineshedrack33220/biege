@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Booking = require('../models/Booking');
 const { check, validationResult } = require('express-validator');
-const auth = require('../middleware/auth'); // If directory is lowercase
+const auth = require('../middleware/auth'); // Consistent with lowercase middleware directory
 
 // Validation middleware
 const bookingValidation = [
@@ -42,7 +42,8 @@ router.post('/', bookingValidation, async (req, res) => {
 });
 
 // GET /api/bookings - Get all bookings (admin only)
-router.get('/', authMiddleware, async (req, res) => {
+router.get('/', auth, // Fixed to use 'auth' instead of 'authMiddleware'
+  async (req, res) => {
     try {
         const bookings = await Booking.find().sort({ createdAt: -1 });
         res.json(bookings);
@@ -53,7 +54,8 @@ router.get('/', authMiddleware, async (req, res) => {
 });
 
 // PUT /api/bookings/:id - Update booking status (admin only)
-router.put('/:id', authMiddleware, [
+router.put('/:id', auth, // Fixed to use 'auth' instead of 'authMiddleware'
+  [
     check('status').isIn(['pending', 'reviewed', 'confirmed', 'cancelled']).withMessage('Invalid status')
 ], async (req, res) => {
     const errors = validationResult(req);
@@ -78,7 +80,8 @@ router.put('/:id', authMiddleware, [
 });
 
 // DELETE /api/bookings/:id - Delete a booking (admin only)
-router.delete('/:id', authMiddleware, async (req, res) => {
+router.delete('/:id', auth, // Fixed to use 'auth' instead of 'authMiddleware'
+  async (req, res) => {
     try {
         const booking = await Booking.findByIdAndDelete(req.params.id);
         if (!booking) {
