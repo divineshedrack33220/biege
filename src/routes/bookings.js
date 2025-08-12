@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Booking = require('../models/Booking');
 const { check, validationResult } = require('express-validator');
-const authMiddleware = require('../Middleware/auth');
+const auth = require('../middleware/auth'); // If directory is lowercase
 
 // Validation middleware
 const bookingValidation = [
