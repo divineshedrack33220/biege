@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const TeamMember = require('../models/TeamMember');
-const auth = require('../middleware/auth'); // If directory is lowercase
+const auth = require('../middleware/auth'); // Consistent with lowercase middleware directory
 const upload = require('../middleware/multer');
 const cloudinary = require('../config/cloudinary');
 const { body, validationResult } = require('express-validator');
@@ -20,7 +20,7 @@ router.get('/', async (req, res) => {
 // Admin: Add a team member
 router.post(
   '/',
-  authMiddleware,
+  auth, // Fixed to use 'auth' instead of 'authMiddleware'
   upload.single('image'),
   [
     body('name').notEmpty().withMessage('Name is required'),
@@ -71,7 +71,7 @@ router.post(
 // Admin: Update a team member
 router.put(
   '/:id',
-  authMiddleware,
+  auth, // Fixed to use 'auth' instead of 'authMiddleware'
   upload.single('image'),
   [
     body('name').optional().notEmpty().withMessage('Name cannot be empty'),
@@ -127,21 +127,23 @@ router.put(
 );
 
 // Admin: Delete a team member
-router.delete('/:id', authMiddleware, async (req, res) => {
-  try {
-    const teamMember = await TeamMember.findById(req.params.id);
-    if (!teamMember) {
-      return res.status(404).json({ message: 'Team member not found' });
+router.delete('/:id', auth, // Fixed to use 'auth' instead of 'authMiddleware'
+  async (req, res) => {
+    try {
+      const teamMember = await TeamMember.findById(req.params.id);
+      if (!teamMember) {
+        return res.status(404).json({ message: 'Team member not found' });
+      }
+      if (teamMember.imagePublicId) {
+        await cloudinary.uploader.destroy(teamMember.imagePublicId).catch(err => console.error('Error deleting image:', err));
+      }
+      await TeamMember.findByIdAndDelete(req.params.id);
+      res.json({ message: 'Team member deleted' });
+    } catch (error) {
+      console.error('Error deleting team member:', error);
+      res.status(500).json({ message: error.message || 'Server error' });
     }
-    if (teamMember.imagePublicId) {
-      await cloudinary.uploader.destroy(teamMember.imagePublicId).catch(err => console.error('Error deleting image:', err));
-    }
-    await TeamMember.findByIdAndDelete(req.params.id);
-    res.json({ message: 'Team member deleted' });
-  } catch (error) {
-    console.error('Error deleting team member:', error);
-    res.status(500).json({ message: error.message || 'Server error' });
   }
-});
+);
 
 module.exports = router;
