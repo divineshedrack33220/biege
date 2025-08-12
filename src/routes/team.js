@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const TeamMember = require('../models/TeamMember');
-const authMiddleware = require('../Middleware/auth');
+const auth = require('../middleware/auth'); // If directory is lowercase
 const upload = require('../middleware/multer');
 const cloudinary = require('../config/cloudinary');
 const { body, validationResult } = require('express-validator');
