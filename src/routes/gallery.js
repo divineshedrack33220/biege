@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const GalleryImage = require('../models/GalleryImage');
-const auth = require('../middleware/auth'); // If directory is lowercase
+const auth = require('../middleware/auth'); // Consistent with lowercase middleware directory
 const upload = require('../middleware/multer');
 const cloudinary = require('../config/cloudinary');
 const { body, validationResult } = require('express-validator');
@@ -20,7 +20,7 @@ router.get('/', async (req, res) => {
 // Admin: Add a gallery image
 router.post(
   '/',
-  authMiddleware,
+  auth, // Fixed to use 'auth' instead of 'authMiddleware'
   upload.single('image'),
   [
     body('title').notEmpty().withMessage('Title is required'),
@@ -69,7 +69,7 @@ router.post(
 // Admin: Update a gallery image
 router.put(
   '/:id',
-  authMiddleware,
+  auth, // Fixed to use 'auth' instead of 'authMiddleware'
   upload.single('image'),
   [
     body('title').optional().notEmpty().withMessage('Title cannot be empty'),
@@ -123,21 +123,23 @@ router.put(
 );
 
 // Admin: Delete a gallery image
-router.delete('/:id', authMiddleware, async (req, res) => {
-  try {
-    const galleryImage = await GalleryImage.findById(req.params.id);
-    if (!galleryImage) {
-      return res.status(404).json({ message: 'Gallery image not found' });
+router.delete('/:id', auth, // Fixed to use 'auth' instead of 'authMiddleware'
+  async (req, res) => {
+    try {
+      const galleryImage = await GalleryImage.findById(req.params.id);
+      if (!galleryImage) {
+        return res.status(404).json({ message: 'Gallery image not found' });
+      }
+      if (galleryImage.imagePublicId) {
+        await cloudinary.uploader.destroy(galleryImage.imagePublicId).catch(err => console.error('Error deleting image:', err));
+      }
+      await GalleryImage.findByIdAndDelete(req.params.id);
+      res.json({ message: 'Gallery image deleted' });
+    } catch (error) {
+      console.error('Error deleting gallery image:', error);
+      res.status(500).json({ message: error.message || 'Server error' });
     }
-    if (galleryImage.imagePublicId) {
-      await cloudinary.uploader.destroy(galleryImage.imagePublicId).catch(err => console.error('Error deleting image:', err));
-    }
-    await GalleryImage.findByIdAndDelete(req.params.id);
-    res.json({ message: 'Gallery image deleted' });
-  } catch (error) {
-    console.error('Error deleting gallery image:', error);
-    res.status(500).json({ message: error.message || 'Server error' });
   }
-});
+);
 
 module.exports = router;
