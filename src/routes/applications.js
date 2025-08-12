@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Application = require('../models/Application');
-const auth = require('../middleware/auth'); // If directory is lowercase
+const auth = require('../middleware/auth'); // Consistent with lowercase middleware directory
 const { check, validationResult } = require('express-validator');
 const cloudinary = require('../config/cloudinary');
 const multer = require('multer');
@@ -92,8 +92,9 @@ router.post('/', upload.array('photos', 6), applicationValidation, async (req, r
     }
 });
 
-// GET, PUT, DELETE routes remain unchanged
-router.get('/', authMiddleware, async (req, res) => {
+// GET, PUT, DELETE routes
+router.get('/', auth, // Fixed to use 'auth' instead of 'authMiddleware'
+  async (req, res) => {
     try {
         const applications = await Application.find().sort({ createdAt: -1 });
         res.json(applications);
@@ -103,7 +104,8 @@ router.get('/', authMiddleware, async (req, res) => {
     }
 });
 
-router.put('/:id', authMiddleware, [
+router.put('/:id', auth, // Fixed to use 'auth' instead of 'authMiddleware'
+  [
     check('status').isIn(['pending', 'reviewed', 'accepted', 'rejected']).withMessage('Invalid status')
 ], async (req, res) => {
     const errors = validationResult(req);
@@ -128,7 +130,8 @@ router.put('/:id', authMiddleware, [
     }
 });
 
-router.delete('/:id', authMiddleware, async (req, res) => {
+router.delete('/:id', auth, // Fixed to use 'auth' instead of 'authMiddleware'
+  async (req, res) => {
     try {
         const application = await Application.findById(req.params.id);
         if (!application) {
