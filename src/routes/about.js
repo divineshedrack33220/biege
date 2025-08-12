@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const About = require('../models/about');
-const Company = require('../models/Company');
+const Company = require('../models/company');
 const auth = require('../middleware/auth');
 const upload = require('../middleware/multer');
 const cloudinary = require('../config/cloudinary');
@@ -188,4 +188,5 @@ router.delete('/companies/:id', auth, async (req, res) => {
 });
 
 module.exports = router;
+
 
