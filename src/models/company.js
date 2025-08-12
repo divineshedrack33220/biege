@@ -1,4 +1,3 @@
-// src/models/company.js
 const mongoose = require('mongoose');
 
 const companySchema = new mongoose.Schema({
@@ -26,4 +25,4 @@ const companySchema = new mongoose.Schema({
   }
 });
 
-module.exports = mongoose.model('company', companySchema);
+module.exports = mongoose.model('Company', companySchema);
