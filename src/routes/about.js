@@ -1,9 +1,9 @@
 // src/routes/about.js
 const express = require('express');
 const router = express.Router();
-const About = require('../model/about');
+const About = require('../models/about'); // fixed folder name
 const Company = require('../models/Company');
-const auth = require('../middleware/auth'); // Consistent with lowercase middleware directory
+const auth = require('../middleware/auth');
 const upload = require('../middleware/multer');
 const cloudinary = require('../config/cloudinary');
 const { body, validationResult } = require('express-validator');
@@ -13,7 +13,7 @@ router.get('/about', async (req, res) => {
   try {
     const about = await About.findOne().lean();
     if (!about) {
-      return res.json({ id: null, text: '' }); // Return empty if no About exists
+      return res.json({ id: null, text: '' });
     }
     res.json({ id: about._id, text: about.text });
   } catch (error) {
@@ -27,7 +27,10 @@ router.put(
   '/about',
   auth,
   [
-    body('text').notEmpty().withMessage('About text is required').trim().isLength({ max: 500 }).withMessage('About text cannot exceed 500 characters')
+    body('text')
+      .notEmpty().withMessage('About text is required')
+      .trim()
+      .isLength({ max: 500 }).withMessage('About text cannot exceed 500 characters')
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -107,7 +110,7 @@ router.post(
 
       await company.save();
       res.status(201).json(company);
-    } catch (error) { // Fixed typo from 'about (error)' to 'catch (error)'
+    } catch (error) {
       console.error('Error adding company:', error);
       res.status(500).json({ message: error.message || 'Server error' });
     }
@@ -169,23 +172,21 @@ router.put(
 );
 
 // Admin: Delete a company
-router.delete('/companies/:id', auth,
-  async (req, res) => {
-    try {
-      const company = await Company.findById(req.params.id);
-      if (!company) {
-        return res.status(404).json({ message: 'Company not found' });
-      }
-      if (company.logoPublicId) {
-        await cloudinary.uploader.destroy(company.logoPublicId).catch(err => console.error('Error deleting logo:', err));
-      }
-      await Company.findByIdAndDelete(req.params.id);
-      res.json({ message: 'Company deleted' });
-    } catch (error) {
-      console.error('Error deleting company:', error);
-      res.status(500).json({ message: error.message || 'Server error' });
+router.delete('/companies/:id', auth, async (req, res) => {
+  try {
+    const company = await Company.findById(req.params.id);
+    if (!company) {
+      return res.status(404).json({ message: 'Company not found' });
     }
+    if (company.logoPublicId) {
+      await cloudinary.uploader.destroy(company.logoPublicId).catch(err => console.error('Error deleting logo:', err));
+    }
+    await Company.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Company deleted' });
+  } catch (error) {
+    console.error('Error deleting company:', error);
+    res.status(500).json({ message: error.message || 'Server error' });
   }
-);
+});
 
 module.exports = router;
