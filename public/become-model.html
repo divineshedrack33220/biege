@@ -7,10 +7,23 @@
     <meta name="keywords" content="model application, Beige agency, AI assistant, talent application">
     <title>Anne - AI Model Application Assistant | Beige</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?cache_bust=20250812"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css?cache_bust=20250812">
     <style>
+        @font-face {
+            font-family: 'Didot';
+            src: url('/fonts/Didot.woff2') format('woff2'),
+                 url('/fonts/Didot.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'Didot';
+            src: url('/fonts/Didot-Bold.woff2') format('woff2'),
+                 url('/fonts/Didot-Bold.woff') format('woff');
+            font-weight: bold;
+            font-style: normal;
+        }
         * {
             box-sizing: border-box;
         }
@@ -21,7 +34,6 @@
             margin: 0;
             background-color: #f7f7f8;
         }
-        /* Custom scrollbar */
         .custom-scrollbar::-webkit-scrollbar {
             width: 6px;
         }
@@ -36,26 +48,25 @@
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
             background: #555;
         }
-        /* Chat bubble animation */
         @keyframes bubbleIn {
-            0% { opacity: 0; transform: translateY(10px); }
+            0% { opacity: 0; transform: translateY(5px); }
             100% { opacity: 1; transform: translateY(0); }
         }
         .chat-bubble {
-            animation: bubbleIn 0.3s ease-out forwards;
+            animation: bubbleIn 0.2s ease-out forwards;
+            max-width: 100%;
+            transition: all 0.2s ease;
         }
-        /* Typing indicator animation */
         @keyframes typing {
-            0% { opacity: 0.5; }
+            0% { opacity: 0.4; }
             50% { opacity: 1; }
-            100% { opacity: 0.5; }
+            100% { opacity: 0.4; }
         }
         .typing-dot {
-            animation: typing 1.5s infinite ease-in-out;
+            animation: typing 1.2s infinite ease-in-out;
         }
-        .typing-dot:nth-child(2) { animation-delay: 0.3s; }
-        .typing-dot:nth-child(3) { animation-delay: 0.6s; }
-        /* Model application specific styles */
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
         .example-box {
             background: #f5f5f5;
             border-left: 3px solid #000;
@@ -83,7 +94,6 @@
             background: #000;
             color: white;
         }
-        /* Modal styles */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -102,6 +112,7 @@
             max-width: 95%;
             width: 500px;
             border: 1px solid #000;
+            border-radius: 0.5rem;
             transform: scale(0.95);
             opacity: 0;
             transition: all 0.3s ease;
@@ -115,6 +126,7 @@
             font-weight: bold;
             margin-bottom: 1rem;
             color: #000;
+            text-shadow: none;
         }
         .modal-content p {
             color: #333;
@@ -125,6 +137,7 @@
             background-color: #000;
             color: #fff;
             padding: 0.75rem;
+            border-radius: 0.5rem;
             font-weight: 500;
             transition: background-color 0.2s;
         }
@@ -133,40 +146,53 @@
             outline: 2px solid #000;
             outline-offset: 2px;
         }
-        /* Image preview styles */
-        .image-preview {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
+        .modal-content input, .modal-content textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 0.25rem;
+            font-size: clamp(0.875rem, 2.5vw, 1rem);
             margin-bottom: 1rem;
         }
+        .image-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
         .image-preview img {
-            width: 100px;
-            height: 100px;
+            width: 100%;
+            height: 150px;
             object-fit: cover;
             border: 1px solid #ddd;
+            border-radius: 0.5rem;
+            transition: transform 0.2s ease;
+        }
+        .image-preview img:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
         .image-preview .remove-btn {
             position: absolute;
-            top: -8px;
-            right: -8px;
+            top: -10px;
+            right: -10px;
             background: #000;
             color: #fff;
             border-radius: 50%;
-            width: 20px;
-            height: 20px;
+            width: 24px;
+            height: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 14px;
+            transition: background-color 0.2s;
         }
         .image-preview .remove-btn:hover, .image-preview .remove-btn:focus {
             background: #333;
-            outline: 2px solid #000;
-            outline-offset: 2px;
         }
-        /* Input area */
         .input-area {
             position: fixed;
             bottom: env(safe-area-inset-bottom, 0);
@@ -174,20 +200,18 @@
             width: 100%;
             max-width: 100%;
             background-color: #fff;
-            padding: 1rem 0.5rem;
+            padding: 0.5rem;
             box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
             z-index: 20;
         }
-        /* Input container */
         .input-container {
             display: flex;
-            align-items: flex-end;
+            align-items: center;
             background: #f7f7f8;
             border: 1px solid #d1d5db;
-            border-radius: 0.5rem;
-            padding: 0.5rem;
+            border-radius: 1.5rem;
+            padding: 0.25rem 0.5rem;
         }
-        /* Textarea */
         .input-area textarea {
             background: transparent;
             border: none;
@@ -196,22 +220,20 @@
             flex-grow: 1;
             font-size: clamp(0.875rem, 2.5vw, 1rem);
             line-height: 1.5;
-            min-height: 2.75rem;
-            max-height: 8rem;
-            padding: 0.5rem 0.75rem;
+            min-height: 1.5rem;
+            max-height: 4rem;
+            padding: 0.25rem 0.5rem;
         }
         .input-area textarea:focus {
-            outline: 2px solid #000;
-            outline-offset: 2px;
+            outline: none;
         }
-        /* Send button */
         .input-area .send-btn {
             background: #000;
             color: #fff;
-            border-radius: 0.375rem;
+            border-radius: 50%;
             padding: 0.5rem;
-            width: 2.25rem;
-            height: 2.25rem;
+            width: 2rem;
+            height: 2rem;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -219,42 +241,62 @@
         }
         .input-area .send-btn:hover:not(:disabled), .input-area .send-btn:focus:not(:disabled) {
             background: #333;
-            outline: 2px solid #000;
-            outline-offset: 2px;
         }
         .input-area .send-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
-        /* Clear button */
-        .input-area .clear-btn {
-            color: #6b7280;
-            padding: 0.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .input-area .clear-btn:hover, .input-area .clear-btn:focus {
-            color: #374151;
-            outline: 2px solid #000;
-            outline-offset: 2px;
-        }
-        /* Typing indicator */
         .typing-indicator {
             display: flex;
             align-items: center;
-            padding: 0.5rem 1rem;
-            background: #fff;
+            padding: 0.5rem 0.75rem;
+            background: #FFFFFF;
             border-radius: 0.5rem;
             margin-bottom: 0.5rem;
+            max-width: 100%;
+            order: 999;
         }
-        /* Message sound notification */
+        .message-timestamp {
+            font-size: 0.75rem;
+            color: #667781;
+            margin-top: 0.25rem;
+            text-align: right;
+        }
+        .summary-container {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 0.5rem;
+            cursor: pointer;
+            user-select: none;
+        }
+        .summary-field {
+            padding: 0.25rem;
+            border-radius: 0.25rem;
+            transition: background-color 0.2s;
+        }
+        .summary-field:hover {
+            background-color: #e0e0e0;
+        }
+        .summary-photos {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        .summary-photos img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border: 1px solid #ddd;
+            border-radius: 0.25rem;
+        }
         .message-sound {
             position: absolute;
             opacity: 0;
             pointer-events: none;
         }
-        /* Burger menu styles */
         .burger-menu {
             display: block;
         }
@@ -273,44 +315,76 @@
         .burger-nav.open {
             transform: translateX(0);
         }
-        /* Navigation and content sizing */
         .container {
             max-width: 1280px;
             margin-left: auto;
             margin-right: auto;
-            padding-left: 1rem;
-            padding-right: 1rem;
+            padding-left: clamp(1rem, 3vw, 1.5rem);
+            padding-right: clamp(1rem, 3vw, 1.5rem);
+        }
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.9);
+            z-index: 50;
+            padding: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            min-height: 64px;
+        }
+        header a[href="index.html"] {
+            font-family: 'Didot', serif;
+            font-size: clamp(1.5rem, 2.5vw, 3rem);
+            font-weight: 300;
+            color: black;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            max-width: 90vw;
+            text-shadow: none;
         }
         main {
-            scroll-margin-top: 80px;
+            scroll-margin-top: clamp(4rem, 10vw, 6rem);
         }
         .chat-container-wrapper {
-            padding: 4rem 1rem;
+            padding: 0 0.5rem clamp(1.5rem, 5vw, 3rem) 0.5rem;
+            background-color: #FFFFFF;
         }
         .chat-container {
-            padding: 1rem;
-            padding-bottom: 100px;
+            padding: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            min-height: 0;
+            max-height: calc(100vh - 64px - 74px);
+            overflow-y: auto;
         }
         @media (min-width: 640px) {
             .container {
-                padding-left: 1.5rem;
-                padding-right: 1.5rem;
+                padding-left: clamp(1.5rem, 3vw, 2rem);
+                padding-right: clamp(1.5rem, 3vw, 2rem);
             }
             main {
-                scroll-margin-top: 100px;
+                scroll-margin-top: clamp(5rem, 10vw, 6rem);
             }
             .chat-container-wrapper {
-                padding: 4rem 1.5rem;
+                padding: 0 1rem clamp(2rem, 5vw, 4rem) 1rem;
+                max-width: 768px;
+                margin-left: auto;
+                margin-right: auto;
+                border-radius: 0.5rem;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             }
             .chat-container {
-                padding: 1rem;
-                padding-bottom: 100px;
+                padding: 0.75rem;
+                max-height: calc(100vh - 64px - 74px);
             }
             .input-area {
-                max-width: 1280px;
+                max-width: 768px;
                 left: 50%;
                 transform: translateX(-50%);
-                padding: 1rem 1.5rem;
+                padding: 0.75rem 1rem;
             }
             .burger-menu {
                 display: none;
@@ -326,17 +400,22 @@
             .container {
                 max-width: 1280px;
             }
+            .chat-container-wrapper {
+                max-width: 896px;
+            }
+            .input-area {
+                max-width: 896px;
+            }
         }
         @media (max-width: 639px) {
             .chat-container-wrapper {
-                padding: 5rem 1rem 4rem 1rem;
+                padding: 0 0.25rem clamp(1.5rem, 5vw, 3rem) 0.25rem;
                 margin: 0;
                 border-radius: 0;
                 box-shadow: none;
             }
             .chat-container {
-                padding: 0.5rem;
-                padding-bottom: 100px;
+                padding: 0.25rem;
             }
             .modal-content {
                 width: 95%;
@@ -351,7 +430,7 @@
                 right: 0;
                 height: 100%;
                 width: 100%;
-                background: #000;
+                background: rgba(255, 255, 255, 0.95);
                 transform: translateX(100%);
                 z-index: 100;
                 display: flex;
@@ -360,17 +439,23 @@
                 align-items: center;
                 padding: 2rem;
             }
+            .burger-nav a {
+                color: black;
+            }
+            .close-btn {
+                color: black;
+            }
             .become-icon {
                 display: none;
             }
         }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col">
     <!-- Header -->
-    <header class="bg-black text-white p-4 shadow-md sticky top-0 z-10">
+    <header class="bg-white bg-opacity-90 shadow-sm z-50 flex items-center">
         <div class="container mx-auto flex justify-between items-center">
-            <a href="index.html" class="text-xl font-bold tracking-wider" aria-label="Beige Home">BEIGE</a>
+            <a href="index.html" aria-label="Beige Home">BEIGE</a>
             <div class="flex items-center space-x-4">
                 <div class="hidden md:flex desktop-nav space-x-6">
                     <a href="home.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase flex items-center gap-2" aria-label="Home">
@@ -389,26 +474,27 @@
                         <i class="fas fa-clipboard-list"></i> BECOME A MODEL
                     </a>
                 </div>
-                <button class="burger-menu md:hidden p-2 rounded-full hover:bg-gray-800 focus:outline focus:outline-2 focus:outline-[#000] focus:outline-offset-2 transition">
+                <button class="burger-menu md:hidden p-2 rounded-full hover:bg-gray-200 focus:outline focus:outline-2 focus:outline-[#000] focus:outline-offset-2 transition">
                     <div class="burger-icon flex flex-col space-y-1">
-                        <span class="w-6 h-0.5 bg-white"></span>
-                        <span class="w-6 h-0.5 bg-white"></span>
-                        <span class="w-6 h-0.5 bg-white"></span>
+                        <span class="w-6 h-0.5 bg-black"></span>
+                        <span class="w-6 h-0.5 bg-black"></span>
+                        <span class="w-6 h-0.5 bg-black"></span>
                     </div>
                 </button>
             </div>
         </div>
         <!-- Burger Menu Navigation -->
         <nav class="burger-nav md:hidden flex flex-col">
-            <button class="close-btn text-white hover:text-gray-300 focus:outline focus:outline-2 focus:outline-[#000] focus:outline-offset-2 transition">
+            <button class="close-btn hover:text-gray-600 focus:outline focus:outline-2 focus:outline-[#000] focus:outline-offset-2 transition">
                 <i class="fas fa-times"></i>
             </button>
             <div class="burger-nav-links flex flex-col space-y-4 text-center">
-                <a href="about.html" class="text-white text-lg hover:text-gray-300 focus:outline focus:outline-2 focus:outline-[#000] focus:outline-offset-2 transition" aria-label="About Beige">ABOUT</a>
-                <a href="models.html" class="text-white text-lg hover:text-gray-300 focus:outline focus:outline-2 focus:outline-[#000] focus:outline-offset-2 transition" aria-label="Models">MODELS</a>
-                <a href="become-model.html" class="text-white text-lg hover:text-gray-300 focus:outline focus:outline-2 focus:outline-[#000] focus:outline-offset-2 transition" aria-label="Become a Model">BECOME A MODEL</a>
-                <a href="booking.html" class="text-white text-lg hover:text-gray-300 focus:outline focus:outline-2 focus:outline-[#000] focus:outline-offset-2 transition" aria-label="Booking Models">BOOKING</a>
-                <a href="admin.html" class="text-white text-lg hover:text-gray-300 focus:outline focus:outline-2 focus:outline-[#000] focus:outline-offset-2 transition" aria-label="Admin CPanel">ADMIN</a>
+                        <a href="home.html" class="text-lg hover:text-gray-600 focus:outline focus:outline-2 focus:outline-[#000] focus:outline-offset-2 transition" aria-label="Admin CPanel">HOME</a>
+                <a href="about.html" class="text-lg hover:text-gray-600 focus:outline focus:outline-2 focus:outline-[#000] focus:outline-offset-2 transition" aria-label="About Beige">ABOUT</a>
+                <a href="models.html" class="text-lg hover:text-gray-600 focus:outline focus:outline-2 focus:outline-[#000] focus:outline-offset-2 transition" aria-label="Models">MODELS</a>
+                <a href="become-model.html" class="text-lg hover:text-gray-600 focus:outline focus:outline-2 focus:outline-[#000] focus:outline-offset-2 transition" aria-label="Become a Model">BECOME A MODEL</a>
+                <a href="booking.html" class="text-lg hover:text-gray-600 focus:outline focus:outline-2 focus:outline-[#000] focus:outline-offset-2 transition" aria-label="Booking Models">BOOKING</a>
+        
             </div>
         </nav>
     </header>
@@ -416,23 +502,41 @@
     <!-- Main content -->
     <main class="flex-1 flex flex-col">
         <!-- Chat container -->
-        <div class="chat-container-wrapper w-full bg-white sm:rounded-lg sm:shadow-md sm:mx-auto sm:my-4 sm:max-w-3xl flex-1 flex flex-col">
-            <div id="chat-container" class="chat-container flex-1 overflow-y-auto custom-scrollbar space-y-4">
+        <div class="chat-container-wrapper w-full sm:mx-auto sm:max-w-3xl flex-1 flex flex-col">
+            <div id="chat-container" class="chat-container flex-1 overflow-y-auto custom-scrollbar">
                 <!-- Welcome message -->
                 <div class="chat-bubble flex">
-                    <div class="w-10 h-10 rounded-full bg-gray-100 flex-shrink-0 flex items-center justify-center mr-3">
-                        <i class="fas fa-robot text-black"></i>
+                    <div class="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 flex items-center justify-center mr-2">
+                        <i class="fas fa-robot text-gray-600 text-sm" aria-label="Anne, AI Assistant"></i>
                     </div>
-                    <div class="bg-white p-4 rounded-lg shadow-sm max-w-3xl border border-gray-200">
-                        <p class="text-gray-800 font-medium">Hello! I'm Anne, your Model Application Assistant.</p>
-                        <p class="text-gray-800 mt-2">I'll guide you through the application process step by step with precision and professionalism.</p>
-                        <div class="mt-3 flex flex-wrap gap-2">
-                            <button onclick="startApplication()" class="option-button px-3 py-1 bg-black hover:bg-gray-800 rounded-full text-sm text-white transition">
+                    <div class="bg-white p-2 rounded-lg border border-gray-200">
+                        <p class="text-gray-800 text-sm font-semibold">Anne</p>
+                        <p class="text-gray-800 text-sm">Hello! I'm Anne, your Model Application Assistant.</p>
+                        <p class="text-gray-800 text-sm mt-1">I'll guide you through the application process step by step with precision and professionalism.</p>
+                        <div class="mt-2 flex flex-wrap gap-2">
+                            <button onclick="startApplication()" class="option-button px-2 py-1 bg-black hover:bg-gray-800 rounded-full text-xs text-white transition">
                                 <i class="fas fa-play mr-1"></i> Start Application
                             </button>
-                            <button onclick="addMessageToChat('user', 'I have a question about the application')" class="option-button px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-sm text-gray-800 transition">
+                            <button onclick="addMessageToChat('user', 'I have a question about the application')" class="option-button px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-xs text-gray-800 transition">
                                 <i class="fas fa-question mr-1"></i> Ask a Question
                             </button>
+                        </div>
+                        <div class="message-timestamp">04:53 AM</div>
+                    </div>
+                </div>
+                <!-- Typing indicator -->
+                <div id="typing-indicator" class="typing-indicator hidden">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 flex items-center justify-center mr-2">
+                            <i class="fas fa-robot text-gray-600 text-sm" aria-label="Anne, AI Assistant"></i>
+                        </div>
+                        <div class="flex flex-col">
+                            <p class="text-gray-800 text-sm font-semibold">Anne</p>
+                            <div class="flex space-x-1">
+                                <div class="typing-dot w-1.5 h-1.5 bg-gray-600 rounded-full"></div>
+                                <div class="typing-dot w-1.5 h-1.5 bg-gray-600 rounded-full"></div>
+                                <div class="typing-dot w-1.5 h-1.5 bg-gray-600 rounded-full"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -440,32 +544,15 @@
 
             <!-- Input area -->
             <div class="input-area">
-                <div id="typing-indicator" class="typing-indicator hidden">
-                    <div class="flex items-center space-x-1">
-                        <div class="w-10 h-10 rounded-full bg-gray-100 flex-shrink-0 flex items-center justify-center mr-3">
-                            <i class="fas fa-robot text-black"></i>
-                        </div>
-                        <div class="flex space-x-1">
-                            <div class="typing-dot w-2 h-2 bg-gray-600 rounded-full"></div>
-                            <div class="typing-dot w-2 h-2 bg-gray-600 rounded-full"></div>
-                            <div class="typing-dot w-2 h-2 bg-gray-600 rounded-full"></div>
-                        </div>
-                    </div>
-                </div>
                 <div class="input-container">
-                    <div class="flex-1 relative">
-                        <textarea
-                            id="user-input"
-                            rows="1"
-                            placeholder="Message Anne..."
-                            class="w-full"
-                        ></textarea>
-                        <button id="clear-btn" class="clear-btn absolute right-2 bottom-2 hidden">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
+                    <textarea
+                        id="user-input"
+                        rows="1"
+                        placeholder="Message Anne..."
+                        class="w-full"
+                    ></textarea>
                     <button id="send-btn" class="send-btn" disabled>
-                        <i class="fas fa-paper-plane"></i>
+                        <i class="fas fa-paper-plane text-sm"></i>
                     </button>
                 </div>
             </div>
@@ -486,6 +573,31 @@
         </div>
     </div>
 
+    <!-- Edit Field Modal -->
+    <div id="edit-field-modal" class="modal-overlay hidden" role="dialog" aria-labelledby="edit-modal-title" aria-describedby="edit-modal-desc">
+        <div class="modal-content">
+            <h3 id="edit-modal-title">Edit Field</h3>
+            <p id="edit-modal-desc">Edit the selected field below.</p>
+            <textarea id="edit-field-input" rows="1" class="w-full"></textarea>
+            <div class="flex space-x-2">
+                <button onclick="saveFieldEdit()" class="flex-1">Save</button>
+                <button onclick="closeEditModal()" class="flex-1 bg-gray-500 hover:bg-gray-600">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Clear Chat Modal -->
+    <div id="clear-chat-modal" class="modal-overlay hidden" role="dialog" aria-labelledby="clear-chat-title" aria-describedby="clear-chat-desc">
+        <div class="modal-content">
+            <h3 id="clear-chat-title">Clear Chat History</h3>
+            <p id="clear-chat-desc">Do you want to clear the chat history and start a new application?</p>
+            <div class="flex space-x-2">
+                <button onclick="clearChatHistory()" class="flex-1">Yes</button>
+                <button onclick="keepChatHistory()" class="flex-1 bg-gray-500 hover:bg-gray-600">No</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Sound elements -->
     <audio id="message-sound" class="message-sound" preload="auto">
         <source src="https://assets.mixkit.co/sfx/preview/mixkit-positive-interface-beep-221.mp3" type="audio/mpeg">
@@ -497,9 +609,34 @@
     <script>
         const config = { apiBaseUrl: '/api' };
 
+        function clampValue(min, value, max) {
+            return Math.min(Math.max(value, min), max);
+        }
+
+        function adjustSectionPadding() {
+            const main = document.querySelector('main');
+            const header = document.querySelector('header');
+            const inputArea = document.querySelector('.input-area');
+            const chatContainer = document.getElementById('chat-container');
+            if (main && header && inputArea && chatContainer) {
+                const navHeight = header.offsetHeight;
+                const inputHeight = inputArea.offsetHeight;
+                main.style.paddingTop = `${navHeight}px`; // Align with header
+                chatContainer.style.paddingBottom = `${inputHeight + 16}px`;
+                chatContainer.style.maxHeight = `calc(100vh - ${navHeight}px - ${inputHeight + 16}px)`;
+                console.log('Adjusted main padding-top:', main.style.paddingTop, 
+                            'chat-container padding-bottom:', chatContainer.style.paddingBottom, 
+                            'chat-container max-height:', chatContainer.style.maxHeight, 
+                            'computed height:', getComputedStyle(chatContainer).height,
+                            'overflow-y:', getComputedStyle(chatContainer).overflowY);
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
-            // Application data
-            const applicationData = {
+            adjustSectionPadding();
+            window.addEventListener('resize', adjustSectionPadding);
+
+            let applicationData = JSON.parse(localStorage.getItem('applicationData')) || {
                 firstName: '',
                 lastName: '',
                 bust: '',
@@ -515,13 +652,13 @@
                 email: '',
                 altContact: ''
             };
+            let currentQuestion = parseInt(localStorage.getItem('currentQuestion')) || 0;
+            let isApplicationActive = JSON.parse(localStorage.getItem('isApplicationActive')) || false;
+            let selectedPhotos = JSON.parse(localStorage.getItem('selectedPhotos')) || [];
+            let messages = JSON.parse(localStorage.getItem('chatMessages')) || [];
+            let currentEditField = null;
+            let holdTimer = null;
 
-            // Current question index
-            let currentQuestion = 0;
-            let isApplicationActive = false;
-            let selectedPhotos = [];
-
-            // Validation functions
             const validators = {
                 firstName: (value) => !value ? 'First name is required' : null,
                 lastName: (value) => !value ? 'Last name is required' : null,
@@ -539,89 +676,27 @@
                 altContact: (value) => !value ? 'Alternative contact method is required' : null
             };
 
-            // Questions for the application process
             const applicationQuestions = [
-                {
-                    question: "Let's begin with your first name. Please provide your first name.",
-                    field: 'firstName',
-                    example: "Example: Jane"
-                },
-                {
-                    question: "Thank you! Now, please provide your last name.",
-                    field: 'lastName',
-                    example: "Example: Smith"
-                },
-                {
-                    question: "Please provide your bust measurement.",
-                    field: 'bust',
-                    example: "Example: 86"
-                },
-                {
-                    question: "Please provide your waist measurement.",
-                    field: 'waist',
-                    example: "Example: 61"
-                },
-                {
-                    question: "Please provide your hip measurement.",
-                    field: 'hips',
-                    example: "Example: 89"
-                },
-                {
-                    question: "Please provide your agency representation status (current or past agencies, or 'Independent' if unrepresented).",
-                    field: 'justCo',
-                    example: "Example: Elite Model Management or Independent"
-                },
-                {
-                    question: "Please provide your height.",
-                    field: 'height',
-                    example: "Example: 5 feet 9 inches"
-                },
-                {
-                    question: "You will need to submit two photos: one full-body shot and one portrait. Please click the button below to upload your photos or ask any questions about the photo requirements.",
-                    field: 'photos',
-                    example: "Example response: I understand"
-                },
-                {
-                    question: "If you have an Instagram profile, please share your username or link.",
-                    field: 'instagram',
-                    example: "Example: yourusername or leave blank"
-                },
-                {
-                    question: "If you have a TikTok account, please provide your username or link.",
-                    field: 'tiktok',
-                    example: "Example: yourusername or leave blank"
-                },
-                {
-                    question: "Please specify your current location.",
-                    field: 'location',
-                    example: "Example: Los Angeles, USA"
-                },
-                {
-                    question: "Please provide your date of birth.",
-                    field: 'dob',
-                    example: "Example: May 15, 1995"
-                },
-                {
-                    question: "When would you like to begin modeling?",
-                    field: 'startDate',
-                    example: "Example: January 2026"
-                },
-                {
-                    question: "Please provide an email address we can use to contact you.",
-                    field: 'email',
-                    example: "Example: yourname@example.com"
-                },
-                {
-                    question: "Please provide an alternative contact method.",
-                    field: 'altContact',
-                    example: "Example: +1234567890 or alternate@example.com"
-                }
+                { question: "Let's begin with your first name. Please provide your first name.", field: 'firstName', example: "Example: Jane" },
+                { question: "Thank you! Now, please provide your last name.", field: 'lastName', example: "Example: Smith" },
+                { question: "Please provide your bust measurement.", field: 'bust', example: "Example: 86" },
+                { question: "Please provide your waist measurement.", field: 'waist', example: "Example: 61" },
+                { question: "Please provide your hip measurement.", field: 'hips', example: "Example: 89" },
+                { question: "Please provide your agency representation status (current or past agencies, or 'Independent' if unrepresented).", field: 'justCo', example: "Example: Elite Model Management or Independent" },
+                { question: "Please provide your height.", field: 'height', example: "Example: 5 feet 9 inches" },
+                { question: "You will need to submit two photos: one full-body shot and one portrait. Please click the button below to upload your photos or ask any questions about the photo requirements.", field: 'photos', example: "Example response: I understand" },
+                { question: "If you have an Instagram profile, please share your username or link.", field: 'instagram', example: "Example: yourusername or leave blank" },
+                { question: "If you have a TikTok account, please provide your username or link.", field: 'tiktok', example: "Example: yourusername or leave blank" },
+                { question: "Please specify your current location.", field: 'location', example: "Example: Los Angeles, USA" },
+                { question: "Please provide your date of birth.", field: 'dob', example: "Example: May 15, 1995" },
+                { question: "When would you like to begin modeling?", field: 'startDate', example: "Example: January 2026" },
+                { question: "Please provide an email address we can use to contact you.", field: 'email', example: "Example: yourname@example.com" },
+                { question: "Please provide an alternative contact method.", field: 'altContact', example: "Example: +1234567890 or alternate@example.com" }
             ];
 
             const chatContainer = document.getElementById('chat-container');
             const userInput = document.getElementById('user-input');
             const sendBtn = document.getElementById('send-btn');
-            const clearBtn = document.getElementById('clear-btn');
             const typingIndicator = document.getElementById('typing-indicator');
             const messageSound = document.getElementById('message-sound');
             const sendSound = document.getElementById('send-sound');
@@ -631,6 +706,9 @@
             const photoInput = document.getElementById('photo-input');
             const imagePreview = document.getElementById('image-preview');
             const photoModal = document.getElementById('photo-upload-modal');
+            const editFieldModal = document.getElementById('edit-field-modal');
+            const editFieldInput = document.getElementById('edit-field-input');
+            const clearChatModal = document.getElementById('clear-chat-modal');
 
             // Toggle burger menu
             burgerMenu.addEventListener('click', function() {
@@ -657,54 +735,66 @@
                 soundElement.play().catch(e => console.log("Sound playback prevented:", e));
             }
 
-            // Debounce function
-            function debounce(func, wait) {
-                let timeout;
-                return function(...args) {
-                    clearTimeout(timeout);
-                    timeout = setTimeout(() => func.apply(this, args), wait);
-                };
-            }
-
             // Scroll to bottom
-            const scrollToBottom = debounce(function() {
+            let scrollTimeout = null;
+            const scrollToBottom = () => {
+                if (scrollTimeout) clearTimeout(scrollTimeout);
                 requestAnimationFrame(() => {
+                    const inputHeight = document.querySelector('.input-area').offsetHeight;
                     chatContainer.scrollTo({
                         top: chatContainer.scrollHeight,
-                        behavior: 'smooth'
+                        behavior: 'auto'
                     });
+                    scrollTimeout = setTimeout(() => {
+                        const isScrolledToBottom = Math.abs(chatContainer.scrollHeight - chatContainer.scrollTop - chatContainer.clientHeight) <= 1;
+                        if (!isScrolledToBottom) {
+                            chatContainer.scrollTo({
+                                top: chatContainer.scrollHeight,
+                                behavior: 'auto'
+                            });
+                        }
+                        console.log('Scrolled to bottom, scrollHeight:', chatContainer.scrollHeight, 
+                                    'scrollTop:', chatContainer.scrollTop, 
+                                    'clientHeight:', chatContainer.clientHeight, 
+                                    'inputHeight:', inputHeight, 
+                                    'typingIndicator visible:', !typingIndicator.classList.contains('hidden'),
+                                    'max-height:', getComputedStyle(chatContainer).maxHeight);
+                    }, 200);
                 });
-            }, 100);
+            };
+
+            // Mutation observer for chat container
+            const observer = new MutationObserver(() => {
+                scrollToBottom();
+            });
+            observer.observe(chatContainer, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+
+            // Resize observer for chat container
+            const resizeObserver = new ResizeObserver(() => {
+                scrollToBottom();
+            });
+            resizeObserver.observe(chatContainer);
 
             // Auto-resize textarea
             userInput.addEventListener('input', function() {
                 this.style.height = 'auto';
-                this.style.height = `${this.scrollHeight}px`;
-                clearBtn.classList.toggle('hidden', this.value.trim().length === 0);
+                this.style.height = `${Math.min(this.scrollHeight, 64)}px`;
                 sendBtn.disabled = this.value.trim().length === 0;
+                scrollToBottom();
             });
 
             // Handle mobile keyboard
             if (window.visualViewport) {
-                window.visualViewport.addEventListener('resize', debounce(() => {
+                window.visualViewport.addEventListener('resize', () => {
                     if (document.activeElement === userInput) {
                         scrollToBottom();
                     }
-                }, 100));
+                });
             }
 
             // Scroll on textarea focus
             userInput.addEventListener('focus', () => {
-                scrollToBottom();
-            });
-
-            // Clear input
-            clearBtn.addEventListener('click', function() {
-                userInput.value = '';
-                userInput.style.height = '2.75rem';
-                clearBtn.classList.add('hidden');
-                sendBtn.disabled = true;
-                userInput.focus();
+                setTimeout(scrollToBottom, 100);
             });
 
             // Send message on Enter
@@ -740,13 +830,15 @@
 
                     const reader = new FileReader();
                     reader.onload = function(event) {
-                        selectedPhotos.push({ name: file.name, data: event.target.result, file });
+                        selectedPhotos.push({ name: file.name, data: event.target.result });
+                        localStorage.setItem('selectedPhotos', JSON.stringify(selectedPhotos));
                         updateImagePreview();
                     };
                     reader.readAsDataURL(file);
                 });
 
                 photoInput.value = '';
+                scrollToBottom();
             });
 
             function updateImagePreview() {
@@ -760,11 +852,14 @@
                     `;
                     imagePreview.appendChild(previewDiv);
                 });
+                scrollToBottom();
             }
 
             window.removePhoto = function(index) {
                 selectedPhotos.splice(index, 1);
+                localStorage.setItem('selectedPhotos', JSON.stringify(selectedPhotos));
                 updateImagePreview();
+                scrollToBottom();
             };
 
             window.submitPhotos = function() {
@@ -776,22 +871,88 @@
                 photoModal.querySelector('.modal-content').classList.remove('show');
                 addMessageToChat('user', `Uploaded ${selectedPhotos.length} photo(s)`);
                 currentQuestion++;
+                localStorage.setItem('currentQuestion', currentQuestion);
                 setTimeout(() => {
                     askQuestion(currentQuestion);
                     scrollToBottom();
-                }, 1000);
+                }, 100);
             };
 
             window.closePhotoModal = function() {
                 selectedPhotos = [];
+                localStorage.setItem('selectedPhotos', JSON.stringify(selectedPhotos));
                 photoModal.classList.add('hidden');
                 photoModal.querySelector('.modal-content').classList.remove('show');
                 addMessageToChat('ai', 'Photo upload cancelled. Please upload your photos to continue.');
                 setTimeout(() => {
                     askQuestion(currentQuestion);
                     scrollToBottom();
-                }, 1000);
+                }, 100);
             };
+
+            window.saveFieldEdit = function() {
+                if (currentEditField === 'photos') {
+                    editFieldModal.classList.add('hidden');
+                    editFieldModal.querySelector('.modal-content').classList.remove('show');
+                    photoModal.classList.remove('hidden');
+                    photoModal.querySelector('.modal-content').classList.add('show');
+                    return;
+                }
+                const newValue = editFieldInput.value.trim();
+                const validationError = validators[currentEditField](newValue);
+                if (validationError) {
+                    alert(validationError);
+                    return;
+                }
+                applicationData[currentEditField] = newValue;
+                localStorage.setItem('applicationData', JSON.stringify(applicationData));
+                editFieldModal.classList.add('hidden');
+                editFieldModal.querySelector('.modal-content').classList.remove('show');
+                showApplicationReview();
+            };
+
+            window.closeEditModal = function() {
+                editFieldModal.classList.add('hidden');
+                editFieldModal.querySelector('.modal-content').classList.remove('show');
+                scrollToBottom();
+            };
+
+            window.clearChatHistory = function() {
+                localStorage.removeItem('chatMessages');
+                localStorage.removeItem('applicationData');
+                localStorage.removeItem('currentQuestion');
+                localStorage.removeItem('isApplicationActive');
+                localStorage.removeItem('selectedPhotos');
+                messages = [];
+                applicationData = {
+                    firstName: '', lastName: '', bust: '', waist: '', hips: '', justCo: '',
+                    height: '', instagram: '', tiktok: '', location: '', dob: '',
+                    startDate: '', email: '', altContact: ''
+                };
+                currentQuestion = 0;
+                isApplicationActive = false;
+                selectedPhotos = [];
+                while (chatContainer.children.length > 2) {
+                    chatContainer.removeChild(chatContainer.children[1]);
+                }
+                clearChatModal.classList.add('hidden');
+                clearChatModal.querySelector('.modal-content').classList.remove('show');
+                scrollToBottom();
+            };
+
+            window.keepChatHistory = function() {
+                clearChatModal.classList.add('hidden');
+                clearChatModal.querySelector('.modal-content').classList.remove('show');
+                restoreMessages();
+                scrollToBottom();
+            };
+
+            function getCurrentTime() {
+                const now = new Date();
+                const hours = now.getHours().toString().padStart(2, '0');
+                const minutes = now.getMinutes().toString().padStart(2, '0');
+                return `${hours}:${minutes} AM`;
+            }
 
             function sendMessage() {
                 const message = userInput.value.trim();
@@ -800,15 +961,16 @@
                 playSound(sendSound);
                 addMessageToChat('user', message);
                 userInput.value = '';
-                userInput.style.height = '2.75rem';
-                clearBtn.classList.add('hidden');
+                userInput.style.height = '1.5rem';
                 sendBtn.disabled = true;
 
                 typingIndicator.classList.remove('hidden');
+                console.log('Typing indicator shown');
                 scrollToBottom();
 
                 setTimeout(() => {
                     typingIndicator.classList.add('hidden');
+                    console.log('Typing indicator hidden');
                     if (isApplicationActive) {
                         if (applicationQuestions[currentQuestion].field === 'photos') {
                             if (message.toLowerCase() === 'i understand') {
@@ -819,7 +981,7 @@
                                 setTimeout(() => {
                                     askQuestion(currentQuestion);
                                     scrollToBottom();
-                                }, 1000);
+                                }, 100);
                             }
                         } else {
                             processApplicationAnswer(message);
@@ -829,20 +991,22 @@
                         addMessageToChat('ai', response);
                     }
                     scrollToBottom();
-                }, 1000 + Math.random() * 2000);
+                }, 1000 + Math.random() * 1000);
             }
 
             function addMessageToChat(sender, message) {
                 const messageDiv = document.createElement('div');
-                messageDiv.className = `chat-bubble flex ${sender === 'user' ? 'justify-end' : ''}`;
+                messageDiv.className = `chat-bubble flex ${sender === 'user' ? 'justify-end' : 'flex-row'}`;
+                const timestamp = getCurrentTime();
 
                 if (sender === 'user') {
                     messageDiv.innerHTML = `
-                        <div class="bg-black text-white p-4 rounded-lg shadow-sm max-w-3xl">
-                            <p>${message}</p>
+                        <div class="bg-black text-white p-2 rounded-lg">
+                            <p class="text-sm">${message}</p>
+                            <div class="message-timestamp">${timestamp}</div>
                         </div>
-                        <div class="w-10 h-10 rounded-full bg-gray-800 flex-shrink-0 flex items-center justify-center ml-3">
-                            <i class="fas fa-user text-white"></i>
+                        <div class="w-8 h-8 rounded-full bg-gray-800 flex-shrink-0 flex items-center justify-center ml-2">
+                            <i class="fas fa-user text-white text-sm" aria-label="User"></i>
                         </div>
                     `;
                 } else {
@@ -851,26 +1015,30 @@
                     const isAppQuestion = isApplicationActive && currentQ && currentQ.question === message;
 
                     messageDiv.innerHTML = `
-                        <div class="w-10 h-10 rounded-full bg-gray-100 flex-shrink-0 flex items-center justify-center mr-3">
-                            <i class="fas fa-robot text-black"></i>
+                        <div class="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 flex items-center justify-center mr-2">
+                            <i class="fas fa-robot text-gray-600 text-sm" aria-label="Anne, AI Assistant"></i>
                         </div>
-                        <div class="bg-white p-4 rounded-lg shadow-sm max-w-3xl border border-gray-200">
-                            <p class="text-gray-800">${message}</p>
+                        <div class="bg-white p-2 rounded-lg border border-gray-200">
+                            <p class="text-gray-800 text-sm font-semibold">Anne</p>
+                            <p class="text-gray-800 text-sm">${message}</p>
                             ${isAppQuestion && currentQ.example ? `
                                 <div class="example-box">${currentQ.example}</div>
                             ` : ''}
                             ${isAppQuestion && currentQ.field === 'photos' ? `
-                                <div class="mt-3">
+                                <div class="mt-2">
                                     <button onclick="document.getElementById('photo-upload-modal').classList.remove('hidden'); document.getElementById('photo-upload-modal').querySelector('.modal-content').classList.add('show')" class="option-button">
                                         Upload Photos
                                     </button>
                                 </div>
                             ` : ''}
+                            <div class="message-timestamp">${timestamp}</div>
                         </div>
                     `;
                 }
 
-                chatContainer.appendChild(messageDiv);
+                chatContainer.insertBefore(messageDiv, typingIndicator);
+                messages.push({ sender, message, timestamp });
+                localStorage.setItem('chatMessages', JSON.stringify(messages));
                 scrollToBottom();
             }
 
@@ -916,17 +1084,21 @@
             function startApplication() {
                 isApplicationActive = true;
                 currentQuestion = 0;
+                localStorage.setItem('isApplicationActive', JSON.stringify(isApplicationActive));
+                localStorage.setItem('currentQuestion', currentQuestion);
 
-                while (chatContainer.children.length > 1) {
-                    chatContainer.removeChild(chatContainer.lastChild);
+                while (chatContainer.children.length > 2) {
+                    chatContainer.removeChild(chatContainer.children[1]);
                 }
+                messages = [];
+                localStorage.setItem('chatMessages', JSON.stringify(messages));
 
                 addMessageToChat('ai', "Thank you for choosing to begin your professional modeling application. I'll guide you through each required field systematically. Please provide accurate information for optimal evaluation.");
 
                 setTimeout(() => {
                     askQuestion(currentQuestion);
                     scrollToBottom();
-                }, 1000);
+                }, 100);
             }
 
             function askQuestion(index) {
@@ -937,6 +1109,7 @@
 
                 const question = applicationQuestions[index];
                 addMessageToChat('ai', question.question);
+                scrollToBottom();
             }
 
             function processApplicationAnswer(answer) {
@@ -948,15 +1121,17 @@
                         setTimeout(() => {
                             askQuestion(currentQuestion);
                             scrollToBottom();
-                        }, 1000);
+                        }, 100);
                         return;
                     }
                     applicationData[currentField] = answer;
+                    localStorage.setItem('applicationData', JSON.stringify(applicationData));
                     currentQuestion++;
+                    localStorage.setItem('currentQuestion', currentQuestion);
                     setTimeout(() => {
                         askQuestion(currentQuestion);
                         scrollToBottom();
-                    }, 1000);
+                    }, 100);
                 }
             }
 
@@ -973,53 +1148,87 @@
                 if (errors.length > 0) {
                     addMessageToChat('ai', `Please correct the following errors:\n\n${errors.join('\n')}`);
                     setTimeout(() => {
-                        addMessageToChat('ai', "Which section would you like to revise?");
-                        const fieldsDiv = document.createElement('div');
-                        fieldsDiv.className = 'flex flex-wrap gap-2 mt-3';
-                        applicationQuestions.forEach((q, index) => {
-                            const button = document.createElement('button');
-                            button.className = 'option-button';
-                            button.textContent = q.field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
-                            button.onclick = () => {
-                                currentQuestion = index;
-                                askQuestion(currentQuestion);
-                            };
-                            fieldsDiv.appendChild(button);
-                        });
-                        const botMessages = document.querySelectorAll('.chat-bubble:not(.justify-end)');
-                        const lastBotMessage = botMessages[botMessages.length - 1].querySelector('.bg-white');
-                        lastBotMessage.appendChild(fieldsDiv);
+                        askQuestion(currentQuestion);
                         scrollToBottom();
-                    }, 1000);
+                    }, 100);
                     return;
                 }
 
-                let reviewMessage = "APPLICATION SUMMARY:\n\n";
+                const summaryDiv = document.createElement('div');
+                summaryDiv.className = 'summary-container grid grid-cols-1 sm:grid-cols-2 gap-2 p-2 bg-gray-50 rounded-lg border border-gray-200';
                 for (const [key, value] of Object.entries(applicationData)) {
                     if (value) {
                         const displayKey = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
-                        reviewMessage += `• ${displayKey}: ${value}\n`;
+                        const fieldDiv = document.createElement('div');
+                        fieldDiv.className = 'summary-field';
+                        fieldDiv.dataset.field = key;
+                        fieldDiv.innerHTML = `<span class="font-bold">${displayKey}:</span> ${value}`;
+                        summaryDiv.appendChild(fieldDiv);
                     }
                 }
-                reviewMessage += `• Photos: ${selectedPhotos.length} photo(s) uploaded\n`;
-                reviewMessage += "\nYour photos have been uploaded. Please ensure they include one full-body shot and one portrait (without makeup or filters, no merged or profile shots). Would you like to submit your application now or make revisions?";
+                const photosDiv = document.createElement('div');
+                photosDiv.className = 'summary-photos';
+                photosDiv.dataset.field = 'photos';
+                selectedPhotos.forEach((photo, index) => {
+                    const img = document.createElement('img');
+                    img.src = photo.data;
+                    img.alt = `Uploaded photo ${index + 1}`;
+                    photosDiv.appendChild(img);
+                });
+                summaryDiv.appendChild(photosDiv);
 
-                addMessageToChat('ai', reviewMessage);
+                addMessageToChat('ai', "APPLICATION SUMMARY\n\nYour photos have been uploaded. Please ensure they include one full-body shot and one portrait (without makeup or filters, no merged or profile shots). Click and hold any field to edit, then submit when ready.");
+                const botMessages = document.querySelectorAll('.chat-bubble:not(.justify-end)');
+                const lastBotMessage = botMessages[botMessages.length - 1].querySelector('.bg-white');
+                lastBotMessage.appendChild(summaryDiv);
 
                 const actionDiv = document.createElement('div');
-                actionDiv.className = 'flex space-x-2 mt-3';
+                actionDiv.className = 'flex space-x-2 mt-2';
                 actionDiv.innerHTML = `
                     <button onclick="submitApplication()" class="option-button bg-black hover:bg-gray-800 text-white">
                         <i class="fas fa-check mr-1"></i> Submit Application
                     </button>
-                    <button onclick="editApplication()" class="option-button bg-gray-100 hover:bg-gray-200 text-gray-800">
-                        <i class="fas fa-edit mr-1"></i> Make Changes
-                    </button>
                 `;
-
-                const botMessages = document.querySelectorAll('.chat-bubble:not(.justify-end)');
-                const lastBotMessage = botMessages[botMessages.length - 1].querySelector('.bg-white');
                 lastBotMessage.appendChild(actionDiv);
+
+                // Click-and-hold handlers for summary fields
+                summaryDiv.querySelectorAll('.summary-field, .summary-photos').forEach(field => {
+                    field.addEventListener('mousedown', (e) => {
+                        holdTimer = setTimeout(() => {
+                            currentEditField = field.dataset.field;
+                            if (currentEditField === 'photos') {
+                                photoModal.classList.remove('hidden');
+                                photoModal.querySelector('.modal-content').classList.add('show');
+                            } else {
+                                editFieldInput.value = applicationData[currentEditField] || '';
+                                editFieldModal.querySelector('#edit-modal-title').textContent = `Edit ${currentEditField.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}`;
+                                editFieldModal.classList.remove('hidden');
+                                editFieldModal.querySelector('.modal-content').classList.add('show');
+                            }
+                            scrollToBottom();
+                        }, 500);
+                    });
+                    field.addEventListener('mouseup', () => clearTimeout(holdTimer));
+                    field.addEventListener('mouseleave', () => clearTimeout(holdTimer));
+                    field.addEventListener('touchstart', (e) => {
+                        e.preventDefault();
+                        holdTimer = setTimeout(() => {
+                            currentEditField = field.dataset.field;
+                            if (currentEditField === 'photos') {
+                                photoModal.classList.remove('hidden');
+                                photoModal.querySelector('.modal-content').classList.add('show');
+                            } else {
+                                editFieldInput.value = applicationData[currentEditField] || '';
+                                editFieldModal.querySelector('#edit-modal-title').textContent = `Edit ${currentEditField.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}`;
+                                editFieldModal.classList.remove('hidden');
+                                editFieldModal.querySelector('.modal-content').classList.add('show');
+                            }
+                            scrollToBottom();
+                        }, 500);
+                    });
+                    field.addEventListener('touchend', () => clearTimeout(holdTimer));
+                    field.addEventListener('touchcancel', () => clearTimeout(holdTimer));
+                });
 
                 scrollToBottom();
             }
@@ -1037,24 +1246,9 @@
                 if (errors.length > 0) {
                     addMessageToChat('ai', `Cannot submit due to the following errors:\n\n${errors.join('\n')}`);
                     setTimeout(() => {
-                        addMessageToChat('ai', "Which section would you like to revise?");
-                        const fieldsDiv = document.createElement('div');
-                        fieldsDiv.className = 'flex flex-wrap gap-2 mt-3';
-                        applicationQuestions.forEach((q, index) => {
-                            const button = document.createElement('button');
-                            button.className = 'option-button';
-                            button.textContent = q.field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
-                            button.onclick = () => {
-                                currentQuestion = index;
-                                askQuestion(currentQuestion);
-                            };
-                            fieldsDiv.appendChild(button);
-                        });
-                        const botMessages = document.querySelectorAll('.chat-bubble:not(.justify-end)');
-                        const lastBotMessage = botMessages[botMessages.length - 1].querySelector('.bg-white');
-                        lastBotMessage.appendChild(fieldsDiv);
+                        showApplicationReview();
                         scrollToBottom();
-                    }, 1000);
+                    }, 100);
                     return;
                 }
 
@@ -1064,98 +1258,146 @@
                 for (const [key, value] of Object.entries(applicationData)) {
                     formData.append(key, value);
                 }
-                selectedPhotos.forEach((photo) => {
-                    formData.append('photos', photo.file, photo.name);
-                });
-
                 try {
+                    const photoBlobs = await Promise.all(
+                        selectedPhotos.map(async (photo, index) => {
+                            const res = await fetch(photo.data);
+                            const blob = await res.blob();
+                            return { blob, name: photo.name };
+                        })
+                    );
+                    photoBlobs.forEach(({ blob, name }, index) => {
+                        formData.append('photos', blob, name);
+                    });
+
+                    // Log FormData contents for debugging
+                    const formDataEntries = {};
+                    for (const [key, value] of formData.entries()) {
+                        formDataEntries[key] = value instanceof Blob ? `Blob: ${value.size} bytes` : value;
+                    }
+                    console.log('FormData contents:', formDataEntries);
+
                     const response = await fetch(`${config.apiBaseUrl}/applications`, {
                         method: 'POST',
                         body: formData
                     });
 
                     const data = await response.json();
+                    console.log('Server response:', data);
 
                     setTimeout(() => {
                         if (response.ok) {
                             addMessageToChat('ai', "APPLICATION SUBMITTED\n\nThank you for your professional submission. We've received your information and photos, and will conduct a thorough review. Our team will contact you within 2-3 weeks if we wish to proceed.");
+                            localStorage.removeItem('chatMessages');
+                            localStorage.removeItem('applicationData');
+                            localStorage.removeItem('currentQuestion');
+                            localStorage.removeItem('isApplicationActive');
+                            localStorage.removeItem('selectedPhotos');
+                            messages = [];
+                            applicationData = {
+                                firstName: '', lastName: '', bust: '', waist: '', hips: '', justCo: '',
+                                height: '', instagram: '', tiktok: '', location: '', dob: '',
+                                startDate: '', email: '', altContact: ''
+                            };
+                            currentQuestion = 0;
+                            isApplicationActive = false;
+                            selectedPhotos = [];
                         } else {
                             addMessageToChat('ai', `Error: ${data.message || 'Failed to submit application. Please correct your inputs and try again.'}`);
                             setTimeout(() => {
-                                addMessageToChat('ai', "Which section would you like to revise?");
-                                const fieldsDiv = document.createElement('div');
-                                fieldsDiv.className = 'flex flex-wrap gap-2 mt-3';
-                                applicationQuestions.forEach((q, index) => {
-                                    const button = document.createElement('button');
-                                    button.className = 'option-button';
-                                    button.textContent = q.field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
-                                    button.onclick = () => {
-                                        currentQuestion = index;
-                                        askQuestion(currentQuestion);
-                                    };
-                                    fieldsDiv.appendChild(button);
-                                });
-                                const botMessages = document.querySelectorAll('.chat-bubble:not(.justify-end)');
-                                const lastBotMessage = botMessages[botMessages.length - 1].querySelector('.bg-white');
-                                lastBotMessage.appendChild(fieldsDiv);
+                                showApplicationReview();
                                 scrollToBottom();
-                            }, 1000);
+                            }, 100);
                         }
-                        isApplicationActive = false;
-                        currentQuestion = 0;
-                        for (const key in applicationData) {
-                            applicationData[key] = '';
-                        }
-                        selectedPhotos = [];
                         scrollToBottom();
-                    }, 1000);
+                    }, 100);
                 } catch (error) {
                     console.error('Error submitting application:', error);
                     setTimeout(() => {
                         addMessageToChat('ai', 'Error: Server error. Please try again later.');
                         scrollToBottom();
-                    }, 1000);
+                    }, 100);
                 }
             }
 
-            function editApplication() {
-                addMessageToChat('user', 'I need to edit my application');
+            // Restore messages on page load
+            function restoreMessages() {
+                messages.forEach(({ sender, message, timestamp }) => {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = `chat-bubble flex ${sender === 'user' ? 'justify-end' : 'flex-row'}`;
+                    const isAppQuestion = isApplicationActive && applicationQuestions[currentQuestion] && applicationQuestions[currentQuestion].question === message;
 
-                setTimeout(() => {
-                    addMessageToChat('ai', "Which section requires revision? Please select from the following:");
+                    if (sender === 'user') {
+                        messageDiv.innerHTML = `
+                            <div class="bg-black text-white p-2 rounded-lg">
+                                <p class="text-sm">${message}</p>
+                                <div class="message-timestamp">${timestamp}</div>
+                            </div>
+                            <div class="w-8 h-8 rounded-full bg-gray-800 flex-shrink-0 flex items-center justify-center ml-2">
+                                <i class="fas fa-user text-white text-sm" aria-label="User"></i>
+                            </div>
+                        `;
+                    } else {
+                        messageDiv.innerHTML = `
+                            <div class="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 flex items-center justify-center mr-2">
+                                <i class="fas fa-robot text-gray-600 text-sm" aria-label="Anne, AI Assistant"></i>
+                            </div>
+                            <div class="bg-white p-2 rounded-lg border border-gray-200">
+                                <p class="text-gray-800 text-sm font-semibold">Anne</p>
+                                <p class="text-gray-800 text-sm">${message}</p>
+                                ${isAppQuestion && applicationQuestions.find(q => q.question === message)?.example ? `
+                                    <div class="example-box">${applicationQuestions.find(q => q.question === message).example}</div>
+                                ` : ''}
+                                ${isAppQuestion && applicationQuestions.find(q => q.question === message)?.field === 'photos' ? `
+                                    <div class="mt-2">
+                                        <button onclick="document.getElementById('photo-upload-modal').classList.remove('hidden'); document.getElementById('photo-upload-modal').querySelector('.modal-content').classList.add('show')" class="option-button">
+                                            Upload Photos
+                                        </button>
+                                    </div>
+                                ` : ''}
+                                <div class="message-timestamp">${timestamp}</div>
+                            </div>
+                        `;
+                    }
 
-                    const fieldsDiv = document.createElement('div');
-                    fieldsDiv.className = 'flex flex-wrap gap-2 mt-3';
-
-                    applicationQuestions.forEach((q, index) => {
-                        const button = document.createElement('button');
-                        button.className = 'option-button';
-                        button.textContent = q.field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
-                        button.onclick = () => {
-                            currentQuestion = index;
-                            askQuestion(currentQuestion);
-                        };
-                        fieldsDiv.appendChild(button);
-                    });
-
-                    const botMessages = document.querySelectorAll('.chat-bubble:not(.justify-end)');
-                    const lastBotMessage = botMessages[botMessages.length - 1].querySelector('.bg-white');
-                    lastBotMessage.appendChild(fieldsDiv);
-
+                    chatContainer.insertBefore(messageDiv, typingIndicator);
+                });
+                if (messages.length > 0) {
+                    updateImagePreview();
                     scrollToBottom();
-                }, 1000);
+                }
+            }
+
+            // Show clear chat modal on page load if chat history exists
+            if (localStorage.getItem('chatMessages') && JSON.parse(localStorage.getItem('chatMessages')).length > 0) {
+                clearChatModal.classList.remove('hidden');
+                clearChatModal.querySelector('.modal-content').classList.add('show');
+                scrollToBottom();
+            } else {
+                restoreMessages();
+                scrollToBottom();
             }
 
             window.startApplication = startApplication;
             window.submitApplication = submitApplication;
-            window.editApplication = editApplication;
             window.addMessageToChat = addMessageToChat;
             window.closePhotoModal = closePhotoModal;
             window.submitPhotos = submitPhotos;
             window.removePhoto = removePhoto;
+            window.saveFieldEdit = saveFieldEdit;
+            window.closeEditModal = closeEditModal;
+            window.clearChatHistory = clearChatHistory;
+            window.keepChatHistory = keepChatHistory;
 
-            // Initialize scroll to bottom on load
-            setTimeout(scrollToBottom, 300);
+            // Initialize
+            adjustSectionPadding();
+        });
+
+        window.addEventListener('load', () => {
+            adjustSectionPadding();
+            console.log('Header font-family:', getComputedStyle(document.querySelector('header a[href="index.html"]')).fontFamily);
+            console.log('Header logo font-size:', getComputedStyle(document.querySelector('header a[href="index.html"]')).fontSize);
+            console.log('Main padding-top:', getComputedStyle(document.querySelector('main')).paddingTop);
         });
     </script>
 </body>
