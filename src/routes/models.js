@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const Model = require('../models/Model');
-const auth = require('../middleware/auth'); // Consistent with lowercase middleware directory
-const { query, body, validationResult } = require('express-validator');
+const auth = require('../middleware/auth');
+const { query, body, validationResult, matchedData } = require('express-validator');
 const cloudinary = require('../config/cloudinary');
 const upload = require('../middleware/multer');
+const mongoose = require('mongoose');
 
 // Public: Get all models with pagination
 router.get(
@@ -25,7 +26,7 @@ router.get(
     }
 
     try {
-      const { category, name, page = 1, limit = 6 } = req.query;
+      const { category, name, page = 1, limit = 6 } = matchedData(req);
       const query = {};
       if (category && category !== 'all') query.category = category;
       if (name) query.name = { $regex: name, $options: 'i' };
@@ -40,12 +41,19 @@ router.get(
       const models = await Model.find(query)
         .sort({ createdAt: -1 })
         .skip(skip)
-        .limit(limitNum);
+        .limit(limitNum)
+        .lean();
       const total = await Model.countDocuments(query);
 
-      res.json({ models, total });
+      // Ensure socialLinks is always included
+      const modelsWithSocialLinks = models.map(model => ({
+        ...model,
+        socialLinks: model.socialLinks || { instagram: null, tiktok: null }
+      }));
+
+      res.json({ models: modelsWithSocialLinks, total });
     } catch (error) {
-      console.error('Error fetching models:', error);
+      console.error('Error fetching models:', error.message);
       res.status(500).json({ message: 'Server error' });
     }
   }
@@ -54,32 +62,58 @@ router.get(
 // Public: Get model by ID
 router.get('/:id', async (req, res) => {
   try {
-    const model = await Model.findById(req.params.id);
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ message: 'Invalid model ID' });
+    }
+    const model = await Model.findById(req.params.id).lean();
     if (!model) {
       return res.status(404).json({ message: 'Model not found' });
     }
-    res.json(model);
+    // Ensure socialLinks is always included
+    const modelWithSocialLinks = {
+      ...model,
+      socialLinks: model.socialLinks || { instagram: null, tiktok: null }
+    };
+    res.json(modelWithSocialLinks);
   } catch (error) {
-    console.error('Error fetching model by ID:', error);
+    console.error('Error fetching model by ID:', error.message);
     res.status(500).json({ message: 'Server error' });
-    }
+  }
 });
 
 // Admin: Add a model
 router.post(
   '/',
-  auth, // Fixed to use 'auth' instead of 'authMiddleware'
+  auth,
   upload.single('image'),
   [
-    body('name').notEmpty().withMessage('Name is required'),
+    body('name').notEmpty().withMessage('Name is required').trim().isLength({ min: 2, max: 100 }).withMessage('Name must be between 2 and 100 characters'),
     body('category').isIn(['beauty', 'bridal', 'fashion', 'brand', 'makeup', 'Light Skin', 'Dark Skin', 'Caramel Skin', 'Brown Skin']).withMessage('Invalid category'),
-    body('height').optional().trim(),
-    body('measurements').optional().trim(),
-    body('hair').optional().trim(),
-    body('eyes').optional().trim(),
-    body('location').optional().trim(),
-    body('description').optional().trim(),
-    body('socialLinks').optional().isString().withMessage('Social links must be a valid JSON string'),
+    body('height').optional().trim().isLength({ max: 20 }).withMessage('Height cannot exceed 20 characters'),
+    body('measurements.bust').optional().trim().isLength({ max: 20 }).withMessage('Bust measurement cannot exceed 20 characters'),
+    body('measurements.waist').optional().trim().isLength({ max: 20 }).withMessage('Waist measurement cannot exceed 20 characters'),
+    body('measurements.hips').optional().trim().isLength({ max: 20 }).withMessage('Hips measurement cannot exceed 20 characters'),
+    body('hair').optional().trim().isLength({ max: 50 }).withMessage('Hair description cannot exceed 50 characters'),
+    body('eyes').optional().trim().isLength({ max: 50 }).withMessage('Eyes description cannot exceed 50 characters'),
+    body('shoes').optional().trim().isLength({ max: 20 }).withMessage('Shoes size cannot exceed 20 characters'),
+    body('location').optional().trim().isLength({ max: 100 }).withMessage('Location cannot exceed 100 characters'),
+    body('description').optional().trim().isLength({ max: 1000 }).withMessage('Description cannot exceed 1000 characters'),
+    body('placements').optional().customSanitizer(value => {
+      try {
+        return value ? JSON.parse(value) : [];
+      } catch (error) {
+        throw new Error('Placements must be a valid JSON array');
+      }
+    }).isArray().withMessage('Placements must be an array'),
+    body('placements.*.city').optional().trim().isLength({ max: 100 }).withMessage('City cannot exceed 100 characters'),
+    body('placements.*.agency').optional().trim().isLength({ max: 100 }).withMessage('Agency cannot exceed 100 characters'),
+    body('socialLinks').optional().customSanitizer(value => {
+      try {
+        return value ? JSON.parse(value) : { instagram: null, tiktok: null };
+      } catch (error) {
+        throw new Error('SocialLinks must be a valid JSON object');
+      }
+    }),
     body('socialLinks.instagram').optional().isURL().withMessage('Valid Instagram URL is required'),
     body('socialLinks.tiktok').optional().isURL().withMessage('Valid TikTok URL is required')
   ],
@@ -94,14 +128,13 @@ router.post(
         return res.status(400).json({ message: 'Main image is required' });
       }
 
-      const { name, category, description, height, measurements, hair, eyes, location } = req.body;
-      let socialLinks = req.body.socialLinks ? JSON.parse(req.body.socialLinks) : {};
+      const data = matchedData(req);
+      const { name, category, description, height, measurements, hair, eyes, shoes, location, placements, socialLinks } = data;
 
-      // Create base64 data URI
-      const mimeType = req.file.mimetype; // e.g., 'image/jpeg'
+      // Upload main image to Cloudinary
+      const mimeType = req.file.mimetype;
       const base64Data = req.file.buffer.toString('base64');
       const dataUri = `data:${mimeType};base64,${base64Data}`;
-
       const result = await cloudinary.uploader.upload(dataUri, {
         folder: 'models',
         resource_type: 'image',
@@ -115,21 +148,30 @@ router.post(
         imagePublicId: result.public_id,
         description: description || undefined,
         height: height || undefined,
-        measurements: measurements || undefined,
+        measurements: measurements ? {
+          bust: measurements.bust || undefined,
+          waist: measurements.waist || undefined,
+          hips: measurements.hips || undefined
+        } : undefined,
         hair: hair || undefined,
         eyes: eyes || undefined,
+        shoes: shoes || undefined,
         location: location || undefined,
+        placements: placements ? placements.map(p => ({
+          city: p.city || undefined,
+          agency: p.agency || undefined
+        })) : [],
         socialLinks: {
-          instagram: socialLinks.instagram || undefined,
-          tiktok: socialLinks.tiktok || undefined
+          instagram: socialLinks?.instagram || undefined,
+          tiktok: socialLinks?.tiktok || undefined
         }
       });
 
       await model.save();
       res.status(201).json(model);
     } catch (error) {
-      console.error('Error adding model:', error);
-      res.status(500).json({ message: error.message || 'Server error' });
+      console.error('Error adding model:', error.message);
+      res.status(500).json({ message: 'Server error' });
     }
   }
 );
@@ -137,18 +179,36 @@ router.post(
 // Admin: Update a model
 router.put(
   '/:id',
-  auth, // Fixed to use 'auth' instead of 'authMiddleware'
+  auth,
   upload.single('image'),
   [
-    body('name').optional().notEmpty().withMessage('Name cannot be empty'),
+    body('name').optional().notEmpty().withMessage('Name cannot be empty').trim().isLength({ min: 2, max: 100 }).withMessage('Name must be between 2 and 100 characters'),
     body('category').optional().isIn(['beauty', 'bridal', 'fashion', 'brand', 'makeup', 'Light Skin', 'Dark Skin', 'Caramel Skin', 'Brown Skin']).withMessage('Invalid category'),
-    body('height').optional().trim(),
-    body('measurements').optional().trim(),
-    body('hair').optional().trim(),
-    body('eyes').optional().trim(),
-    body('location').optional().trim(),
-    body('description').optional().trim(),
-    body('socialLinks').optional().isString().withMessage('Social links must be a valid JSON string'),
+    body('height').optional().trim().isLength({ max: 20 }).withMessage('Height cannot exceed 20 characters'),
+    body('measurements.bust').optional().trim().isLength({ max: 20 }).withMessage('Bust measurement cannot exceed 20 characters'),
+    body('measurements.waist').optional().trim().isLength({ max: 20 }).withMessage('Waist measurement cannot exceed 20 characters'),
+    body('measurements.hips').optional().trim().isLength({ max: 20 }).withMessage('Hips measurement cannot exceed 20 characters'),
+    body('hair').optional().trim().isLength({ max: 50 }).withMessage('Hair description cannot exceed 50 characters'),
+    body('eyes').optional().trim().isLength({ max: 50 }).withMessage('Eyes description cannot exceed 50 characters'),
+    body('shoes').optional().trim().isLength({ max: 20 }).withMessage('Shoes size cannot exceed 20 characters'),
+    body('location').optional().trim().isLength({ max: 100 }).withMessage('Location cannot exceed 100 characters'),
+    body('description').optional().trim().isLength({ max: 1000 }).withMessage('Description cannot exceed 1000 characters'),
+    body('placements').optional().customSanitizer(value => {
+      try {
+        return value ? JSON.parse(value) : [];
+      } catch (error) {
+        throw new Error('Placements must be a valid JSON array');
+      }
+    }).isArray().withMessage('Placements must be an array'),
+    body('placements.*.city').optional().trim().isLength({ max: 100 }).withMessage('City cannot exceed 100 characters'),
+    body('placements.*.agency').optional().trim().isLength({ max: 100 }).withMessage('Agency cannot exceed 100 characters'),
+    body('socialLinks').optional().customSanitizer(value => {
+      try {
+        return value ? JSON.parse(value) : { instagram: null, tiktok: null };
+      } catch (error) {
+        throw new Error('SocialLinks must be a valid JSON object');
+      }
+    }),
     body('socialLinks.instagram').optional().isURL().withMessage('Valid Instagram URL is required'),
     body('socialLinks.tiktok').optional().isURL().withMessage('Valid TikTok URL is required')
   ],
@@ -159,21 +219,34 @@ router.put(
     }
 
     try {
-      const { name, category, description, height, measurements, hair, eyes, location, imagePublicId } = req.body;
-      let socialLinks = req.body.socialLinks ? JSON.parse(req.body.socialLinks) : {};
+      if (!mongoose.isValidObjectId(req.params.id)) {
+        return res.status(400).json({ message: 'Invalid model ID' });
+      }
+
+      const data = matchedData(req);
+      const { name, category, description, height, measurements, hair, eyes, shoes, location, placements, socialLinks, imagePublicId } = data;
 
       const updateData = {
         name,
         category,
         description: description || undefined,
         height: height || undefined,
-        measurements: measurements || undefined,
+        measurements: measurements ? {
+          bust: measurements.bust || undefined,
+          waist: measurements.waist || undefined,
+          hips: measurements.hips || undefined
+        } : undefined,
         hair: hair || undefined,
         eyes: eyes || undefined,
+        shoes: shoes || undefined,
         location: location || undefined,
+        placements: placements ? placements.map(p => ({
+          city: p.city || undefined,
+          agency: p.agency || undefined
+        })) : [],
         socialLinks: {
-          instagram: socialLinks.instagram || undefined,
-          tiktok: socialLinks.tiktok || undefined
+          instagram: socialLinks?.instagram || undefined,
+          tiktok: socialLinks?.tiktok || undefined
         }
       };
 
@@ -203,10 +276,15 @@ router.put(
       if (!model) {
         return res.status(404).json({ message: 'Model not found' });
       }
-      res.json(model);
+      // Ensure socialLinks is always included in response
+      const modelWithSocialLinks = {
+        ...model.toObject(),
+        socialLinks: model.socialLinks || { instagram: null, tiktok: null }
+      };
+      res.json(modelWithSocialLinks);
     } catch (error) {
-      console.error('Error updating model:', error);
-      res.status(500).json({ message: error.message || 'Server error' });
+      console.error('Error updating model:', error.message);
+      res.status(500).json({ message: 'Server error' });
     }
   }
 );
@@ -214,19 +292,21 @@ router.put(
 // Admin: Add portfolio image
 router.post(
   '/:id/portfolio',
-  auth, // Fixed to use 'auth' instead of 'authMiddleware'
+  auth,
   upload.single('image'),
   async (req, res) => {
     try {
+      if (!mongoose.isValidObjectId(req.params.id)) {
+        return res.status(400).json({ message: 'Invalid model ID' });
+      }
       if (!req.file) {
         return res.status(400).json({ message: 'Portfolio image is required' });
       }
 
-      // Create base64 data URI
+      // Upload image to Cloudinary
       const mimeType = req.file.mimetype;
       const base64Data = req.file.buffer.toString('base64');
       const dataUri = `data:${mimeType};base64,${base64Data}`;
-
       const result = await cloudinary.uploader.upload(dataUri, {
         folder: 'models/portfolio',
         resource_type: 'image',
@@ -243,10 +323,15 @@ router.post(
         await cloudinary.uploader.destroy(result.public_id).catch(err => console.error('Error deleting uploaded image:', err));
         return res.status(404).json({ message: 'Model not found' });
       }
-      res.json(model);
+      // Ensure socialLinks is always included in response
+      const modelWithSocialLinks = {
+        ...model.toObject(),
+        socialLinks: model.socialLinks || { instagram: null, tiktok: null }
+      };
+      res.json(modelWithSocialLinks);
     } catch (error) {
-      console.error('Error adding portfolio image:', error);
-      res.status(500).json({ message: error.message || 'Server error' });
+      console.error('Error adding portfolio image:', error.message);
+      res.status(500).json({ message: 'Server error' });
     }
   }
 );
@@ -254,9 +339,12 @@ router.post(
 // Admin: Delete portfolio image
 router.delete(
   '/:id/portfolio/:imageIndex',
-  auth, // Fixed to use 'auth' instead of 'authMiddleware'
+  auth,
   async (req, res) => {
     try {
+      if (!mongoose.isValidObjectId(req.params.id)) {
+        return res.status(400).json({ message: 'Invalid model ID' });
+      }
       const model = await Model.findById(req.params.id);
       if (!model) {
         return res.status(404).json({ message: 'Model not found' });
@@ -271,10 +359,15 @@ router.delete(
       }
       model.portfolioImages.splice(imageIndex, 1);
       await model.save();
-      res.json(model);
+      // Ensure socialLinks is always included in response
+      const modelWithSocialLinks = {
+        ...model.toObject(),
+        socialLinks: model.socialLinks || { instagram: null, tiktok: null }
+      };
+      res.json(modelWithSocialLinks);
     } catch (error) {
-      console.error('Error deleting portfolio image:', error);
-      res.status(500).json({ message: error.message || 'Server error' });
+      console.error('Error deleting portfolio image:', error.message);
+      res.status(500).json({ message: 'Server error' });
     }
   }
 );
@@ -282,9 +375,12 @@ router.delete(
 // Admin: Delete a model
 router.delete(
   '/:id',
-  auth, // Fixed to use 'auth' instead of 'authMiddleware'
+  auth,
   async (req, res) => {
     try {
+      if (!mongoose.isValidObjectId(req.params.id)) {
+        return res.status(400).json({ message: 'Invalid model ID' });
+      }
       const model = await Model.findById(req.params.id);
       if (!model) {
         return res.status(404).json({ message: 'Model not found' });
@@ -302,8 +398,8 @@ router.delete(
       await Model.findByIdAndDelete(req.params.id);
       res.json({ message: 'Model deleted' });
     } catch (error) {
-      console.error('Error deleting model:', error);
-      res.status(500).json({ message: error.message || 'Server error' });
+      console.error('Error deleting model:', error.message);
+      res.status(500).json({ message: 'Server error' });
     }
   }
 );
