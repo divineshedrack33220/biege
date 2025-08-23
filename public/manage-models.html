@@ -453,11 +453,6 @@
                     <div>
                         <label for="model-category" class="block text-xs font-medium text-gray-700 mb-1">Category</label>
                         <select id="model-category" class="form-input" aria-label="Model Category" required>
-                            <option value="beauty">Beauty</option>
-                            <option value="bridal">Bridal</option>
-                            <option value="fashion">Fashion</option>
-                            <option value="brand">Brand</option>
-                            <option value="makeup">Makeup</option>
                             <option value="Light Skin">Light Skin</option>
                             <option value="Dark Skin">Dark Skin</option>
                             <option value="Caramel Skin">Caramel Skin</option>
@@ -1050,7 +1045,7 @@ modelForm.addEventListener('submit', async (e) => {
 
         // Validate inputs
         if (!name) throw new Error('Model name is required');
-        if (!category || !['beauty', 'bridal', 'fashion', 'brand', 'makeup', 'Light Skin', 'Dark Skin', 'Caramel Skin', 'Brown Skin'].includes(category)) {
+        if (!category || !['Light Skin', 'Dark Skin', 'Caramel Skin', 'Brown Skin'].includes(category)) {
             throw new Error('Invalid category');
         }
         if (!id && !imageFile) throw new Error('Main image is required for new models');
