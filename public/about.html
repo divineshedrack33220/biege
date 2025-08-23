@@ -27,14 +27,23 @@
         * {
             box-sizing: border-box;
         }
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
         body {
             font-family: 'Didot', serif;
             scroll-behavior: smooth;
             overflow-x: hidden;
-            margin: 0;
             font-weight: 400;
-            background: #fff;
-            color: #000;
+            display: flex;
+            flex-direction: column;
+        }
+        main {
+            flex: 1 0 auto;
+        }
+        footer {
+            flex-shrink: 0;
         }
         .container {
             max-width: 1280px;
@@ -62,6 +71,9 @@
             text-transform: uppercase;
             letter-spacing: 0.08em;
             max-width: 90vw;
+        }
+        .desktop-nav-bar a[href="home.html"] {
+            font-size: clamp(1rem, 1.5vw, 1.25rem);
         }
         .burger-icon {
             display: none;
@@ -97,6 +109,9 @@
             margin: 1rem 0;
             transition: color 0.3s ease, transform 0.3s ease;
         }
+        .mobile-menu a[href="home.html"] {
+            font-size: clamp(1.25rem, 5vw, 1.75rem);
+        }
         .mobile-menu a:hover, .mobile-menu a:focus {
             color: #4b5563;
             transform: scale(1.1);
@@ -108,19 +123,6 @@
             font-size: 1.5rem;
             cursor: pointer;
             color: black;
-        }
-        .section {
-            scroll-margin-top: clamp(4rem, 10vw, 6rem);
-            padding: clamp(2rem, 5vw, 4rem) 0;
-        }
-        .reveal {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: all 0.6s cubic-bezier(0.5, 0, 0, 1);
-        }
-        .reveal.active {
-            opacity: 1;
-            transform: translateY(0);
         }
         .hero-title {
             font-size: clamp(1.25rem, 4.5vw, 2.75rem);
@@ -140,21 +142,25 @@
             opacity: 1;
             transform: translateY(0);
         }
+        .section {
+            scroll-margin-top: clamp(4rem, 10vw, 6rem);
+            padding: clamp(2rem, 5vw, 4rem) 0;
+        }
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s cubic-bezier(0.5, 0, 0, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
         .btn-animate {
             position: relative;
             overflow: hidden;
             transition: all 0.3s ease;
             padding: clamp(0.5rem, 1.5vw, 0.75rem) clamp(1rem, 2vw, 1.5rem);
             font-size: clamp(0.625rem, 1.5vw, 0.875rem);
-            border: 1px solid #000;
-            color: #000;
-            background: transparent;
-            text-transform: uppercase;
-            font-weight: medium;
-        }
-        .btn-animate:hover {
-            background: #fff;
-            color: #000;
         }
         .btn-animate::after {
             content: '';
@@ -172,13 +178,28 @@
         .btn-animate:hover::after {
             animation: ripple 1s ease-out;
         }
+        .btn-animate[href="booking.html"] {
+            border: 1px solid #000000;
+            color: #000000;
+        }
+        .btn-animate[href="booking.html"]:hover {
+            background: #FFFFFF;
+            color: #000000;
+        }
         @keyframes ripple {
             0% { transform: scale(0, 0); opacity: 1; }
             100% { transform: scale(20, 20); opacity: 0; }
         }
         .section.bg-white .text-gray-600 {
-            color: #000;
+            color: #000000;
             font-weight: 400;
+        }
+        .section.bg-white .text-gray-400 {
+            color: #4b5563;
+        }
+        .section.bg-white h2, .section.bg-white h3 {
+            font-weight: 600;
+            color: #000000;
         }
         @media (min-width: 640px) {
             .container {
@@ -191,12 +212,12 @@
             .mobile-menu {
                 display: none !important;
             }
-            .desktop-nav-bar .desktop-nav {
-                display: flex !important;
-            }
             .hero-title {
-                max-width: 800px;
+                display: block;
                 text-align: center;
+                max-width: 800px;
+                margin-left: auto;
+                margin-right: auto;
             }
         }
         @media (min-width: 1024px) {
@@ -219,6 +240,13 @@
             .burger-icon {
                 display: flex;
                 align-items: center;
+            }
+            .container {
+                padding-left: clamp(1rem, 4vw, 1.7rem);
+                padding-right: clamp(1rem, 4vw, 1.7rem);
+            }
+            .section {
+                padding-top: clamp(3rem, 8vw, 5rem);
             }
         }
     </style>
@@ -251,22 +279,73 @@
         </div>
     </nav>
 
-    <!-- About Section -->
-    <section id="about" class="section bg-white">
-        <div class="container mx-auto">
-            <div class="text-center mb-12 reveal">
-                <h2 class="hero-title" id="aboutTitle">ABOUT BEIGE</h2>
-                <div class="w-16 h-px bg-black mx-auto mb-4"></div>
-                <p class="text-gray-600 max-w-xl mx-auto">Beige Model Agency is dedicated to discovering and nurturing talent, redefining beauty standards, and collaborating with top brands worldwide.</p>
+    <!-- Main Content -->
+    <main>
+        <section id="about" class="section bg-white">
+            <div class="container mx-auto">
+                <div class="text-center mb-12 reveal">
+                    <h2 class="hero-title" id="aboutTitle">ABOUT BEIGE</h2>
+                    <div class="w-16 h-px bg-black mx-auto mb-4"></div>
+                    <p class="text-gray-600 max-w-xl mx-auto">Beige Model Agency is dedicated to discovering and nurturing talent, redefining beauty standards, and collaborating with top brands worldwide.</p>
+                </div>
+                <div class="text-center reveal">
+                    <a href="become-model.html" class="btn-animate inline-block bg-white text-black rounded-none hover:bg-gray-200 focus:outline focus:outline-2 focus:outline-[black] focus:outline-offset-2 transition-all duration-300 uppercase tracking-wider font-medium reveal">JOIN OUR TALENT</a>
+                </div>
             </div>
-            <div class="text-center reveal">
-                <a href="become-model.html" class="btn-animate">JOIN OUR TALENT</a>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-black text-white py-12">
+        <div class="container">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl mb-4 uppercase font-bold">BEIGE</h3>
+                    <p class="text-sm">Portraying beauty in every shade since 2018.</p>
+                </div>
+                <div>
+                    <h4 class="text-lg mb-4 uppercase font-bold">Quick Links</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="home.html" class="hover:underline focus:outline focus:outline-2 focus:outline-[black] focus:outline-offset-2">Home</a></li>
+                        <li><a href="about.html" class="hover:underline focus:outline focus:outline-2 focus:outline-[black] focus:outline-offset-2">About</a></li>
+                        <li><a href="models.html" class="hover:underline focus:outline focus:outline-2 focus:outline-[black] focus:outline-offset-2">Models</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg mb-4 uppercase font-bold">Legal</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="privacy.html" class="hover:underline focus:outline focus:outline-2 focus:outline-[black] focus:outline-offset-2">Privacy Policy</a></li>
+                        <li><a href="terms-of-service.html" class="hover:underline focus:outline focus:outline-2 focus:outline-[black] focus:outline-offset-2">Terms of Service</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg mb-4 uppercase font-bold">Newsletter</h4>
+                    <p class="text-sm mb-4">Subscribe to our updates on new faces and opportunities.</p>
+                    <div id="newsletter-feedback" class="hidden text-center mb-4"></div>
+                    <div class="flex">
+                        <label for="newsletter-email" class="sr-only">Your email</label>
+                        <input type="email" id="newsletter-email" placeholder="Your email" class="px-4 py-2 w-full text-black focus:outline focus:outline-2 focus:outline-[black] focus:outline-offset-2" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" required>
+                        <button id="newsletter-submit" class="bg-white text-black px-4 py-2 hover:bg-opacity-80 focus:outline focus:outline-2 focus:outline-[black] focus:outline-offset-2">→</button>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-6 text-center">
+                <p class="text-sm">© 2023 Beige Modeling Management. All rights reserved.</p>
             </div>
         </div>
-    </section>
+    </footer>
 
     <script>
         const config = { apiBaseUrl: '/api' };
+
+        function escapeHtml(str) {
+            if (typeof str !== 'string') return str || '';
+            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
+
+        function clampValue(min, value, max) {
+            return Math.min(Math.max(value, min), max);
+        }
 
         function toggleMenu() {
             const mobileMenu = document.querySelector('.mobile-menu');
@@ -283,52 +362,16 @@
             }
         }
 
-        document.querySelectorAll('.mobile-menu a').forEach(link => {
-            link.addEventListener('click', toggleMenu);
-        });
-
-        // Fetch About Section
-        fetch('/api/about')
-            .then(response => response.json())
-            .then(data => {
-                const aboutDescription = document.querySelector('#about p');
-                if (data.text) {
-                    aboutDescription.textContent = data.text;
-                } else {
-                    aboutDescription.textContent = 'Beige Model Agency is dedicated to discovering and nurturing talent, redefining beauty standards, and collaborating with top brands worldwide.';
-                }
-                console.log('About data:', data);
-            })
-            .catch(error => {
-                console.error('Error fetching about section:', error);
-                document.querySelector('#about p').textContent = 'Failed to load description';
-            });
-
-        // Scroll Reveal Animation
-        const revealElements = document.querySelectorAll('.reveal');
-        const revealOnScroll = () => {
-            const windowHeight = window.innerHeight;
-            const revealPoint = 150;
-            revealElements.forEach(element => {
-                const elementTop = element.getBoundingClientRect().top;
-                if (elementTop < windowHeight - revealPoint) {
-                    element.classList.add('active');
-                }
-            });
-        };
-
         window.addEventListener('load', () => {
-            adjustSectionPadding();
-            revealOnScroll();
-            const aboutTitle = document.getElementById('aboutTitle');
-            if (aboutTitle) aboutTitle.classList.add('active');
             try {
                 console.log('Body font-family:', getComputedStyle(document.body).fontFamily);
                 const logo = document.querySelector('.desktop-nav-bar a[href="index.html"]');
                 console.log('Nav logo font-size: clamp(1.5rem, 2.5vw, 3rem)');
                 console.log('Nav logo computed font-size:', logo ? getComputedStyle(logo).fontSize : 'Not found');
+                const aboutTitle = document.getElementById('aboutTitle');
                 console.log('About title font-size:', aboutTitle ? getComputedStyle(aboutTitle).fontSize : 'Not found');
                 console.log('About section padding-top:', document.querySelector('#about') ? getComputedStyle(document.querySelector('#about')).paddingTop : 'Not found');
+                console.log('Burger icon z-index:', document.querySelector('.burger-icon') ? getComputedStyle(document.querySelector('.burger-icon')).zIndex : 'Not found');
                 if (window.innerWidth < 640) {
                     const desktopNav = document.querySelector('.desktop-nav-bar .desktop-nav');
                     const burgerIcon = document.querySelector('.burger-icon');
@@ -349,19 +392,125 @@
                         console.log('Mobile view (< 640px): Burger icon position:', { top: rect.top, left: rect.left, right: rect.right });
                     }
                 } else {
+                    const becomeModelLinkDesktop = document.querySelector('.desktop-nav a[href="become-model.html"]');
                     const desktopNavLinks = document.querySelectorAll('.desktop-nav a');
+                    console.log('Desktop view (≥640px): Become a Model link display:', becomeModelLinkDesktop ? (becomeModelLinkDesktop.style.display || getComputedStyle(becomeModelLinkDesktop).display) : 'Not found');
                     console.log('Desktop view (≥640px): Desktop nav link count:', desktopNavLinks.length);
                     desktopNavLinks.forEach((link, index) => {
                         console.log(`Desktop nav link ${index + 1} text:`, link.textContent.trim());
                     });
+                    if (becomeModelLinkDesktop) {
+                        const rect = becomeModelLinkDesktop.getBoundingClientRect();
+                        console.log('Desktop view (≥640px): Become a Model link position:', { top: rect.top, left: rect.left, right: rect.right });
+                    }
                 }
+                adjustSectionPadding();
             } catch (error) {
                 console.error('Error in window.load handler:', error);
             }
         });
 
         window.addEventListener('resize', adjustSectionPadding);
+
+        const revealElements = document.querySelectorAll('.reveal');
+        const revealOnScroll = () => {
+            const windowHeight = window.innerHeight;
+            const revealPoint = 150;
+            revealElements.forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                if (elementTop < windowHeight - revealPoint) {
+                    element.classList.add('active');
+                }
+            });
+        };
         window.addEventListener('scroll', revealOnScroll);
+        window.addEventListener('load', () => {
+            revealOnScroll();
+            const aboutTitle = document.getElementById('aboutTitle');
+            if (aboutTitle) aboutTitle.classList.add('active');
+        });
+
+        document.querySelectorAll('.mobile-menu a').forEach(link => {
+            link.addEventListener('click', toggleMenu);
+        });
+
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    const navHeight = document.querySelector('.desktop-nav-bar').offsetHeight;
+                    window.scrollTo({
+                        top: targetElement.offsetTop - clampValue(64, navHeight + 16, 96),
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        async function fetchWithRetry(url, retries = 3, delay = 1000) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, { method: 'GET', headers: { 'Accept': 'application/json' } });
+                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                    const contentType = response.headers.get('content-type');
+                    if (!contentType || !contentType.includes('application/json')) throw new Error('Server response is not JSON');
+                    return await response.json();
+                } catch (error) {
+                    if (i === retries - 1) throw error;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+            }
+        }
+
+        fetchWithRetry('/api/about')
+            .then(data => {
+                const aboutDescription = document.querySelector('#about p');
+                if (data.text) {
+                    aboutDescription.textContent = escapeHtml(data.text);
+                } else {
+                    aboutDescription.textContent = 'Beige Model Agency is dedicated to discovering and nurturing talent, redefining beauty standards, and collaborating with top brands worldwide.';
+                }
+                console.log('About data:', data);
+            })
+            .catch(error => {
+                console.error('Error fetching about section:', error);
+                document.querySelector('#about p').textContent = 'Failed to load description';
+            });
+
+        document.getElementById('newsletter-submit').addEventListener('click', async () => {
+            const emailInput = document.getElementById('newsletter-email');
+            const feedback = document.getElementById('newsletter-feedback');
+            const email = emailInput.value;
+
+            if (!email.match(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/)) {
+                feedback.className = 'text-red-500 text-center mb-4';
+                feedback.textContent = 'Please enter a valid email address';
+                feedback.classList.remove('hidden');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${config.apiBaseUrl}/newsletter`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email }),
+                });
+                const result = await response.json();
+                feedback.className = response.ok ? 'text-green-500 text-center mb-4' : 'text-red-500 text-center mb-4';
+                feedback.textContent = result.message || 'An error occurred';
+                feedback.classList.remove('hidden');
+                if (response.ok) {
+                    emailInput.value = '';
+                    setTimeout(() => feedback.classList.add('hidden'), 3000);
+                }
+            } catch (error) {
+                feedback.className = 'text-red-500 text-center mb-4';
+                feedback.textContent = 'Server error';
+                feedback.classList.remove('hidden');
+            }
+        });
     </script>
 </body>
 </html>
