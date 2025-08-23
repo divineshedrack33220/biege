@@ -890,7 +890,7 @@
                     modelGrid.innerHTML = '';
                     viewMoreContainer.innerHTML = '';
                 }
-                const url = `${config.apiBaseUrl}/models?page=${page}&limit=3`;
+                const url = `${config.apiBaseUrl}/models?page=${page}&limit=6`;
                 console.log('Fetching models from:', url);
                 const data = await fetchWithRetry(url);
                 if (!data || !Array.isArray(data.models) || typeof data.total !== 'number') throw new Error('Invalid API response format');
