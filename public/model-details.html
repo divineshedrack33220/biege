@@ -291,26 +291,6 @@
             background: #000000;
             border-radius: 4px;
         }
-        #placement h3 {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            font-weight: bold;
-            font-size: 16px;
-            text-transform: uppercase;
-            margin: 40px 0 15px 0;
-        }
-        #placement .placement-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            min-height: 40px;
-        }
-        #placement .placement-grid div {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            font-size: 14px;
-        }
-        #placement .placement-grid div:nth-child(odd) {
-            font-weight: bold;
-        }
         .section.bg-white .text-gray-600 {
             color: #000000;
             font-weight: 400;
@@ -482,7 +462,7 @@
                 <a href="models.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase" aria-label="Models">MODELS</a>
                 <a href="booking.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase" aria-label="Book a Model">BOOK A MODEL</a>
                 <a href="become-model.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase" aria-label="Become a Model">BECOME A MODEL</a>
-                <a href="admin.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase" aria-label="Admin CPanel">ADMIN</a>
+                
             </div>
             <div class="burger-icon" onclick="toggleMenu()">☰</div>
         </div>
@@ -495,7 +475,7 @@
             <a href="models.html" aria-label="Models">MODELS</a>
             <a href="booking.html" aria-label="Book a Model">BOOK A MODEL</a>
             <a href="become-model.html" aria-label="Become a Model">BECOME A MODEL</a>
-            <a href="admin.html" aria-label="Admin CPanel">ADMIN</a>
+           
         </div>
     </nav>
 
@@ -540,11 +520,6 @@
                         <p><strong>EYES</strong><span></span></p>
                         <p><strong>SHOES</strong><span></span></p>
                     </div>
-                </div>
-                <!-- Placement -->
-                <div id="placement" class="mt-12 reveal">
-                    <h3>PLACEMENT</h3>
-                    <div class="placement-grid"></div>
                 </div>
                 <!-- Social Links -->
                 <div id="social-links" class="mt-12 reveal">
@@ -608,9 +583,9 @@
                 <div>
                     <h4 class="text-lg mb-4 uppercase font-bold">Legal</h4>
                     <ul class="space-y-2 text-sm">
-                        <li><a href="#" class="hover:underline focus:outline focus:outline-2 focus:outline-[black] focus:outline-offset-2">Privacy Policy</a></li>
-                        <li><a href="#" class="hover:underline focus:outline focus:outline-2 focus:outline-[black] focus:outline-offset-2">Terms of Service</a></li>
-                        <li><a href="#" class="hover:underline focus:outline focus:outline-2 focus:outline-[black] focus:outline-offset-2">Model Contracts</a></li>
+                        <li><a href="privacy.html" class="hover:underline focus:outline focus:outline-2 focus:outline-[black] focus:outline-offset-2">Privacy Policy</a></li>
+                        <li><a href="terms-of-service.html" class="hover:underline focus:outline focus:outline-2 focus:outline-[black] focus:outline-offset-2">Terms of Service</a></li>
+                        
                     </ul>
                 </div>
                 <div>
@@ -775,32 +750,6 @@
                     `;
                 } else console.error('Element .measurements-grid not found');
             } else console.error('Element #model-attributes not found');
-
-            // Update Placement
-            const placementDiv = document.getElementById('placement');
-            if (placementDiv) {
-                const placementGrid = placementDiv.querySelector('.placement-grid');
-                if (placementGrid) {
-                    console.log('Placements data:', model.placements);
-                    placementGrid.innerHTML = '';
-                    const placements = Array.isArray(model.placements) ? model.placements.slice(0, 4) : [];
-                    if (placements.length === 0) {
-                        placementGrid.innerHTML = '<div class="col-span-2 text-gray-600">No placements available</div>';
-                        console.log('Set placement-grid to "No placements available"');
-                    } else {
-                        placements.forEach((placement, index) => {
-                            placementGrid.innerHTML += `
-                                <div>${placement.city || 'N/A'}</div>
-                                <div>${placement.agency || 'N/A'}</div>
-                            `;
-                            console.log(`Added placement ${index + 1}:`, { city: placement.city, agency: placement.agency });
-                        });
-                        for (let i = placements.length; i < 4; i++) {
-                            placementGrid.innerHTML += '<div>N/A</div><div>N/A></div>';
-                        }
-                    }
-                } else console.error('Element .placement-grid not found');
-            } else console.error('Element #placement not found');
 
             // Update Social Links
             const socialLinksDiv = document.getElementById('social-links');
