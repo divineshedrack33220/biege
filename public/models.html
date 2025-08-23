@@ -256,32 +256,6 @@
             font-size: clamp(0.875rem, 2.5vw, 1rem);
             font-weight: 300;
         }
-        #become-model-modal a, #become-model-modal button {
-            font-family: 'Didot', serif;
-            font-weight: bold;
-            font-size: clamp(0.75rem, 2vw, 0.875rem);
-            padding: 0.75rem 1.5rem;
-            border: 1px solid #000000;
-            background: white;
-            color: black;
-            text-transform: uppercase;
-            transition: all 0.3s ease;
-            min-width: 80px;
-            width: clamp(80px, 30%, 100px);
-            text-align: center;
-            min-height: 40px;
-        }
-        #become-model-modal a[href="become-model.html"] {
-            min-width: 120px;
-            width: clamp(120px, 50%, 140px);
-        }
-        #become-model-modal a:hover, #become-model-modal button:hover,
-        #become-model-modal a:focus, #become-model-modal button:focus {
-            background: #000000;
-            color: white;
-            transform: scale(1.05);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
         @media (min-width: 640px) {
             .container {
                 padding-left: clamp(1.5rem, 3vw, 2rem);
@@ -369,34 +343,6 @@
                 line-height: 1.2;
                 min-height: 44px; /* Accessibility touch target */
             }
-            #become-model-modal div {
-                padding: clamp(0.75rem, 4vw, 1rem);
-                max-width: 90%;
-                margin: 0 auto;
-            }
-            #become-model-modal h2 {
-                font-size: clamp(1.25rem, 5vw, 1.5rem);
-            }
-            #become-model-modal p {
-                font-size: clamp(0.75rem, 2.5vw, 0.875rem);
-            }
-            #become-model-modal .flex {
-                flex-direction: row;
-                flex-wrap: nowrap;
-                justify-content: center;
-                gap: 0.5rem;
-            }
-            #become-model-modal a, #become-model-modal button {
-                font-size: clamp(0.65rem, 2.5vw, 0.75rem);
-                padding: 0.4rem 0.8rem;
-                min-width: 80px;
-                width: clamp(80px, 30%, 100px);
-                min-height: 40px; /* Slightly reduced for fit */
-            }
-            #become-model-modal a[href="become-model.html"] {
-                min-width: 120px;
-                width: clamp(120px, 50%, 140px);
-            }
         }
         @media (max-width: 360px) {
             .container {
@@ -409,27 +355,6 @@
                 min-width: 60px;
                 max-width: 90px;
                 min-height: 40px;
-            }
-            #become-model-modal div {
-                padding: clamp(0.5rem, 3vw, 0.75rem);
-                max-width: 95%;
-            }
-            #become-model-modal h2 {
-                font-size: clamp(1rem, 4vw, 1.25rem);
-            }
-            #become-model-modal p {
-                font-size: clamp(0.7rem, 2.2vw, 0.8rem);
-            }
-            #become-model-modal a, #become-model-modal button {
-                font-size: clamp(0.6rem, 2.2vw, 0.7rem);
-                padding: 0.35rem 0.6rem;
-                min-width: 70px;
-                width: clamp(70px, 30%, 90px);
-                min-height: 36px; /* Reduced for very small screens */
-            }
-            #become-model-modal a[href="become-model.html"] {
-                min-width: 100px;
-                width: clamp(100px, 50%, 120px);
             }
         }
         .section.bg-white .text-gray-600 {
@@ -446,18 +371,6 @@
     </style>
 </head>
 <body class="bg-white text-black">
-    <!-- Modal -->
-    <div id="become-model-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden" role="dialog" aria-labelledby="modal-title" aria-modal="true">
-        <div class="bg-white p-6 rounded-none max-w-md w-full mx-4 transform scale-95 opacity-0 transition-all duration-300">
-            <h2 id="modal-title" class="text-2xl font-bold mb-4 uppercase tracking-wider">Join Our Talent</h2>
-            <p class="text-gray-600 mb-6 text-sm font-weight-300">Are you ready to become a model with Beige? Join our exclusive network and start your journey in fashion.</p>
-            <div class="flex justify-end gap-4">
-                <a href="become-model.html" class="btn-animate modal-btn inline-block bg-white text-black rounded-none">Become a Model</a>
-                <button id="close-modal" class="btn-animate modal-btn inline-block bg-white text-black rounded-none">Close</button>
-            </div>
-        </div>
-    </div>
-
     <!-- Navigation (Desktop and Mobile) -->
     <nav class="desktop-nav-bar fixed top-0 left-0 right-0 bg-white bg-opacity-90 shadow-sm z-50 flex items-center">
         <div class="container flex justify-between items-center">
@@ -652,37 +565,6 @@
                     });
                 }
             });
-        });
-
-        // Modal Functionality
-        const modal = document.getElementById('become-model-modal');
-        const closeModalBtn = document.getElementById('close-modal');
-
-        window.addEventListener('load', () => {
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                modal.querySelector('div').classList.remove('scale-95', 'opacity-0');
-                modal.querySelector('div').classList.add('scale-100', 'opacity-100');
-                console.log('Modal container border:', getComputedStyle(document.querySelector('#become-model-modal div')).border);
-                console.log('Modal button border:', getComputedStyle(document.querySelector('#become-model-modal a')).border);
-            }, 100);
-            modal.focus();
-        });
-
-        closeModalBtn.addEventListener('click', () => {
-            modal.classList.add('hidden');
-        });
-
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.classList.add('hidden');
-            }
-        });
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
-                modal.classList.add('hidden');
-            }
         });
 
         // Back to Top Button
