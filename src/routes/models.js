@@ -15,7 +15,7 @@ router.get(
     query('limit').optional().isInt({ min: 1, max: 100 }).toInt().withMessage('Limit must be between 1 and 100'),
     query('category')
       .optional()
-      .isIn(['all', 'beauty', 'bridal', 'fashion', 'brand', 'makeup', 'Light Skin', 'Dark Skin', 'Caramel Skin', 'Brown Skin'])
+      .isIn(['all', 'Light Skin', 'Dark Skin', 'Caramel Skin', 'Brown Skin'])
       .withMessage('Invalid category'),
     query('name').optional().trim().isString().withMessage('Name must be a string')
   ],
@@ -88,7 +88,7 @@ router.post(
   upload.single('image'),
   [
     body('name').notEmpty().withMessage('Name is required').trim().isLength({ min: 2, max: 100 }).withMessage('Name must be between 2 and 100 characters'),
-    body('category').isIn(['beauty', 'bridal', 'fashion', 'brand', 'makeup', 'Light Skin', 'Dark Skin', 'Caramel Skin', 'Brown Skin']).withMessage('Invalid category'),
+    body('category').isIn(['Light Skin', 'Dark Skin', 'Caramel Skin', 'Brown Skin']).withMessage('Invalid category'),
     body('height').optional().trim().isLength({ max: 20 }).withMessage('Height cannot exceed 20 characters'),
     body('measurements.bust').optional().trim().isLength({ max: 20 }).withMessage('Bust measurement cannot exceed 20 characters'),
     body('measurements.waist').optional().trim().isLength({ max: 20 }).withMessage('Waist measurement cannot exceed 20 characters'),
@@ -183,7 +183,7 @@ router.put(
   upload.single('image'),
   [
     body('name').optional().notEmpty().withMessage('Name cannot be empty').trim().isLength({ min: 2, max: 100 }).withMessage('Name must be between 2 and 100 characters'),
-    body('category').optional().isIn(['beauty', 'bridal', 'fashion', 'brand', 'makeup', 'Light Skin', 'Dark Skin', 'Caramel Skin', 'Brown Skin']).withMessage('Invalid category'),
+    body('category').optional().isIn(['Light Skin', 'Dark Skin', 'Caramel Skin', 'Brown Skin']).withMessage('Invalid category'),
     body('height').optional().trim().isLength({ max: 20 }).withMessage('Height cannot exceed 20 characters'),
     body('measurements.bust').optional().trim().isLength({ max: 20 }).withMessage('Bust measurement cannot exceed 20 characters'),
     body('measurements.waist').optional().trim().isLength({ max: 20 }).withMessage('Waist measurement cannot exceed 20 characters'),
