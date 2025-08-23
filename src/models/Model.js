@@ -13,7 +13,7 @@ const modelSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Category is required'],
     enum: {
-      values: ['beauty', 'bridal', 'fashion', 'brand', 'makeup', 'Light Skin', 'Dark Skin', 'Caramel Skin', 'Brown Skin'],
+      values: ['Light Skin', 'Dark Skin', 'Caramel Skin', 'Brown Skin'],
       message: 'Invalid category'
     },
     trim: true
