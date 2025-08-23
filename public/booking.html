@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Book top-tier models with Beige Model Agency for your fashion, commercial, or editorial shoots">
     <meta name="keywords" content="model booking, fashion models, Beige agency, talent booking">
-    <title>Booking Models | Beige</title>
+    <title>Book a Model | Beige</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <script src="https://cdn.tailwindcss.com?cache_bust=20250812"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css?cache_bust=20250812">
@@ -221,12 +221,6 @@
             outline: none;
             box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2);
         }
-        h2 {
-            font-size: clamp(1.5rem, 5vw, 2.25rem);
-            font-weight: 600;
-            color: #000;
-            text-transform: uppercase;
-        }
         label, p, input, select, textarea {
             font-size: clamp(0.875rem, 2.5vw, 1rem);
             color: #000;
@@ -237,15 +231,31 @@
         .modal-content {
             border: 1px solid #000;
         }
-        .model-image-container {
-            max-width: 200px;
-            margin: 0 auto 1rem;
+        .model-card {
+            max-width: 150px;
+            margin: 1rem 0;
+            text-align: left;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         .model-image {
-            width: 100%;
-            height: auto;
+            width: 80px;
+            height: 80px;
             object-fit: cover;
-            border-radius: 8px;
+            border-radius: 50%;
+            border: 3px solid #000;
+            margin: 0 auto;
+            display: block;
+        }
+        .model-name {
+            margin-top: 0.5rem;
+            font-size: clamp(0.875rem, 2vw, 1rem);
+            color: #000;
+            font-weight: 500;
+            text-align: center;
         }
         @media (min-width: 640px) {
             .container {
@@ -335,9 +345,6 @@
                     <p class="text-gray-600 max-w-xl mx-auto">Submit your request to book our top-tier modeling talent</p>
                 </div>
                 <div id="form-error" class="text-red-500 text-center text-sm hidden"></div>
-                <div id="model-image-container" class="model-image-container hidden">
-                    <img id="model-image" src="" alt="Selected Model" class="model-image">
-                </div>
                 <form id="booking-form" class="space-y-6 max-w-2xl mx-auto reveal">
                     <input type="hidden" id="model-id" name="modelId">
                     <div>
@@ -360,9 +367,9 @@
                         <select id="shoot-type" class="w-full form-input" required>
                             <option value="">Select a shoot type</option>
                             <option value="beauty">Beauty Shoot</option>
-                            <option value="editorial">Editorial Shoot</option>
+                            <option value="editorial">Editorials </option>
                             <option value="bridal">Bridal Shoot</option>
-                            <option value="commercial">Commercial Shoot</option>
+                            <option value="commercial">Commercials </option>
                             <option value="fashion">Fashion Shoot</option>
                             <option value="brand">Brand Shoot</option>
                             <option value="makeup">Makeup Shoot</option>
@@ -372,11 +379,11 @@
                             <option value="video">Video Shoot</option>
                         </select>
                         <p class="text-red-500 text-xs mt-1 hidden error-message" id="shoot-type-error">Shoot type is required</p>
-                    </div>
-                    <div>
-                        <label for="model-details" class="block mb-2">Preferred Model Details</label>
-                        <textarea rows="4" id="model-details" class="w-full form-input" placeholder="e.g., specific model names, characteristics, or requirements" required></textarea>
-                        <p class="text-red-500 text-xs mt-1 hidden error-message" id="model-details-error">Model details are required</p>
+                        <label id="bookingTitle" class="block mb-2 hidden">Booked Model</label>
+                        <div id="model-card" class="model-card hidden">
+                            <img id="model-image" src="" alt="Selected Model" class="model-image">
+                            <p id="model-name" class="model-name"></p>
+                        </div>
                     </div>
                     <div>
                         <label for="booking-datetime" class="block mb-2">Booking Date/Time</label>
@@ -516,7 +523,7 @@
                 description: 'Price: 30,000 Naira (Standard Models), 35,000 Naira (Top Models)<br>Duration: 1-5 hours<br>Description: Includes collaboration with makeup, hairstylists, or gele artists within social media use.'
             },
             'editorial': {
-                title: 'Editorial Shoot',
+                title: 'Editorials',
                 description: 'Price: TBD<br>Duration: TBD<br>Description: Creative promotion of magazines or campaigns.'
             },
             'bridal': {
@@ -524,7 +531,7 @@
                 description: 'Price: TBD<br>Duration: TBD<br>Description: Showcasing bridal fashion and styles.'
             },
             'commercial': {
-                title: 'Commercial Shoot',
+                title: 'Commercials',
                 description: 'Price: TBD<br>Duration: TBD<br>Description: Advertisement of a product, service, or brand.'
             },
             'fashion': {
@@ -613,16 +620,18 @@
 
                 // Initialize form with query parameters
                 const { modelId, modelName, imageUrl } = getQueryParams();
-                const modelImageContainer = document.getElementById('model-image-container');
+                const modelCard = document.getElementById('model-card');
                 const modelImage = document.getElementById('model-image');
-                const modelDetails = document.getElementById('model-details');
+                const modelNameElement = document.getElementById('model-name');
                 const modelIdInput = document.getElementById('model-id');
-                if (imageUrl && modelImageContainer && modelImage) {
+                const bookingTitle = document.getElementById('bookingTitle');
+                if (imageUrl && modelCard && modelImage && bookingTitle) {
                     modelImage.src = decodeURIComponent(imageUrl);
-                    modelImageContainer.classList.remove('hidden');
+                    modelCard.classList.remove('hidden');
+                    bookingTitle.classList.remove('hidden');
                 }
-                if (modelName && modelDetails) {
-                    modelDetails.value = `Model: ${decodeURIComponent(modelName)}`;
+                if (modelName && modelNameElement) {
+                    modelNameElement.textContent = decodeURIComponent(modelName);
                 }
                 if (modelId && modelIdInput) {
                     modelIdInput.value = modelId;
@@ -630,7 +639,7 @@
 
                 // Trigger reveal animations
                 revealOnScroll();
-                if (titleElement) titleElement.classList.add('active');
+                if (bookingTitle) bookingTitle.classList.add('active');
             } catch (error) {
                 console.error('Error in window.load handler:', error);
             }
@@ -715,6 +724,8 @@
         const confirmationModal = document.getElementById('confirmationModal');
         const modalMessage = document.getElementById('modal-message');
         const submitBtn = document.getElementById('submit-btn');
+        const modelCard = document.getElementById('model-card');
+        const bookingTitle = document.getElementById('bookingTitle');
 
         function validateForm() {
             let isValid = true;
@@ -723,7 +734,6 @@
                 { id: 'email', errorId: 'email-error', message: 'Valid email is required', pattern: /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/ },
                 { id: 'phone', errorId: 'phone-error', message: 'Valid phone number is required', pattern: /\+?[0-9\s\-()]{7,15}/ },
                 { id: 'shoot-type', errorId: 'shoot-type-error', message: 'Shoot type is required' },
-                { id: 'model-details', errorId: 'model-details-error', message: 'Model details are required' },
                 { id: 'booking-datetime', errorId: 'booking-datetime-error', message: 'Valid date/time is required' },
                 { id: 'address', errorId: 'address-error', message: 'Address is required' },
                 { id: 'city', errorId: 'city-error', message: 'City is required' },
@@ -770,15 +780,15 @@
                 submitBtn.disabled = true;
                 submitBtn.textContent = 'SUBMITTING...';
 
-                const { imageUrl } = getQueryParams();
+                const { imageUrl, modelName } = getQueryParams();
                 const bookingData = {
                     modelId: document.getElementById('model-id').value.trim(),
                     imageUrl: imageUrl ? decodeURIComponent(imageUrl) : '',
+                    modelName: modelName ? decodeURIComponent(modelName) : '',
                     fullName: document.getElementById('full-name').value.trim(),
                     email: document.getElementById('email').value.trim(),
                     phone: document.getElementById('phone').value.trim(),
                     shootType: document.getElementById('shoot-type').value,
-                    modelDetails: document.getElementById('model-details').value.trim(),
                     bookingDateTime: new Date(document.getElementById('booking-datetime').value).toISOString(),
                     location: {
                         address: document.getElementById('address').value.trim(),
@@ -832,8 +842,10 @@
                 if (modalMessage.textContent.includes('Thank you')) {
                     form.reset();
                     document.querySelectorAll('.error-message').forEach(el => el.classList.add('hidden'));
-                    document.getElementById('model-image-container').classList.add('hidden');
+                    modelCard.classList.add('hidden');
+                    bookingTitle.classList.add('hidden');
                     document.getElementById('model-image').src = '';
+                    document.getElementById('model-name').textContent = '';
                 }
             }
         }
