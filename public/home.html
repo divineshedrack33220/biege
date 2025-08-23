@@ -61,6 +61,9 @@
             letter-spacing: 0.08em;
             max-width: 90vw;
         }
+        .desktop-nav-bar a[href="home.html"] {
+            font-size: clamp(1rem, 1.5vw, 1.25rem);
+        }
         .burger-icon {
             display: none;
             font-size: 1.5rem;
@@ -94,6 +97,9 @@
             text-transform: uppercase;
             margin: 1rem 0;
             transition: color 0.3s ease, transform 0.3s ease;
+        }
+        .mobile-menu a[href="home.html"] {
+            font-size: clamp(1.25rem, 5vw, 1.75rem);
         }
         .mobile-menu a:hover, .mobile-menu a:focus {
             color: #4b5563;
@@ -196,6 +202,12 @@
             object-fit: cover;
             width: 100%;
             height: 100%;
+        }
+        .model-name {
+            color: #FFFFFF !important;
+        }
+        .model-name h3, .model-name p {
+            color: #FFFFFF !important;
         }
         .reveal {
             opacity: 0;
@@ -399,7 +411,7 @@
         </video>
         <div class="container text-center relative z-10">
             <h1 class="hero-title font-bold tracking-widest" id="heroTitle">BEIGE</h1>
-            <h2 class="hero-subhead">MODEL AGENCY</h2>
+            <h2 class="hero-subhead">Portraying beauty in every shade</h2>
             <div class="flex justify-center">
                 <a href="become-model.html" class="btn-animate inline-block bg-white text-black rounded-none hover:bg-gray-200 focus:outline focus:outline-2 focus:outline-[black] focus:outline-offset-2 transition-all duration-300 uppercase tracking-wider font-medium reveal">
                     Become a model
@@ -477,7 +489,7 @@
             <p class="text-gray-300 max-w-xl mx-auto mb-6 reveal text-sm md:text-base">We're always looking for fresh faces and unique talent</p>
             <div class="flex flex-col sm:flex-row justify-center gap-4">
                 <a href="become-model.html" class="btn-animate inline-block bg-white text-black px-6 py-3 rounded-none hover:bg-gray-200 focus:outline focus:outline-2 focus:outline-[black] focus:outline-offset-2 transition-all duration-300 uppercase tracking-wider text-sm font-medium reveal">
-                    Apply as Model
+                   Become a model
                 </a>
                 <a href="booking.html" class="btn-animate inline-block border border-white text-white px-6 py-3 rounded-none hover:bg-white hover:text-black focus:outline focus:outline-2 focus:outline-[black] focus:outline-offset-2 transition-all duration-300 uppercase tracking-wider text-sm font-medium reveal">
                     Book a Model
@@ -553,8 +565,7 @@
                     <h4 class="text-lg mb-4 uppercase font-bold">Legal</h4>
                     <ul class="space-y-2 text-sm">
                         <li><a href="privacy.html" class="hover:underline focus:outline focus:outline-2 focus:outline-[black] focus:outline-offset-2">Privacy Policy</a></li>
-                        <li><a href="#" class="hover:underline focus:outline focus:outline-2 focus:outline-[black] focus:outline-offset-2">Terms of Service</a></li>
-                        <li><a href="#" class="hover:underline focus:outline focus:outline-2 focus:outline-[black] focus:outline-offset-2">Model Contracts</a></li>
+                        <li><a href="terms-of-service.html" class="hover:underline focus:outline focus:outline-2 focus:outline-[black] focus:outline-offset-2">Terms of Service</a></li>
                     </ul>
                 </div>
                 <div>
@@ -795,7 +806,7 @@
                 <div class="model-image absolute inset-0">
                     <img src="${escapeHtml(model.imageUrl || '/placeholder.jpg')}" alt="Portrait of ${escapeHtml(model.name || 'Unknown Model')}" class="w-full h-full object-cover" loading="lazy">
                 </div>
-                <div class="model-name absolute bottom-[-50px] left-0 w-full p-4 text-white transition-all duration-300 opacity-0" id="model-name-${escapeHtml(model._id || 'placeholder')}">
+                <div class="model-name absolute bottom-[-50px] left-0 w-full p-4 transition-all duration-300 opacity-0" id="model-name-${escapeHtml(model._id || 'placeholder')}">
                     <h3 class="text-lg font-bold">${escapeHtml(model.name || 'Unknown Model').toUpperCase()}</h3>
                     <p class="text-xs">${escapeHtml(model.category || 'unknown').charAt(0).toUpperCase() + escapeHtml(model.category || 'unknown').slice(1)} Model</p>
                 </div>
