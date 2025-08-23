@@ -61,6 +61,9 @@
             letter-spacing: 0.08em;
             max-width: 90vw;
         }
+        .desktop-nav-bar a[href="home.html"] {
+            font-size: clamp(1rem, 1.5vw, 1.25rem);
+        }
         .burger-icon {
             display: none;
             font-size: 1.5rem;
@@ -94,6 +97,9 @@
             text-transform: uppercase;
             margin: 1rem 0;
             transition: color 0.3s ease, transform 0.3s ease;
+        }
+        .mobile-menu a[href="home.html"] {
+            font-size: clamp(1.25rem, 5vw, 1.75rem);
         }
         .mobile-menu a:hover, .mobile-menu a:focus {
             color: #4b5563;
@@ -199,14 +205,14 @@
         .filter-bar button {
             font-family: 'Didot', serif;
             font-size: clamp(0.7rem, 1.8vw, 0.85rem);
-            padding: 0.4rem 0.75rem;
+            padding: 0.5rem 1rem;
             border: 1px solid #000000;
             background: white;
             text-transform: uppercase;
             border-radius: 0;
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
             transition: all 0.3s ease;
-            min-width: 60px;
+            min-width: 80px;
             max-width: 140px;
             text-align: center;
             white-space: nowrap;
@@ -254,12 +260,20 @@
             font-family: 'Didot', serif;
             font-weight: bold;
             font-size: clamp(0.75rem, 2vw, 0.875rem);
-            padding: 0.75rem 2rem;
+            padding: 0.75rem 1.5rem;
             border: 1px solid #000000;
             background: white;
             color: black;
             text-transform: uppercase;
             transition: all 0.3s ease;
+            min-width: 80px;
+            width: clamp(80px, 30%, 100px);
+            text-align: center;
+            min-height: 40px;
+        }
+        #become-model-modal a[href="become-model.html"] {
+            min-width: 120px;
+            width: clamp(120px, 50%, 140px);
         }
         #become-model-modal a:hover, #become-model-modal button:hover,
         #become-model-modal a:focus, #become-model-modal button:focus {
@@ -323,8 +337,8 @@
                 align-items: center;
             }
             .container {
-                padding-left: clamp(1rem, 4vw, 1.7rem);
-                padding-right: clamp(1rem, 4vw, 1.7rem);
+                padding-left: clamp(0.75rem, 3vw, 1rem);
+                padding-right: clamp(0.75rem, 3vw, 1rem);
             }
             .section {
                 padding-top: clamp(3rem, 8vw, 5rem);
@@ -339,39 +353,84 @@
                 margin-top: 1.5rem;
             }
             .filter-bar {
-                display: grid;
-                grid-template-columns: repeat(4, minmax(0, auto));
-                grid-template-areas: 
-                    "a b c d"
-                    "e f g ."
-                    "h i . ."
-                    "j . . .";
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
                 gap: 0.3rem;
-                justify-items: center;
-                align-items: center;
                 padding: 0.5rem;
                 max-width: 100%;
-                overflow-x: hidden;
+                overflow-x: auto;
             }
             .filter-bar button {
-                font-size: clamp(0.65rem, 1.8vw, 0.75rem);
-                padding: 0.35rem 0.7rem;
-                max-width: 120px;
-                min-width: 60px;
+                font-size: clamp(0.65rem, 2.5vw, 0.75rem);
+                padding: 0.4rem 0.8rem;
+                min-width: 70px;
+                max-width: 100px;
                 line-height: 1.2;
-                text-align: center;
-                white-space: nowrap;
+                min-height: 44px; /* Accessibility touch target */
             }
-            .filter-bar button:nth-child(1) { grid-area: a; }
-            .filter-bar button:nth-child(2) { grid-area: b; }
-            .filter-bar button:nth-child(3) { grid-area: c; }
-            .filter-bar button:nth-child(4) { grid-area: d; }
-            .filter-bar button:nth-child(5) { grid-area: e; }
-            .filter-bar button:nth-child(6) { grid-area: f; }
-            .filter-bar button:nth-child(7) { grid-area: g; }
-            .filter-bar button:nth-child(8) { grid-area: h; }
-            .filter-bar button:nth-child(9) { grid-area: i; }
-            .filter-bar button:nth-child(10) { grid-area: j; }
+            #become-model-modal div {
+                padding: clamp(0.75rem, 4vw, 1rem);
+                max-width: 90%;
+                margin: 0 auto;
+            }
+            #become-model-modal h2 {
+                font-size: clamp(1.25rem, 5vw, 1.5rem);
+            }
+            #become-model-modal p {
+                font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+            }
+            #become-model-modal .flex {
+                flex-direction: row;
+                flex-wrap: nowrap;
+                justify-content: center;
+                gap: 0.5rem;
+            }
+            #become-model-modal a, #become-model-modal button {
+                font-size: clamp(0.65rem, 2.5vw, 0.75rem);
+                padding: 0.4rem 0.8rem;
+                min-width: 80px;
+                width: clamp(80px, 30%, 100px);
+                min-height: 40px; /* Slightly reduced for fit */
+            }
+            #become-model-modal a[href="become-model.html"] {
+                min-width: 120px;
+                width: clamp(120px, 50%, 140px);
+            }
+        }
+        @media (max-width: 360px) {
+            .container {
+                padding-left: clamp(0.5rem, 2vw, 0.75rem);
+                padding-right: clamp(0.5rem, 2vw, 0.75rem);
+            }
+            .filter-bar button {
+                font-size: clamp(0.6rem, 2.2vw, 0.7rem);
+                padding: 0.35rem 0.6rem;
+                min-width: 60px;
+                max-width: 90px;
+                min-height: 40px;
+            }
+            #become-model-modal div {
+                padding: clamp(0.5rem, 3vw, 0.75rem);
+                max-width: 95%;
+            }
+            #become-model-modal h2 {
+                font-size: clamp(1rem, 4vw, 1.25rem);
+            }
+            #become-model-modal p {
+                font-size: clamp(0.7rem, 2.2vw, 0.8rem);
+            }
+            #become-model-modal a, #become-model-modal button {
+                font-size: clamp(0.6rem, 2.2vw, 0.7rem);
+                padding: 0.35rem 0.6rem;
+                min-width: 70px;
+                width: clamp(70px, 30%, 90px);
+                min-height: 36px; /* Reduced for very small screens */
+            }
+            #become-model-modal a[href="become-model.html"] {
+                min-width: 100px;
+                width: clamp(100px, 50%, 120px);
+            }
         }
         .section.bg-white .text-gray-600 {
             color: #1f293700;
@@ -437,11 +496,6 @@
             <!-- Filter Bar -->
             <div class="filter-bar mb-8 bg-gray-100">
                 <button class="btn-animate category-filter active" data-category="all" aria-label="Filter by All Categories" aria-pressed="true">All</button>
-                <button class="btn-animate category-filter" data-category="beauty" aria-label="Filter by Beauty" aria-pressed="false">Beauty</button>
-                <button class="btn-animate category-filter" data-category="bridal" aria-label="Filter by Bridal" aria-pressed="false">Bridal</button>
-                <button class="btn-animate category-filter" data-category="fashion" aria-label="Filter by Fashion" aria-pressed="false">Fashion</button>
-                <button class="btn-animate category-filter" data-category="brand" aria-label="Filter by Brand" aria-pressed="false">Brand</button>
-                <button class="btn-animate category-filter" data-category="makeup" aria-label="Filter by Makeup" aria-pressed="false">Makeup</button>
                 <button class="btn-animate category-filter" data-category="Light Skin" aria-label="Filter by Light Skin" aria-pressed="false">Light Skin</button>
                 <button class="btn-animate category-filter" data-category="Dark Skin" aria-label="Filter by Dark Skin" aria-pressed="false">Dark Skin</button>
                 <button class="btn-animate category-filter" data-category="Caramel Skin" aria-label="Filter by Caramel Skin" aria-pressed="false">Caramel Skin</button>
@@ -479,9 +533,8 @@
                 <div>
                     <h4 class="text-lg mb-4 uppercase font-bold">Legal</h4>
                     <ul class="space-y-2 text-sm">
-                        <li><a href="#" class="hover:underline focus:outline focus:outline-2 focus:outline-[#4b5563] focus:outline-offset-2">Privacy Policy</a></li>
-                        <li><a href="#" class="hover:underline focus:outline focus:outline-2 focus:outline-[#4b5563] focus:outline-offset-2">Terms of Service</a></li>
-                        <li><a href="#" class="hover:underline focus:outline focus:outline-2 focus:outline-[#4b5563] focus:outline-offset-2">Model Contracts</a></li>
+                        <li><a href="privacy.html" class="hover:underline focus:outline focus:outline-2 focus:outline-[black] focus:outline-offset-2">Privacy Policy</a></li>
+                        <li><a href="terms-of-service.html" class="hover:underline focus:outline focus:outline-2 focus:outline-[black] focus:outline-offset-2">Terms of Service</a></li>
                     </ul>
                 </div>
                 <div>
