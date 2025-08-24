@@ -109,7 +109,7 @@
                 <ul>
                     <li><a href="manage-about-companies.html" data-section="about-companies-section" class="nav-item flex items-center px-3 py-2 text-gray-700 bg-primary-50 text-primary-600 active">
                         <i class="fas fa-info-circle w-5 text-center"></i><span class="sidebar-text ml-2 text-sm">About & Companies</span></a></li>
-                        <li>
+                    <li>
                         <a href="manage-team-members.html" data-section="team-section" class="nav-item flex items-center px-3 py-2 text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-colors">
                             <i class="fas fa-user-tie w-5 text-center"></i>
                             <span class="sidebar-text ml-2 text-sm">Team</span>
@@ -207,10 +207,34 @@
             <div class="p-6">
                 <form id="about-form" class="space-y-4">
                     <input type="hidden" id="about-id">
+                    <input type="hidden" id="about-image-public-id">
                     <div>
                         <label for="about-text" class="block text-sm font-medium text-gray-700 mb-1">About Text</label>
                         <textarea id="about-text" placeholder="Enter About Beige description" class="form-textarea w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 text-base" rows="6" aria-label="About Beige Description" required></textarea>
                         <p id="about-text-error" class="error-text"></p>
+                    </div>
+                    <div>
+                        <label for="about-address" class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                        <input type="text" id="about-address" placeholder="Enter address" class="form-input w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 text-base" aria-label="Address" required>
+                        <p id="about-address-error" class="error-text"></p>
+                    </div>
+                    <div>
+                        <label for="about-phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                        <input type="text" id="about-phone" placeholder="Enter phone number" class="form-input w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 text-base" aria-label="Phone Number" required>
+                        <p id="about-phone-error" class="error-text"></p>
+                    </div>
+                    <div>
+                        <label for="about-email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input type="email" id="about-email" placeholder="Enter email" class="form-input w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 text-base" aria-label="Email" required>
+                        <p id="about-email-error" class="error-text"></p>
+                    </div>
+                    <div>
+                        <label for="about-image" class="block text-sm font-medium text-gray-700 mb-1">Image (optional)</label>
+                        <div class="file-input-wrapper">
+                            <input type="file" id="about-image" accept="image/*" class="form-file" aria-label="About Image">
+                            <p class="file-input-text">Drag and drop or click to upload an image</p>
+                        </div>
+                        <p id="about-image-error" class="error-text"></p>
                     </div>
                     <div class="flex justify-end space-x-4">
                         <button type="button" id="cancel-about" class="px-4 py-2 border border-secondary-300 rounded-md text-sm font-medium text-gray-700 bg-secondary-50 hover:bg-secondary-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">Cancel</button>
@@ -375,29 +399,37 @@
             firstFocusable.focus();
         }
 
-        // Drag and Drop for File Input
-        const fileInputWrapper = document.querySelector('.file-input-wrapper');
-        const fileInput = document.getElementById('company-logo');
-        if (fileInputWrapper && fileInput) {
-            fileInputWrapper.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                fileInputWrapper.classList.add('dragover');
-            });
-            fileInputWrapper.addEventListener('dragleave', () => {
-                fileInputWrapper.classList.remove('dragover');
-            });
-            fileInputWrapper.addEventListener('drop', (e) => {
-                e.preventDefault();
-                fileInputWrapper.classList.remove('dragover');
-                const files = e.dataTransfer.files;
-                if (files.length) fileInput.files = files;
-            });
-            fileInput.addEventListener('change', () => {
-                const file = fileInput.files[0];
-                const text = file ? `Selected: ${file.name}` : 'Drag and drop or click to upload an image';
-                fileInputWrapper.querySelector('.file-input-text').textContent = text;
-            });
+        // Drag and Drop for File Inputs
+        function setupFileInput(wrapperId, inputId) {
+            const fileInputWrapper = document.querySelector(`#${wrapperId} .file-input-wrapper`);
+            const fileInput = document.getElementById(inputId);
+            if (fileInputWrapper && fileInput) {
+                fileInputWrapper.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    fileInputWrapper.classList.add('dragover');
+                });
+                fileInputWrapper.addEventListener('dragleave', () => {
+                    fileInputWrapper.classList.remove('dragover');
+                });
+                fileInputWrapper.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    fileInputWrapper.classList.remove('dragover');
+                    const files = e.dataTransfer.files;
+                    if (files.length) fileInput.files = files;
+                    const file = fileInput.files[0];
+                    const text = file ? `Selected: ${file.name}` : 'Drag and drop or click to upload an image';
+                    fileInputWrapper.querySelector('.file-input-text').textContent = text;
+                });
+                fileInput.addEventListener('change', () => {
+                    const file = fileInput.files[0];
+                    const text = file ? `Selected: ${file.name}` : 'Drag and drop or click to upload an image';
+                    fileInputWrapper.querySelector('.file-input-text').textContent = text;
+                });
+            }
         }
+
+        setupFileInput('company-form', 'company-logo');
+        setupFileInput('about-form', 'about-image');
 
         // Debug fetch errors
         async function fetchWithDebug(url, options = {}) {
@@ -461,6 +493,12 @@
                 const data = await fetchWithDebug('/api/about');
                 document.getElementById('about-id').value = data.id || '';
                 document.getElementById('about-text').value = data.text || '';
+                document.getElementById('about-address').value = data.contact?.address || '';
+                document.getElementById('about-phone').value = data.contact?.phone || '';
+                document.getElementById('about-email').value = data.contact?.email || '';
+                document.getElementById('about-image-public-id').value = data.imagePublicId || '';
+                document.getElementById('about-image').value = '';
+                document.querySelector('#about-form .file-input-text').textContent = data.imageUrl ? 'Current image loaded' : 'Drag and drop or click to upload an image';
                 aboutModal.classList.remove('hidden');
                 aboutModal.classList.add('modal-enter-active');
                 setTimeout(() => aboutModal.classList.remove('modal-enter-active'), 300);
@@ -595,6 +633,10 @@
                 aboutCard.innerHTML = `
                     <div class="p-4">
                         <p class="text-sm text-gray-600 line-clamp-3">${data.text || 'No description available'}</p>
+                        <p class="text-sm text-gray-600 mt-2"><strong>Address:</strong> ${data.contact?.address || 'No address available'}</p>
+                        <p class="text-sm text-gray-600"><strong>Phone:</strong> ${data.contact?.phone || 'No phone available'}</p>
+                        <p class="text-sm text-gray-600"><strong>Email:</strong> ${data.contact?.email || 'No email available'}</p>
+                        ${data.imageUrl ? `<img src="${data.imageUrl}" alt="About Beige Image" class="w-full h-32 object-contain mt-2" loading="lazy">` : '<p class="text-sm text-gray-600 mt-2">No image available</p>'}
                     </div>
                 `;
             } catch (error) {
@@ -653,36 +695,105 @@
             e.preventDefault();
             const submitButton = document.getElementById('about-submit');
             const text = document.getElementById('about-text');
-            const errorText = document.getElementById('about-text-error');
+            const address = document.getElementById('about-address');
+            const phone = document.getElementById('about-phone');
+            const email = document.getElementById('about-email');
+            const image = document.getElementById('about-image');
+            const textError = document.getElementById('about-text-error');
+            const addressError = document.getElementById('about-address-error');
+            const phoneError = document.getElementById('about-phone-error');
+            const emailError = document.getElementById('about-email-error');
+            const imageError = document.getElementById('about-image-error');
             submitButton.disabled = true;
             submitButton.innerHTML = '<span class="spinner"></span> Saving...';
-            errorText.classList.add('hidden');
+            textError.classList.add('hidden');
+            addressError.classList.add('hidden');
+            phoneError.classList.add('hidden');
+            emailError.classList.add('hidden');
+            imageError.classList.add('hidden');
             text.parentElement.classList.remove('error');
+            address.parentElement.classList.remove('error');
+            phone.parentElement.classList.remove('error');
+            email.parentElement.classList.remove('error');
+            image.parentElement.classList.remove('error');
             try {
                 const token = localStorage.getItem('token');
                 console.log('Sending about form with token:', token);
                 if (!token) throw new Error('No token found in localStorage');
                 const id = document.getElementById('about-id').value;
                 const textValue = text.value.trim();
+                const addressValue = address.value.trim();
+                const phoneValue = phone.value.trim();
+                const emailValue = email.value.trim();
+                const imageFile = image.files[0];
+                const imagePublicId = document.getElementById('about-image-public-id').value;
                 if (!textValue) {
                     text.parentElement.classList.add('error');
-                    errorText.textContent = 'About text is required';
-                    errorText.classList.remove('hidden');
+                    textError.textContent = 'About text is required';
+                    textError.classList.remove('hidden');
                     throw new Error('About text is required');
                 }
                 if (textValue.length > 500) {
                     text.parentElement.classList.add('error');
-                    errorText.textContent = 'About text must be under 500 characters';
-                    errorText.classList.remove('hidden');
+                    textError.textContent = 'About text must be under 500 characters';
+                    textError.classList.remove('hidden');
                     throw new Error('About text must be under 500 characters');
                 }
+                if (!addressValue) {
+                    address.parentElement.classList.add('error');
+                    addressError.textContent = 'Address is required';
+                    addressError.classList.remove('hidden');
+                    throw new Error('Address is required');
+                }
+                if (addressValue.length > 200) {
+                    address.parentElement.classList.add('error');
+                    addressError.textContent = 'Address must be under 200 characters';
+                    addressError.classList.remove('hidden');
+                    throw new Error('Address must be under 200 characters');
+                }
+                if (!phoneValue) {
+                    phone.parentElement.classList.add('error');
+                    phoneError.textContent = 'Phone number is required';
+                    phoneError.classList.remove('hidden');
+                    throw new Error('Phone number is required');
+                }
+                if (!/^\+?\d{10,15}$/.test(phoneValue)) {
+                    phone.parentElement.classList.add('error');
+                    phoneError.textContent = 'Valid phone number is required';
+                    phoneError.classList.remove('hidden');
+                    throw new Error('Valid phone number is required');
+                }
+                if (!emailValue) {
+                    email.parentElement.classList.add('error');
+                    emailError.textContent = 'Email is required';
+                    emailError.classList.remove('hidden');
+                    throw new Error('Email is required');
+                }
+                if (!/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/.test(emailValue)) {
+                    email.parentElement.classList.add('error');
+                    emailError.textContent = 'Valid email is required';
+                    emailError.classList.remove('hidden');
+                    throw new Error('Valid email is required');
+                }
+                const fileError = imageFile ? validateFile(imageFile) : null;
+                if (fileError) {
+                    image.parentElement.classList.add('error');
+                    imageError.textContent = fileError;
+                    imageError.classList.remove('hidden');
+                    throw new Error(fileError);
+                }
+                const formData = new FormData();
+                formData.append('id', id);
+                formData.append('text', textValue);
+                formData.append('contact[address]', addressValue);
+                formData.append('contact[phone]', phoneValue);
+                formData.append('contact[email]', emailValue);
+                if (imageFile) formData.append('image', imageFile);
+                if (imagePublicId) formData.append('imagePublicId', imagePublicId);
                 const response = await fetch('/api/about', {
                     method: 'PUT',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ id, text: textValue })
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
                 });
                 const data = await response.json();
                 console.log('Server response:', data);
@@ -693,7 +804,7 @@
                         window.location.href = 'admin.html';
                         return;
                     }
-                    throw new Error(data.message || 'Error saving about section');
+                    throw new Error(data.message || (data.errors ? data.errors.map(e => e.msg).join(', ') : 'Error saving about section'));
                 }
                 aboutModal.classList.add('modal-exit-active');
                 setTimeout(() => {
@@ -702,6 +813,8 @@
                 }, 300);
                 aboutForm.reset();
                 document.getElementById('about-id').value = '';
+                document.getElementById('about-image-public-id').value = '';
+                document.querySelector('#about-form .file-input-text').textContent = 'Drag and drop or click to upload an image';
                 loadAbout();
                 document.getElementById('success-message').textContent = 'About section saved successfully!';
                 document.getElementById('success-alert').classList.remove('hidden');
