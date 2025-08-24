@@ -1,11 +1,10 @@
 const express = require('express');
 const router = express.Router();
-// ✅ FIXED: go up two levels instead of one
-const Model = require('../../models/Model');
-const auth = require('../../middleware/auth');
+const Model = require('../models/Model');
+const auth = require('../middleware/auth');
 const { query, body, validationResult, matchedData } = require('express-validator');
-const cloudinary = require('../../config/cloudinary');
-const upload = require('../../middleware/multer');
+const cloudinary = require('../config/cloudinary');
+const upload = require('../middleware/multer');
 const mongoose = require('mongoose');
 
 // Public: Get all models with pagination
