@@ -34,31 +34,30 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 60px;
-            padding: 0 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #FFFFFF;
+            background: rgba(255, 255, 255, 0.9);
             z-index: 50;
+            padding: 1rem 0;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            min-height: 64px;
         }
         .desktop-nav-bar a[href="index.html"] {
-            font-family: 'Playfair Display', serif;
-            font-size: 20px;
-            font-weight: normal;
-            color: #000000;
+            font-size: clamp(1.5rem, 2.5vw, 3rem);
+            font-weight: 300;
+            color: black;
             text-decoration: none;
             text-transform: uppercase;
+            letter-spacing: 0.08em;
+            max-width: 90vw;
+        }
+        .desktop-nav-bar a[href="home.html"] {
+            font-size: clamp(1rem, 1.5vw, 1.25rem);
         }
         .burger-icon {
-            font-size: 22px;
-            cursor: pointer;
-            color: #000000;
-            z-index: 60;
-        }
-        .desktop-nav {
             display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: black;
+            z-index: 60;
         }
         .mobile-menu {
             position: fixed;
@@ -80,13 +79,15 @@
             transform: translateY(0);
         }
         .mobile-menu a {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
             font-size: clamp(1rem, 4vw, 1.5rem);
-            color: #000000;
+            color: black;
             text-decoration: none;
             text-transform: uppercase;
             margin: 1rem 0;
             transition: color 0.3s ease, transform 0.3s ease;
+        }
+        .mobile-menu a[href="home.html"] {
+            font-size: clamp(1.25rem, 5vw, 1.75rem);
         }
         .mobile-menu a:hover, .mobile-menu a:focus {
             color: #4b5563;
