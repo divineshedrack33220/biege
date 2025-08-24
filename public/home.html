@@ -8,7 +8,7 @@
     <meta name="robots" content="index, follow">
     <title>Beige | Model Agency</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Cormorant+Garamond:wght@100;300;400&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com?cache_bust=20250812"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css?cache_bust=20250812">
     <style>
@@ -52,16 +52,31 @@
             min-height: 64px;
         }
         .desktop-nav-bar a[href="index.html"] {
-            font-size: clamp(1.5rem, 2.5vw, 3rem);
+            font-size: clamp(2rem, 3.5vw, 2.44rem); /* Matches 39px height */
             font-weight: 300;
-            color: black;
+            color: #000000;
             text-decoration: none;
             text-transform: uppercase;
-            letter-spacing: 0.08em;
+            letter-spacing: 0.05rem;
             max-width: 90vw;
         }
         .desktop-nav-bar a[href="home.html"] {
             font-size: clamp(1rem, 1.5vw, 1.25rem);
+        }
+        @media (max-width: 1400px) {
+            .desktop-nav-bar a[href="index.html"] {
+                font-size: clamp(1.9rem, 3.3vw, 2.31rem); /* Matches 37px height */
+            }
+        }
+        @media (max-width: 1200px) {
+            .desktop-nav-bar a[href="index.html"] {
+                font-size: clamp(1.6rem, 3vw, 1.94rem); /* Matches 31px height */
+            }
+        }
+        @media (max-width: 992px) {
+            .desktop-nav-bar a[href="index.html"] {
+                font-size: clamp(1.5rem, 2.8vw, 1.75rem); /* Matches 28px height */
+            }
         }
         .burger-icon {
             display: none;
@@ -132,19 +147,24 @@
             z-index: -1;
         }
         .hero-title {
-            font-family: 'Playfair Display', serif;
-            font-size: clamp(1rem, 7.5vw, 4.5rem);
-            line-height: 1.2;
-            font-weight: 100; /* Playfair Display only supports 400 and 700; falls back to 400. Using opacity and text-stroke for lighter appearance */
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(2.5rem, 5vw, 5rem);
+            font-weight: 100;
+            color: #333333;
+            text-decoration: none;
             text-transform: uppercase;
+            letter-spacing: 0.125rem;
+            max-width: 90vw;
+            line-height: 1.2;
             text-align: center;
-            color: #000000;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-            -webkit-text-stroke: 0.5px #FFFFFF;
-            opacity: 0.8;
+            text-shadow: none;
+            -webkit-text-stroke: 0;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            opacity: 0.5;
+            font-stretch: semi-condensed;
             transform: translateY(30px);
             transition: opacity 0.8s ease-out, transform 0.8s ease-out;
-            max-width: 90vw;
             margin: 0 auto 0.5rem;
         }
         .hero-title.active {
@@ -152,10 +172,10 @@
             transform: translateY(0);
         }
         .hero-subhead {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            font-size: clamp(0.875rem, 2.5vw, 1.25rem);
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(0.75rem, 1.75vw, 1rem);
+            font-weight: 400;
             letter-spacing: 0.1em;
-            text-transform: uppercase;
             text-align: center;
             color: #000000;
             text-shadow: 0 4px 8px rgba(0, 0, 0, 0.7);
@@ -180,8 +200,8 @@
             position: relative;
             overflow: hidden;
             transition: all 0.3s ease;
-            padding: clamp(0.5rem, 1.5vw, 0.75rem) clamp(1rem, 2vw, 1.5rem);
-            font-size: clamp(0.625rem, 1.5vw, 0.875rem);
+            padding: clamp(0.75rem, 2vw, 1rem) clamp(1.5rem, 3vw, 2rem);
+            font-size: clamp(0.875rem, 2vw, 1rem);
             border: 1px solid #000000;
             color: #000000;
             background: transparent;
@@ -381,7 +401,6 @@
                 <a href="models.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase" aria-label="Models">MODELS</a>
                 <a href="booking.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase" aria-label="Book a Model">BOOK A MODEL</a>
                 <a href="become-model.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase" aria-label="Become a Model">BECOME A MODEL</a>
-              
             </div>
             <div class="burger-icon" onclick="toggleMenu()">☰</div>
         </div>
@@ -394,7 +413,6 @@
             <a href="models.html" aria-label="Models">MODELS</a>
             <a href="booking.html" aria-label="Book a Model">BOOK A MODEL</a>
             <a href="become-model.html" aria-label="Become a Model">BECOME A MODEL</a>
-        
         </div>
     </nav>
 
@@ -405,7 +423,7 @@
             Your browser does not support the video tag.
         </video>
         <div class="container text-center relative z-10">
-            <h1 class="hero-title font-bold tracking-widest" id="heroTitle">BEIGE MODELS</h1>
+            <h1 class="hero-title font-bold tracking-wider" id="heroTitle">BEIGE MODELS</h1>
             <h2 class="hero-subhead">Portraying beauty in every shade</h2>
             <div class="flex justify-center">
                 <a href="become-model.html" class="btn-animate inline-block bg-white text-black rounded-none hover:bg-gray-200 focus:outline focus:outline-2 focus:outline-[black] focus:outline-offset-2 transition-all duration-300 uppercase tracking-wider font-medium reveal">
@@ -561,7 +579,6 @@
                     <ul class="space-y-2 text-sm">
                         <li><a href="privacy.html" class="hover:underline focus:outline focus:outline-2 focus:outline-[black] focus:outline-offset-2">Privacy Policy</a></li>
                         <li><a href="terms-of-service.html" class="hover:underline focus:outline focus:outline-2 focus:outline-[black] focus:outline-offset-2">Terms of Service</a></li>
-                  
                     </ul>
                 </div>
                 <div>
@@ -616,8 +633,8 @@
             if (!modelGrid || window.innerWidth >= 640) return;
 
             let autoScrollInterval = null;
-            const scrollSpeed = 3000; // 3 seconds per card
-            const pauseDuration = 5000; // 5 seconds pause on interaction
+            const scrollSpeed = 3000;
+            const pauseDuration = 5000;
 
             function startAutoScroll() {
                 if (modelGrid.children.length < 2) {
@@ -628,9 +645,9 @@
                     const cardWidth = modelGrid.querySelector('.model-card')?.offsetWidth || 300;
                     const currentScroll = modelGrid.scrollLeft;
                     const maxScroll = modelGrid.scrollWidth - modelGrid.clientWidth;
-                    let nextScroll = currentScroll + cardWidth + 16; // Account for gap
+                    let nextScroll = currentScroll + cardWidth + 16;
                     if (nextScroll >= maxScroll) {
-                        nextScroll = 0; // Reset to start
+                        nextScroll = 0;
                     }
                     modelGrid.scrollTo({
                         left: nextScroll,
@@ -836,13 +853,15 @@
             try {
                 console.log('Body font-family:', getComputedStyle(document.body).fontFamily);
                 const logo = document.querySelector('.desktop-nav-bar a[href="index.html"]');
-                console.log('Nav logo font-size: 20px');
-                console.log('Nav logo computed font-size:', logo ? getComputedStyle(logo).fontSize : 'Not found');
+                console.log('Nav logo font-family:', logo ? getComputedStyle(logo).fontFamily : 'Not found');
+                console.log('Nav logo font-size:', logo ? getComputedStyle(logo).fontSize : 'Not found');
+                console.log('Nav logo font-weight:', logo ? getComputedStyle(logo).fontWeight : 'Not found');
                 console.log('Hero title font-family:', heroTitle ? getComputedStyle(heroTitle).fontFamily : 'Not found');
                 console.log('Hero title font-size:', heroTitle ? getComputedStyle(heroTitle).fontSize : 'Not found');
                 console.log('Hero title font-weight:', heroTitle ? getComputedStyle(heroTitle).fontWeight : 'Not found');
                 console.log('Hero title text:', heroTitle ? heroTitle.textContent.trim() : 'Not found');
                 console.log('Hero title opacity:', heroTitle ? getComputedStyle(heroTitle).opacity : 'Not found');
+                console.log('Hero title letter-spacing:', heroTitle ? getComputedStyle(heroTitle).letterSpacing : 'Not found');
                 console.log('Hero title text-stroke:', heroTitle ? getComputedStyle(heroTitle).webkitTextStroke : 'Not found');
                 console.log('Hero subhead font-size:', heroSubhead ? getComputedStyle(heroSubhead).fontSize : 'Not found');
                 console.log('Hero section top padding:', document.querySelector('.hero-section') ? getComputedStyle(document.querySelector('.hero-section')).paddingTop : 'Not found');
