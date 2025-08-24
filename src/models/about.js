@@ -1,4 +1,3 @@
-// src/models/about.js
 const mongoose = require('mongoose');
 
 const aboutSchema = new mongoose.Schema({
@@ -7,6 +6,35 @@ const aboutSchema = new mongoose.Schema({
     required: true,
     trim: true,
     maxlength: [500, 'About text cannot exceed 500 characters']
+  },
+  contact: {
+    address: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: [200, 'Address cannot exceed 200 characters']
+    },
+    phone: {
+      type: String,
+      required: true,
+      trim: true,
+      match: [/^\+?\d{10,15}$/, 'Please enter a valid phone number']
+    },
+    email: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+      match: [/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/, 'Please enter a valid email address']
+    }
+  },
+  imageUrl: {
+    type: String,
+    trim: true
+  },
+  imagePublicId: {
+    type: String,
+    trim: true
   },
   createdAt: {
     type: Date,
@@ -24,4 +52,4 @@ aboutSchema.pre('save', function(next) {
   next();
 });
 
-module.exports = mongoose.model('About', aboutSchema);
+module.exports = mongoose.model('about', aboutSchema);
