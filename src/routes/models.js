@@ -1,216 +1,68 @@
 const express = require('express');
 const router = express.Router();
-const Model = require('../models/Model');
+const About = require('../models/about');
+const Company = require('../models/Company');
 const auth = require('../middleware/auth');
-const { query, body, validationResult, matchedData } = require('express-validator');
-const cloudinary = require('../config/cloudinary');
 const upload = require('../middleware/multer');
-const mongoose = require('mongoose');
+const cloudinary = require('../config/cloudinary');
+const { body, validationResult } = require('express-validator');
 
-// Public: Get all models with pagination
-router.get(
-  '/',
-  [
-    query('page').optional().isInt({ min: 1 }).toInt().withMessage('Page must be a positive integer'),
-    query('limit').optional().isInt({ min: 1, max: 100 }).toInt().withMessage('Limit must be between 1 and 100'),
-    query('category')
-      .optional()
-      .isIn(['all', 'Light Skin', 'Dark Skin', 'Caramel Skin', 'Brown Skin'])
-      .withMessage('Invalid category'),
-    query('name').optional().trim().isString().withMessage('Name must be a string')
-  ],
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
-    try {
-      const { category, name, page = 1, limit = 6 } = matchedData(req);
-      const query = {};
-      if (category && category !== 'all') query.category = category;
-      if (name) query.name = { $regex: name, $options: 'i' };
-
-      const pageNum = parseInt(page);
-      const limitNum = parseInt(limit);
-      if (isNaN(pageNum) || isNaN(limitNum)) {
-        return res.status(400).json({ message: 'Invalid page or limit parameters' });
-      }
-
-      const skip = (pageNum - 1) * limitNum;
-      const models = await Model.find(query)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limitNum)
-        .lean();
-      const total = await Model.countDocuments(query);
-
-      // Ensure socialLinks is always included
-      const modelsWithSocialLinks = models.map(model => ({
-        ...model,
-        socialLinks: model.socialLinks || { instagram: null, tiktok: null }
-      }));
-
-      res.json({ models: modelsWithSocialLinks, total });
-    } catch (error) {
-      console.error('Error fetching models:', error.message);
-      res.status(500).json({ message: 'Server error' });
-    }
-  }
-);
-
-// Public: Get model by ID
-router.get('/:id', async (req, res) => {
+// Public: Get About section, Contact details, and Image
+router.get('/about', async (req, res) => {
   try {
-    if (!mongoose.isValidObjectId(req.params.id)) {
-      return res.status(400).json({ message: 'Invalid model ID' });
+    const about = await About.findOne().lean();
+    if (!about) {
+      return res.json({
+        id: null,
+        text: '',
+        contact: {
+          address: '',
+          phone: '',
+          email: ''
+        },
+        imageUrl: '',
+        imagePublicId: ''
+      });
     }
-    const model = await Model.findById(req.params.id).lean();
-    if (!model) {
-      return res.status(404).json({ message: 'Model not found' });
-    }
-    // Ensure socialLinks is always included
-    const modelWithSocialLinks = {
-      ...model,
-      socialLinks: model.socialLinks || { instagram: null, tiktok: null }
-    };
-    res.json(modelWithSocialLinks);
+    res.json({
+      id: about._id,
+      text: about.text,
+      contact: {
+        address: about.contact.address,
+        phone: about.contact.phone,
+        email: about.contact.email
+      },
+      imageUrl: about.imageUrl || '',
+      imagePublicId: about.imagePublicId || ''
+    });
   } catch (error) {
-    console.error('Error fetching model by ID:', error.message);
+    console.error('Error fetching about:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
-// Admin: Add a model
-router.post(
-  '/',
-  auth,
-  upload.single('image'),
-  [
-    body('name').notEmpty().withMessage('Name is required').trim().isLength({ min: 2, max: 100 }).withMessage('Name must be between 2 and 100 characters'),
-    body('category').isIn(['Light Skin', 'Dark Skin', 'Caramel Skin', 'Brown Skin']).withMessage('Invalid category'),
-    body('height').optional().trim().isLength({ max: 20 }).withMessage('Height cannot exceed 20 characters'),
-    body('measurements.bust').optional().trim().isLength({ max: 20 }).withMessage('Bust measurement cannot exceed 20 characters'),
-    body('measurements.waist').optional().trim().isLength({ max: 20 }).withMessage('Waist measurement cannot exceed 20 characters'),
-    body('measurements.hips').optional().trim().isLength({ max: 20 }).withMessage('Hips measurement cannot exceed 20 characters'),
-    body('hair').optional().trim().isLength({ max: 50 }).withMessage('Hair description cannot exceed 50 characters'),
-    body('eyes').optional().trim().isLength({ max: 50 }).withMessage('Eyes description cannot exceed 50 characters'),
-    body('shoes').optional().trim().isLength({ max: 20 }).withMessage('Shoes size cannot exceed 20 characters'),
-    body('location').optional().trim().isLength({ max: 100 }).withMessage('Location cannot exceed 100 characters'),
-    body('description').optional().trim().isLength({ max: 1000 }).withMessage('Description cannot exceed 1000 characters'),
-    body('placements').optional().customSanitizer(value => {
-      try {
-        return value ? JSON.parse(value) : [];
-      } catch (error) {
-        throw new Error('Placements must be a valid JSON array');
-      }
-    }).isArray().withMessage('Placements must be an array'),
-    body('placements.*.city').optional().trim().isLength({ max: 100 }).withMessage('City cannot exceed 100 characters'),
-    body('placements.*.agency').optional().trim().isLength({ max: 100 }).withMessage('Agency cannot exceed 100 characters'),
-    body('socialLinks').optional().customSanitizer(value => {
-      try {
-        return value ? JSON.parse(value) : { instagram: null, tiktok: null };
-      } catch (error) {
-        throw new Error('SocialLinks must be a valid JSON object');
-      }
-    }),
-    body('socialLinks.instagram').optional().isURL().withMessage('Valid Instagram URL is required'),
-    body('socialLinks.tiktok').optional().isURL().withMessage('Valid TikTok URL is required')
-  ],
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
-    try {
-      if (!req.file) {
-        return res.status(400).json({ message: 'Main image is required' });
-      }
-
-      const data = matchedData(req);
-      const { name, category, description, height, measurements, hair, eyes, shoes, location, placements, socialLinks } = data;
-
-      // Upload main image to Cloudinary
-      const mimeType = req.file.mimetype;
-      const base64Data = req.file.buffer.toString('base64');
-      const dataUri = `data:${mimeType};base64,${base64Data}`;
-      const result = await cloudinary.uploader.upload(dataUri, {
-        folder: 'models',
-        resource_type: 'image',
-        transformation: [{ width: 800, height: 800, crop: 'limit' }]
-      });
-
-      const model = new Model({
-        name,
-        category,
-        imageUrl: result.secure_url,
-        imagePublicId: result.public_id,
-        description: description || undefined,
-        height: height || undefined,
-        measurements: measurements ? {
-          bust: measurements.bust || undefined,
-          waist: measurements.waist || undefined,
-          hips: measurements.hips || undefined
-        } : undefined,
-        hair: hair || undefined,
-        eyes: eyes || undefined,
-        shoes: shoes || undefined,
-        location: location || undefined,
-        placements: placements ? placements.map(p => ({
-          city: p.city || undefined,
-          agency: p.agency || undefined
-        })) : [],
-        socialLinks: {
-          instagram: socialLinks?.instagram || undefined,
-          tiktok: socialLinks?.tiktok || undefined
-        }
-      });
-
-      await model.save();
-      res.status(201).json(model);
-    } catch (error) {
-      console.error('Error adding model:', error.message);
-      res.status(500).json({ message: 'Server error' });
-    }
-  }
-);
-
-// Admin: Update a model
+// Admin: Update About section, Contact details, and Image
 router.put(
-  '/:id',
+  '/about',
   auth,
   upload.single('image'),
   [
-    body('name').optional().notEmpty().withMessage('Name cannot be empty').trim().isLength({ min: 2, max: 100 }).withMessage('Name must be between 2 and 100 characters'),
-    body('category').optional().isIn(['Light Skin', 'Dark Skin', 'Caramel Skin', 'Brown Skin']).withMessage('Invalid category'),
-    body('height').optional().trim().isLength({ max: 20 }).withMessage('Height cannot exceed 20 characters'),
-    body('measurements.bust').optional().trim().isLength({ max: 20 }).withMessage('Bust measurement cannot exceed 20 characters'),
-    body('measurements.waist').optional().trim().isLength({ max: 20 }).withMessage('Waist measurement cannot exceed 20 characters'),
-    body('measurements.hips').optional().trim().isLength({ max: 20 }).withMessage('Hips measurement cannot exceed 20 characters'),
-    body('hair').optional().trim().isLength({ max: 50 }).withMessage('Hair description cannot exceed 50 characters'),
-    body('eyes').optional().trim().isLength({ max: 50 }).withMessage('Eyes description cannot exceed 50 characters'),
-    body('shoes').optional().trim().isLength({ max: 20 }).withMessage('Shoes size cannot exceed 20 characters'),
-    body('location').optional().trim().isLength({ max: 100 }).withMessage('Location cannot exceed 100 characters'),
-    body('description').optional().trim().isLength({ max: 1000 }).withMessage('Description cannot exceed 1000 characters'),
-    body('placements').optional().customSanitizer(value => {
-      try {
-        return value ? JSON.parse(value) : [];
-      } catch (error) {
-        throw new Error('Placements must be a valid JSON array');
-      }
-    }).isArray().withMessage('Placements must be an array'),
-    body('placements.*.city').optional().trim().isLength({ max: 100 }).withMessage('City cannot exceed 100 characters'),
-    body('placements.*.agency').optional().trim().isLength({ max: 100 }).withMessage('Agency cannot exceed 100 characters'),
-    body('socialLinks').optional().customSanitizer(value => {
-      try {
-        return value ? JSON.parse(value) : { instagram: null, tiktok: null };
-      } catch (error) {
-        throw new Error('SocialLinks must be a valid JSON object');
-      }
-    }),
-    body('socialLinks.instagram').optional().isURL().withMessage('Valid Instagram URL is required'),
-    body('socialLinks.tiktok').optional().isURL().withMessage('Valid TikTok URL is required')
+    body('text')
+      .notEmpty().withMessage('About text is required')
+      .trim()
+      .isLength({ max: 500 }).withMessage('About text cannot exceed 500 characters'),
+    body('contact.address')
+      .notEmpty().withMessage('Address is required')
+      .trim()
+      .isLength({ max: 200 }).withMessage('Address cannot exceed 200 characters'),
+    body('contact.phone')
+      .notEmpty().withMessage('Phone number is required')
+      .trim()
+      .matches(/^\+?\d{10,15}$/).withMessage('Please enter a valid phone number'),
+    body('contact.email')
+      .notEmpty().withMessage('Email is required')
+      .trim()
+      .isEmail().withMessage('Please enter a valid email address')
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -219,189 +71,186 @@ router.put(
     }
 
     try {
-      if (!mongoose.isValidObjectId(req.params.id)) {
-        return res.status(400).json({ message: 'Invalid model ID' });
-      }
-
-      const data = matchedData(req);
-      const { name, category, description, height, measurements, hair, eyes, shoes, location, placements, socialLinks, imagePublicId } = data;
-
-      const updateData = {
-        name,
-        category,
-        description: description || undefined,
-        height: height || undefined,
-        measurements: measurements ? {
-          bust: measurements.bust || undefined,
-          waist: measurements.waist || undefined,
-          hips: measurements.hips || undefined
-        } : undefined,
-        hair: hair || undefined,
-        eyes: eyes || undefined,
-        shoes: shoes || undefined,
-        location: location || undefined,
-        placements: placements ? placements.map(p => ({
-          city: p.city || undefined,
-          agency: p.agency || undefined
-        })) : [],
-        socialLinks: {
-          instagram: socialLinks?.instagram || undefined,
-          tiktok: socialLinks?.tiktok || undefined
-        }
-      };
+      const { id, text, contact, imagePublicId } = req.body;
+      const updateData = { text, contact };
 
       if (req.file) {
-        // Delete old image from Cloudinary if it exists
         if (imagePublicId) {
           await cloudinary.uploader.destroy(imagePublicId).catch(err => console.error('Error deleting old image:', err));
         }
-        // Upload new image
         const mimeType = req.file.mimetype;
         const base64Data = req.file.buffer.toString('base64');
         const dataUri = `data:${mimeType};base64,${base64Data}`;
         const result = await cloudinary.uploader.upload(dataUri, {
-          folder: 'models',
+          folder: 'about',
           resource_type: 'image',
-          transformation: [{ width: 800, height: 800, crop: 'limit' }]
+          transformation: [{ width: 800, height: 400, crop: 'limit' }]
         });
         updateData.imageUrl = result.secure_url;
         updateData.imagePublicId = result.public_id;
       }
 
-      const model = await Model.findByIdAndUpdate(
+      let about;
+      if (id) {
+        about = await About.findByIdAndUpdate(
+          id,
+          { $set: updateData },
+          { new: true, runValidators: true }
+        );
+        if (!about) {
+          return res.status(404).json({ message: 'About section not found' });
+        }
+      } else {
+        about = new About(updateData);
+        await about.save();
+      }
+      res.json({
+        id: about._id,
+        text: about.text,
+        contact: {
+          address: about.contact.address,
+          phone: about.contact.phone,
+          email: about.contact.email
+        },
+        imageUrl: about.imageUrl || '',
+        imagePublicId: about.imagePublicId || ''
+      });
+    } catch (error) {
+      console.error('Error updating about:', error);
+      res.status(500).json({ message: error.message || 'Server error' });
+    }
+  }
+);
+
+// Public: Get all companies
+router.get('/companies', async (req, res) => {
+  try {
+    const companies = await Company.find().sort({ createdAt: -1 }).lean();
+    res.json(companies);
+  } catch (error) {
+    console.error('Error fetching companies:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Admin: Add a company
+router.post(
+  '/companies',
+  auth,
+  upload.single('logo'),
+  [
+    body('name').notEmpty().withMessage('Company name is required'),
+    body('link').optional().isURL().withMessage('Please enter a valid URL')
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    try {
+      const { name, link } = req.body;
+      let logoUrl, logoPublicId;
+
+      if (req.file) {
+        const mimeType = req.file.mimetype;
+        const base64Data = req.file.buffer.toString('base64');
+        const dataUri = `data:${mimeType};base64,${base64Data}`;
+        const result = await cloudinary.uploader.upload(dataUri, {
+          folder: 'companies',
+          resource_type: 'image',
+          transformation: [{ width: 200, height: 50, crop: 'limit' }]
+        });
+        logoUrl = result.secure_url;
+        logoPublicId = result.public_id;
+      }
+
+      const company = new Company({
+        name,
+        logoUrl,
+        logoPublicId,
+        link: link || undefined
+      });
+
+      await company.save();
+      res.status(201).json(company);
+    } catch (error) {
+      console.error('Error adding company:', error);
+      res.status(500).json({ message: error.message || 'Server error' });
+    }
+  }
+);
+
+// Admin: Update a company
+router.put(
+  '/companies/:id',
+  auth,
+  upload.single('logo'),
+  [
+    body('name').optional().notEmpty().withMessage('Company name cannot be empty'),
+    body('link').optional().isURL().withMessage('Please enter a valid URL')
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    try {
+      const { name, link, logoPublicId } = req.body;
+      const updateData = {
+        name,
+        link: link || undefined
+      };
+
+      if (req.file) {
+        if (logoPublicId) {
+          await cloudinary.uploader.destroy(logoPublicId).catch(err => console.error('Error deleting old logo:', err));
+        }
+        const mimeType = req.file.mimetype;
+        const base64Data = req.file.buffer.toString('base64');
+        const dataUri = `data:${mimeType};base64,${base64Data}`;
+        const result = await cloudinary.uploader.upload(dataUri, {
+          folder: 'companies',
+          resource_type: 'image',
+          transformation: [{ width: 200, height: 50, crop: 'limit' }]
+        });
+        updateData.logoUrl = result.secure_url;
+        updateData.logoPublicId = result.public_id;
+      }
+
+      const company = await Company.findByIdAndUpdate(
         req.params.id,
         { $set: updateData },
         { new: true, runValidators: true }
       );
-      if (!model) {
-        return res.status(404).json({ message: 'Model not found' });
+      if (!company) {
+        return res.status(404).json({ message: 'Company not found' });
       }
-      // Ensure socialLinks is always included in response
-      const modelWithSocialLinks = {
-        ...model.toObject(),
-        socialLinks: model.socialLinks || { instagram: null, tiktok: null }
-      };
-      res.json(modelWithSocialLinks);
+      res.json(company);
     } catch (error) {
-      console.error('Error updating model:', error.message);
-      res.status(500).json({ message: 'Server error' });
+      console.error('Error updating company:', error);
+      res.status(500).json({ message: error.message || 'Server error' });
     }
   }
 );
 
-// Admin: Add portfolio image
-router.post(
-  '/:id/portfolio',
-  auth,
-  upload.single('image'),
-  async (req, res) => {
-    try {
-      if (!mongoose.isValidObjectId(req.params.id)) {
-        return res.status(400).json({ message: 'Invalid model ID' });
-      }
-      if (!req.file) {
-        return res.status(400).json({ message: 'Portfolio image is required' });
-      }
-
-      // Upload image to Cloudinary
-      const mimeType = req.file.mimetype;
-      const base64Data = req.file.buffer.toString('base64');
-      const dataUri = `data:${mimeType};base64,${base64Data}`;
-      const result = await cloudinary.uploader.upload(dataUri, {
-        folder: 'models/portfolio',
-        resource_type: 'image',
-        transformation: [{ width: 800, height: 800, crop: 'limit' }]
-      });
-
-      const model = await Model.findByIdAndUpdate(
-        req.params.id,
-        { $push: { portfolioImages: { url: result.secure_url, public_id: result.public_id } } },
-        { new: true, runValidators: true }
-      );
-      if (!model) {
-        // Delete uploaded image if model not found
-        await cloudinary.uploader.destroy(result.public_id).catch(err => console.error('Error deleting uploaded image:', err));
-        return res.status(404).json({ message: 'Model not found' });
-      }
-      // Ensure socialLinks is always included in response
-      const modelWithSocialLinks = {
-        ...model.toObject(),
-        socialLinks: model.socialLinks || { instagram: null, tiktok: null }
-      };
-      res.json(modelWithSocialLinks);
-    } catch (error) {
-      console.error('Error adding portfolio image:', error.message);
-      res.status(500).json({ message: 'Server error' });
+// Admin: Delete a company
+router.delete('/companies/:id', auth, async (req, res) => {
+  try {
+    const company = await Company.findById(req.params.id);
+    if (!company) {
+      return res.status(404).json({ message: 'Company not found' });
     }
-  }
-);
-
-// Admin: Delete portfolio image
-router.delete(
-  '/:id/portfolio/:imageIndex',
-  auth,
-  async (req, res) => {
-    try {
-      if (!mongoose.isValidObjectId(req.params.id)) {
-        return res.status(400).json({ message: 'Invalid model ID' });
-      }
-      const model = await Model.findById(req.params.id);
-      if (!model) {
-        return res.status(404).json({ message: 'Model not found' });
-      }
-      const imageIndex = parseInt(req.params.imageIndex);
-      if (isNaN(imageIndex) || imageIndex < 0 || imageIndex >= model.portfolioImages.length) {
-        return res.status(400).json({ message: 'Invalid image index' });
-      }
-      const publicId = model.portfolioImages[imageIndex].public_id;
-      if (publicId) {
-        await cloudinary.uploader.destroy(publicId).catch(err => console.error('Error deleting portfolio image:', err));
-      }
-      model.portfolioImages.splice(imageIndex, 1);
-      await model.save();
-      // Ensure socialLinks is always included in response
-      const modelWithSocialLinks = {
-        ...model.toObject(),
-        socialLinks: model.socialLinks || { instagram: null, tiktok: null }
-      };
-      res.json(modelWithSocialLinks);
-    } catch (error) {
-      console.error('Error deleting portfolio image:', error.message);
-      res.status(500).json({ message: 'Server error' });
+    if (company.logoPublicId) {
+      await cloudinary.uploader.destroy(company.logoPublicId).catch(err => console.error('Error deleting logo:', err));
     }
+    await Company.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Company deleted' });
+  } catch (error) {
+    console.error('Error deleting company:', error);
+    res.status(500).json({ message: error.message || 'Server error' });
   }
-);
-
-// Admin: Delete a model
-router.delete(
-  '/:id',
-  auth,
-  async (req, res) => {
-    try {
-      if (!mongoose.isValidObjectId(req.params.id)) {
-        return res.status(400).json({ message: 'Invalid model ID' });
-      }
-      const model = await Model.findById(req.params.id);
-      if (!model) {
-        return res.status(404).json({ message: 'Model not found' });
-      }
-      // Delete main image
-      if (model.imagePublicId) {
-        await cloudinary.uploader.destroy(model.imagePublicId).catch(err => console.error('Error deleting main image:', err));
-      }
-      // Delete portfolio images
-      for (const image of model.portfolioImages) {
-        if (image.public_id) {
-          await cloudinary.uploader.destroy(image.public_id).catch(err => console.error('Error deleting portfolio image:', err));
-        }
-      }
-      await Model.findByIdAndDelete(req.params.id);
-      res.json({ message: 'Model deleted' });
-    } catch (error) {
-      console.error('Error deleting model:', error.message);
-      res.status(500).json({ message: 'Server error' });
-    }
-  }
-);
+});
 
 module.exports = router;
