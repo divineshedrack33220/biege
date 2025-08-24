@@ -7,29 +7,62 @@ const upload = require('../middleware/multer');
 const cloudinary = require('../config/cloudinary');
 const { body, validationResult } = require('express-validator');
 
-// Public: Get About section
+// Public: Get About section, Contact details, and Image
 router.get('/about', async (req, res) => {
   try {
     const about = await About.findOne().lean();
     if (!about) {
-      return res.json({ id: null, text: '' });
+      return res.json({
+        id: null,
+        text: '',
+        contact: {
+          address: '',
+          phone: '',
+          email: ''
+        },
+        imageUrl: '',
+        imagePublicId: ''
+      });
     }
-    res.json({ id: about._id, text: about.text });
+    res.json({
+      id: about._id,
+      text: about.text,
+      contact: {
+        address: about.contact.address,
+        phone: about.contact.phone,
+        email: about.contact.email
+      },
+      imageUrl: about.imageUrl || '',
+      imagePublicId: about.imagePublicId || ''
+    });
   } catch (error) {
     console.error('Error fetching about:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
-// Admin: Update About section
+// Admin: Update About section, Contact details, and Image
 router.put(
   '/about',
   auth,
+  upload.single('image'),
   [
     body('text')
       .notEmpty().withMessage('About text is required')
       .trim()
-      .isLength({ max: 500 }).withMessage('About text cannot exceed 500 characters')
+      .isLength({ max: 500 }).withMessage('About text cannot exceed 500 characters'),
+    body('contact.address')
+      .notEmpty().withMessage('Address is required')
+      .trim()
+      .isLength({ max: 200 }).withMessage('Address cannot exceed 200 characters'),
+    body('contact.phone')
+      .notEmpty().withMessage('Phone number is required')
+      .trim()
+      .matches(/^\+?\d{10,15}$/).withMessage('Please enter a valid phone number'),
+    body('contact.email')
+      .notEmpty().withMessage('Email is required')
+      .trim()
+      .isEmail().withMessage('Please enter a valid email address')
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -38,20 +71,50 @@ router.put(
     }
 
     try {
-      const { id, text } = req.body;
-      let about;
+      const { id, text, contact, imagePublicId } = req.body;
+      const updateData = { text, contact };
 
+      if (req.file) {
+        if (imagePublicId) {
+          await cloudinary.uploader.destroy(imagePublicId).catch(err => console.error('Error deleting old image:', err));
+        }
+        const mimeType = req.file.mimetype;
+        const base64Data = req.file.buffer.toString('base64');
+        const dataUri = `data:${mimeType};base64,${base64Data}`;
+        const result = await cloudinary.uploader.upload(dataUri, {
+          folder: 'about',
+          resource_type: 'image',
+          transformation: [{ width: 800, height: 400, crop: 'limit' }]
+        });
+        updateData.imageUrl = result.secure_url;
+        updateData.imagePublicId = result.public_id;
+      }
+
+      let about;
       if (id) {
-        about = await About.findByIdAndUpdate(id, { text }, { new: true, runValidators: true });
+        about = await About.findByIdAndUpdate(
+          id,
+          { $set: updateData },
+          { new: true, runValidators: true }
+        );
         if (!about) {
           return res.status(404).json({ message: 'About section not found' });
         }
       } else {
-        about = new About({ text });
+        about = new About(updateData);
         await about.save();
       }
-
-      res.json({ id: about._id, text: about.text });
+      res.json({
+        id: about._id,
+        text: about.text,
+        contact: {
+          address: about.contact.address,
+          phone: about.contact.phone,
+          email: about.contact.email
+        },
+        imageUrl: about.imageUrl || '',
+        imagePublicId: about.imagePublicId || ''
+      });
     } catch (error) {
       console.error('Error updating about:', error);
       res.status(500).json({ message: error.message || 'Server error' });
@@ -135,7 +198,10 @@ router.put(
 
     try {
       const { name, link, logoPublicId } = req.body;
-      const updateData = { name, link: link || undefined };
+      const updateData = {
+        name,
+        link: link || undefined
+      };
 
       if (req.file) {
         if (logoPublicId) {
@@ -188,5 +254,3 @@ router.delete('/companies/:id', auth, async (req, res) => {
 });
 
 module.exports = router;
-
-
