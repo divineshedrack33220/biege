@@ -661,7 +661,7 @@
         </div>
     </footer>
     <script>
-    const config = { 
+       const config = { 
     apiBaseUrl: window.location.hostname === 'localhost' ? 'http://localhost:3000/api' : '/api'
 };
 
@@ -678,7 +678,7 @@ function toggleMenu() {
     const mobileMenu = document.querySelector('.mobile-menu');
     const menuToggle = document.querySelector('.menu-toggle');
     mobileMenu.classList.toggle('active');
-    menuToggle.classList.toggle('active'); // Added for hamburger icon animation
+    menuToggle.classList.toggle('active'); // Added to toggle hamburger icon state
     mobileMenu.setAttribute('aria-hidden', !mobileMenu.classList.contains('active'));
 }
 
@@ -750,48 +750,18 @@ const revealOnScroll = () => {
     });
 };
 
-async function getAuthToken() {
-    try {
-        const response = await fetch(`${config.apiBaseUrl}/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                username: 'YOUR_USERNAME', // Replace with actual username
-                password: 'YOUR_PASSWORD'  // Replace with actual password
-            })
-        });
-        if (!response.ok) throw new Error(`Login failed: ${response.status}`);
-        const data = await response.json();
-        return data.token; // Assumes backend returns { token: "jwt" }
-    } catch (error) {
-        console.error('Error fetching auth token:', error);
-        throw error;
-    }
-}
-
 async function fetchWithRetry(url, retries = 3, delay = 1000) {
-    try {
-        const authToken = await getAuthToken();
-        for (let i = 0; i < retries; i++) {
-            try {
-                const response = await fetch(url, {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Authorization': `Bearer ${authToken}`
-                    }
-                });
-                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-                const contentType = response.headers.get('content-type');
-                if (!contentType || !contentType.includes('application/json')) throw new Error('Server response is not JSON');
-                return await response.json();
-            } catch (error) {
-                if (i === retries - 1) throw error;
-                await new Promise(resolve => setTimeout(resolve, delay));
-            }
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(url, { method: 'GET', headers: { 'Accept': 'application/json' } });
+            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) throw new Error('Server response is not JSON');
+            return await response.json();
+        } catch (error) {
+            if (i === retries - 1) throw error;
+            await new Promise(resolve => setTimeout(resolve, delay));
         }
-    } catch (error) {
-        throw error;
     }
 }
 
@@ -1036,14 +1006,10 @@ document.getElementById('newsletter-submit').addEventListener('click', async () 
     }
 
     try {
-        const authToken = await getAuthToken();
         const response = await fetch(`${config.apiBaseUrl}/newsletter`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`
-            },
-            body: JSON.stringify({ email })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email }),
         });
         const result = await response.json();
         feedback.className = response.ok ? 'text-green-500 text-center mb-4' : 'text-red-500 text-center mb-4';
