@@ -60,7 +60,7 @@
             left: 0;
             right: 0;
             background: rgba(255, 255, 255, 0.9);
-            z-index: 50;
+            z-index: 60;
             padding: 1rem 0;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             min-height: 64px;
@@ -73,34 +73,71 @@
             text-transform: uppercase;
             letter-spacing: 0.08em;
             max-width: 90vw;
+            z-index: 65;
         }
         .desktop-nav-bar a[href="home.html"] {
             font-size: clamp(1rem, 1.5vw, 1.25rem);
         }
-        .burger-icon {
+        .menu-toggle {
             display: none;
-            font-size: 1.5rem;
+            position: relative;
+            width: 24px;
+            height: 24px;
             cursor: pointer;
-            color: black;
-            z-index: 60;
+            z-index: 65;
+        }
+        .menu-toggle span {
+            display: block;
+            position: absolute;
+            height: 3px;
+            width: 100%;
+            background: #000000;
+            border-radius: 3px;
+            opacity: 1;
+            left: 0;
+            transform: rotate(0deg);
+            transition: all 0.3s ease;
+        }
+        .menu-toggle span:nth-child(1) {
+            top: 4px;
+        }
+        .menu-toggle span:nth-child(2) {
+            top: 10px;
+        }
+        .menu-toggle span:nth-child(3) {
+            top: 16px;
+        }
+        .menu-toggle.active span:nth-child(1) {
+            top: 10px;
+            transform: rotate(45deg);
+        }
+        .menu-toggle.active span:nth-child(2) {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        .menu-toggle.active span:nth-child(3) {
+            top: 10px;
+            transform: rotate(-45deg);
         }
         .mobile-menu {
             position: fixed;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
+            width: 100%;
+            height: 100%;
             background: rgba(255, 255, 255, 0.95);
-            z-index: 100;
+            z-index: 55;
             display: none;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            transform: translateY(-100%);
-            transition: transform 0.3s ease-in-out;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .mobile-menu.active {
             display: flex;
+            opacity: 1;
             transform: translateY(0);
         }
         .mobile-menu a {
@@ -108,23 +145,26 @@
             color: black;
             text-decoration: none;
             text-transform: uppercase;
-            margin: 1rem 0;
-            transition: color 0.3s ease, transform 0.3s ease;
+            margin: 1.5rem 0;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.3s ease, transform 0.3s ease, color 0.3s ease;
         }
+        .mobile-menu.active a {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .mobile-menu.active a:nth-child(1) { transition-delay: 0.2s; }
+        .mobile-menu.active a:nth-child(2) { transition-delay: 0.3s; }
+        .mobile-menu.active a:nth-child(3) { transition-delay: 0.4s; }
+        .mobile-menu.active a:nth-child(4) { transition-delay: 0.5s; }
+        .mobile-menu.active a:nth-child(5) { transition-delay: 0.6s; }
         .mobile-menu a[href="home.html"] {
             font-size: clamp(1.25rem, 5vw, 1.75rem);
         }
         .mobile-menu a:hover, .mobile-menu a:focus {
             color: #4b5563;
-            transform: scale(1.1);
-        }
-        .close-icon {
-            position: absolute;
-            top: 1rem;
-            right: 1.5rem;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: black;
+            transform: scale(1.05);
         }
         .custom-scrollbar::-webkit-scrollbar {
             width: 6px;
@@ -437,7 +477,7 @@
                 padding-left: clamp(1.5rem, 3vw, 2rem);
                 padding-right: clamp(1.5rem, 3vw, 2rem);
             }
-            .burger-icon {
+            .menu-toggle {
                 display: none !important;
             }
             .mobile-menu {
@@ -482,9 +522,13 @@
                 justify-content: space-between;
                 align-items: center;
             }
-            .burger-icon {
+            .menu-toggle {
                 display: flex;
                 align-items: center;
+            }
+            .desktop-nav-bar a[href="index.html"] {
+                position: relative;
+                z-index: 65;
             }
             .chat-container-wrapper {
                 padding: 0 0.25rem clamp(1.5rem, 5vw, 3rem) 0.25rem;
@@ -514,14 +558,13 @@
                 <a href="booking.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase" aria-label="Book a Model">BOOK A MODEL</a>
                 <a href="become-model.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase" aria-label="Become a Model">BECOME A MODEL</a>
             </div>
-            <div class="burger-icon" onclick="toggleMenu()">
-                <i class="fas fa-bars"></i>
+            <div class="menu-toggle" onclick="toggleMenu()" aria-label="Toggle Menu">
+                <span></span>
+                <span></span>
+                <span></span>
             </div>
         </div>
-        <div class="mobile-menu">
-            <div class="close-icon" onclick="toggleMenu()">
-                <i class="fas fa-times"></i>
-            </div>
+        <div class="mobile-menu" role="dialog" aria-label="Mobile Navigation Menu">
             <a href="home.html" aria-label="Home">HOME</a>
             <a href="about.html" aria-label="About Us">ABOUT US</a>
             <a href="models.html" aria-label="Models">MODELS</a>
@@ -651,7 +694,11 @@
 
         function toggleMenu() {
             const mobileMenu = document.querySelector('.mobile-menu');
+            const menuToggle = document.querySelector('.menu-toggle');
             mobileMenu.classList.toggle('active');
+            menuToggle.classList.toggle('active');
+            mobileMenu.setAttribute('aria-hidden', !mobileMenu.classList.contains('active'));
+            console.log('Mobile menu toggled:', mobileMenu.classList.contains('active') ? 'open' : 'closed');
         }
 
         function adjustSectionPadding() {
