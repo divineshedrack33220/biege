@@ -750,25 +750,48 @@ const revealOnScroll = () => {
     });
 };
 
+async function getAuthToken() {
+    try {
+        const response = await fetch(`${config.apiBaseUrl}/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                username: 'YOUR_USERNAME', // Replace with actual username
+                password: 'YOUR_PASSWORD'  // Replace with actual password
+            })
+        });
+        if (!response.ok) throw new Error(`Login failed: ${response.status}`);
+        const data = await response.json();
+        return data.token; // Assumes backend returns { token: "jwt" }
+    } catch (error) {
+        console.error('Error fetching auth token:', error);
+        throw error;
+    }
+}
+
 async function fetchWithRetry(url, retries = 3, delay = 1000) {
-    const authToken = 'YOUR_AUTH_TOKEN_HERE'; // Replace with your actual Bearer token or API key
-    for (let i = 0; i < retries; i++) {
-        try {
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'Authorization': `Bearer ${authToken}` // Added to fix "No Authorization header provided"
-                }
-            });
-            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-            const contentType = response.headers.get('content-type');
-            if (!contentType || !contentType.includes('application/json')) throw new Error('Server response is not JSON');
-            return await response.json();
-        } catch (error) {
-            if (i === retries - 1) throw error;
-            await new Promise(resolve => setTimeout(resolve, delay));
+    try {
+        const authToken = await getAuthToken();
+        for (let i = 0; i < retries; i++) {
+            try {
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) throw new Error('Server response is not JSON');
+                return await response.json();
+            } catch (error) {
+                if (i === retries - 1) throw error;
+                await new Promise(resolve => setTimeout(resolve, delay));
+            }
         }
+    } catch (error) {
+        throw error;
     }
 }
 
@@ -1013,11 +1036,12 @@ document.getElementById('newsletter-submit').addEventListener('click', async () 
     }
 
     try {
+        const authToken = await getAuthToken();
         const response = await fetch(`${config.apiBaseUrl}/newsletter`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer YOUR_AUTH_TOKEN_HERE` // Added to fix "No Authorization header provided"
+                'Authorization': `Bearer ${authToken}`
             },
             body: JSON.stringify({ email })
         });
