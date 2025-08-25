@@ -660,25 +660,24 @@
             </div>
         </div>
     </footer>
-       const config = { 
-            apiBaseUrl: window.location.hostname === 'localhost' ? 'http://localhost:3000/api' : '/api'
+    <script>
+        const config = {
+            apiBaseUrl: window.location.hostname === 'localhost' ? 'https://biege.onrender.com' : '/api'
         };
-
         function escapeHtml(str) {
             if (typeof str !== 'string') return str || '';
             return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         }
-
         function clampValue(min, value, max) {
             return Math.min(Math.max(value, min), max);
         }
-
         function toggleMenu() {
             const mobileMenu = document.querySelector('.mobile-menu');
+            const menuToggle = document.querySelector('.menu-toggle');
             mobileMenu.classList.toggle('active');
+            menuToggle.classList.toggle('active');
             mobileMenu.setAttribute('aria-hidden', !mobileMenu.classList.contains('active'));
         }
-
         function adjustHeroPadding() {
             const heroSection = document.querySelector('.hero-section');
             const navBar = document.querySelector('.desktop-nav-bar');
@@ -688,15 +687,12 @@
                 console.log('Adjusted hero padding-top:', heroSection.style.paddingTop);
             }
         }
-
         function setupAutoScroll() {
             const modelGrid = document.getElementById('model-grid');
             if (!modelGrid || window.innerWidth >= 640) return;
-
             let autoScrollInterval = null;
             const scrollSpeed = 3000;
             const pauseDuration = 5000;
-
             function startAutoScroll() {
                 if (modelGrid.children.length < 2) {
                     console.log('Auto-scroll disabled: fewer than 2 cards');
@@ -718,7 +714,6 @@
                 }, scrollSpeed);
                 console.log('Auto-scroll started for model-grid');
             }
-
             function pauseAutoScroll() {
                 if (autoScrollInterval) {
                     clearInterval(autoScrollInterval);
@@ -727,14 +722,11 @@
                     setTimeout(startAutoScroll, pauseDuration);
                 }
             }
-
             modelGrid.addEventListener('touchstart', pauseAutoScroll);
             modelGrid.addEventListener('mousedown', pauseAutoScroll);
             modelGrid.addEventListener('scroll', pauseAutoScroll);
-
             startAutoScroll();
         }
-
         const revealElements = document.querySelectorAll('.reveal');
         const revealOnScroll = () => {
             const windowHeight = window.innerHeight;
@@ -746,7 +738,6 @@
                 }
             });
         };
-
         async function fetchWithRetry(url, retries = 3, delay = 1000) {
             for (let i = 0; i < retries; i++) {
                 try {
@@ -761,7 +752,6 @@
                 }
             }
         }
-
         function createModelCard(model) {
             const card = document.createElement('a');
             card.className = 'model-card reveal aspect-[3/4] bg-gray-200 relative';
@@ -783,7 +773,6 @@
             addHoverEffects(card);
             return card;
         }
-
         function addHoverEffects(card) {
             const img = card.querySelector('img');
             img.addEventListener('error', () => {
@@ -813,7 +802,6 @@
                 }
             });
         }
-
         function createViewMoreButton() {
             const buttonContainer = document.createElement('div');
             buttonContainer.className = 'view-more-container';
@@ -824,14 +812,12 @@
             `;
             return buttonContainer;
         }
-
         let page = 1;
         let isLoading = false;
         const modelGrid = document.getElementById('model-grid');
         const errorMessage = document.getElementById('model-error');
         const loadingState = document.getElementById('loading-state');
         const viewMoreContainer = document.getElementById('view-more-container');
-
         async function fetchModels(reset = false) {
             if (isLoading) return;
             isLoading = true;
@@ -893,7 +879,6 @@
                 modelGrid.classList.remove('opacity-50');
             }
         }
-
         const sentinel = document.getElementById('sentinel');
         const observer = new IntersectionObserver((entries) => {
             if (entries[0].isIntersecting && page === 1) {
@@ -901,7 +886,6 @@
             }
         }, { threshold: 0.1 });
         observer.observe(sentinel);
-
         document.addEventListener('DOMContentLoaded', () => {
             adjustHeroPadding();
             revealOnScroll();
@@ -928,10 +912,10 @@
                 console.log('Hero section top padding:', document.querySelector('.hero-section') ? getComputedStyle(document.querySelector('.hero-section')).paddingTop : 'Not found');
                 if (window.innerWidth < 640) {
                     const desktopNav = document.querySelector('.desktop-nav-bar .desktop-nav');
-                    const burgerIcon = document.querySelector('.burger-icon');
+                    const menuToggle = document.querySelector('.menu-toggle');
                     const mobileNavLinks = document.querySelectorAll('.mobile-menu a');
                     console.log('Mobile view (< 640px): Desktop nav links display:', desktopNav ? (desktopNav.style.display || getComputedStyle(desktopNav).display) : 'Not found');
-                    console.log('Mobile view (< 640px): Burger icon display:', burgerIcon ? (burgerIcon.style.display || getComputedStyle(burgerIcon).display) : 'Not found');
+                    console.log('Mobile view (< 640px): Menu toggle display:', menuToggle ? (menuToggle.style.display || getComputedStyle(menuToggle).display) : 'Not found');
                     console.log('Mobile view (< 640px): Logo display:', logo ? (logo.style.display || getComputedStyle(logo).display) : 'Not found');
                     console.log('Mobile view (< 640px): Mobile nav link count:', mobileNavLinks.length);
                     mobileNavLinks.forEach((link, index) => {
@@ -941,9 +925,9 @@
                         const rect = logo.getBoundingClientRect();
                         console.log('Mobile view (< 640px): Logo position:', { top: rect.top, left: rect.left, right: rect.right });
                     }
-                    if (burgerIcon) {
-                        const rect = burgerIcon.getBoundingClientRect();
-                        console.log('Mobile view (< 640px): Burger icon position:', { top: rect.top, left: rect.left, right: rect.right });
+                    if (menuToggle) {
+                        const rect = menuToggle.getBoundingClientRect();
+                        console.log('Mobile view (< 640px): Menu toggle position:', { top: rect.top, left: rect.left, right: rect.right });
                     }
                 } else {
                     const desktopNavLinks = document.querySelectorAll('.desktop-nav a');
@@ -956,18 +940,14 @@
                 console.error('Error in DOMContentLoaded handler:', error);
             }
         });
-
         window.addEventListener('resize', () => {
             adjustHeroPadding();
             setupAutoScroll();
         });
-
         window.addEventListener('scroll', revealOnScroll);
-
         document.querySelectorAll('.mobile-menu a').forEach(link => {
             link.addEventListener('click', toggleMenu);
         });
-
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -982,26 +962,22 @@
                 }
             });
         });
-
         const video = document.querySelector('.hero-video');
         video.addEventListener('error', () => {
             console.error('Video failed to load');
             video.style.display = 'none';
             document.querySelector('.hero-section').style.backgroundImage = `url(${video.poster})`;
         });
-
         document.getElementById('newsletter-submit').addEventListener('click', async () => {
             const emailInput = document.getElementById('newsletter-email');
             const feedback = document.getElementById('newsletter-feedback');
             const email = emailInput.value;
-
             if (!email.match(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/)) {
                 feedback.className = 'text-red-500 text-center mb-4';
                 feedback.textContent = 'Please enter a valid email address';
                 feedback.classList.remove('hidden');
                 return;
             }
-
             try {
                 const response = await fetch(`${config.apiBaseUrl}/newsletter`, {
                     method: 'POST',
@@ -1025,4 +1001,3 @@
     </script>
 </body>
 </html>
-
