@@ -8,23 +8,28 @@ const locationSchema = new mongoose.Schema({
 });
 
 const bookingSchema = new mongoose.Schema({
-  modelId: { type: mongoose.Schema.Types.ObjectId, ref: 'Model', required: false }, // Optional reference to Model
-  imageUrl: { type: String, required: false }, // Optional image URL
+  modelId: { type: mongoose.Schema.Types.ObjectId, ref: 'Model', required: false },
+  imageUrl: { type: String, required: false },
+  modelName: { type: String, required: false },
   fullName: { type: String, required: true },
   email: { type: String, required: true },
   phone: { type: String, required: true },
   shootType: { type: String, required: true },
-  modelDetails: { type: String, required: true },
   bookingDateTime: { type: Date, required: true },
   location: { type: locationSchema, required: true },
-  contactMethod: { type: String, required: true },
-  company: { type: String },
+  additionalNote: { type: String, required: false },
+  contactMethod: {
+    type: String,
+    required: true,
+    enum: ['whatsapp', 'call', 'email', 'instagram']
+  },
+  company: { type: String, required: false },
+  revenue: { type: Number, required: false, default: 0 },
   status: {
     type: String,
     enum: ['pending', 'reviewed', 'confirmed', 'cancelled'],
     default: 'pending'
   },
-  revenue: { type: Number, required: true, default: 0 },
   createdAt: { type: Date, default: Date.now }
 });
 
