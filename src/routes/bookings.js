@@ -3,23 +3,23 @@ const router = express.Router();
 const Booking = require('../models/Booking');
 const { check, validationResult } = require('express-validator');
 const auth = require('../middleware/auth');
-const mongoose = require('mongoose');
 
 // Validation middleware
 const bookingValidation = [
   check('modelId').optional().isMongoId().withMessage('Invalid model ID'),
   check('imageUrl').optional().isURL().withMessage('Valid image URL is required'),
-  check('fullName').notEmpty().trim().withMessage('Full name is required'),
-  check('email').isEmail().normalizeEmail().withMessage('Valid email is required'),
-  check('phone').matches(/\+?[0-9\s-()]{7,15}/).withMessage('Valid phone number is required (7-15 digits)'),
-  check('shootType').notEmpty().withMessage('Shoot type is required'),
-  check('modelDetails').notEmpty().trim().withMessage('Model details are required'),
-  check('bookingDateTime').isISO8601().toDate().withMessage('Valid date/time is required'),
-  check('location.address').notEmpty().trim().withMessage('Address is required'),
-  check('location.city').notEmpty().trim().withMessage('City is required'),
-  check('location.state').notEmpty().trim().withMessage('State is required'),
-  check('location.country').notEmpty().trim().withMessage('Country is required'),
-  check('contactMethod').isIn(['whatsapp', 'call', 'email']).withMessage('Valid contact method is required')
+  check('modelName').optional().trim().isString().withMessage('Model name must be a string'),
+  check('fullName').notEmpty().trim().isString().withMessage('Full name is required'),
+  check('email').notEmpty().isEmail().normalizeEmail().withMessage('Valid email is required'),
+  check('phone').notEmpty().matches(/\+?[0-9\s-()]{7,15}/).withMessage('Valid phone number is required (7-15 digits)'),
+  check('shootType').notEmpty().isString().withMessage('Shoot type is required'),
+  check('bookingDateTime').notEmpty().isISO8601().toDate().withMessage('Valid date/time is required'),
+  check('location.address').notEmpty().trim().isString().withMessage('Address is required'),
+  check('location.city').notEmpty().trim().isString().withMessage('City is required'),
+  check('location.state').notEmpty().trim().isString().withMessage('State is required'),
+  check('location.country').notEmpty().trim().isString().withMessage('Country is required'),
+  check('contactMethod').notEmpty().isString().isIn(['whatsapp', 'call', 'email', 'instagram']).withMessage('Valid contact method is required'),
+  check('additionalNote').optional().trim().isString().withMessage('Additional note must be a string')
 ];
 
 // POST /api/bookings - Create a new booking
@@ -34,7 +34,9 @@ router.post('/', bookingValidation, async (req, res) => {
       ...req.body,
       status: 'pending', // Ensure default status
       modelId: req.body.modelId || undefined, // Convert empty string to undefined
-      imageUrl: req.body.imageUrl || undefined // Convert empty string to undefined
+      imageUrl: req.body.imageUrl || undefined, // Convert empty string to undefined
+      modelName: req.body.modelName || undefined, // Convert empty string to undefined
+      additionalNote: req.body.additionalNote || undefined // Convert empty string to undefined
     };
     const booking = new Booking(bookingData);
     await booking.save();
@@ -58,7 +60,7 @@ router.get('/', auth, async (req, res) => {
 
 // PUT /api/bookings/:id - Update booking status (admin only)
 router.put('/:id', auth, [
-  check('status').isIn(['pending', 'reviewed', 'confirmed', 'cancelled']).withMessage('Invalid status')
+  check('status').notEmpty().isString().isIn(['pending', 'reviewed', 'confirmed', 'cancelled']).withMessage('Invalid status')
 ], async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
