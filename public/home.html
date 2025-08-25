@@ -52,7 +52,7 @@
             min-height: 64px;
         }
         .desktop-nav-bar a[href="index.html"] {
-            font-size: clamp(2rem, 3.5vw, 2.44rem); /* Matches 39px height */
+            font-size: clamp(2rem, 3.5vw, 2.44rem);
             font-weight: 300;
             color: #000000;
             text-decoration: none;
@@ -66,17 +66,17 @@
         }
         @media (max-width: 1400px) {
             .desktop-nav-bar a[href="index.html"] {
-                font-size: clamp(1.9rem, 3.3vw, 2.31rem); /* Matches 37px height */
+                font-size: clamp(1.9rem, 3.3vw, 2.31rem);
             }
         }
         @media (max-width: 1200px) {
             .desktop-nav-bar a[href="index.html"] {
-                font-size: clamp(1.6rem, 3vw, 1.94rem); /* Matches 31px height */
+                font-size: clamp(1.6rem, 3vw, 1.94rem);
             }
         }
         @media (max-width: 992px) {
             .desktop-nav-bar a[href="index.html"] {
-                font-size: clamp(1.5rem, 2.8vw, 1.75rem); /* Matches 28px height */
+                font-size: clamp(1.5rem, 2.8vw, 1.75rem);
             }
         }
         .menu-toggle {
@@ -231,7 +231,7 @@
         }
         .hero-section .flex {
             flex-direction: row;
-            flex-wrap: nowrap; /* Prevent wrapping to keep buttons side by side */
+            flex-wrap: nowrap;
             gap: 1rem;
             justify-content: center;
             align-items: center;
@@ -248,9 +248,9 @@
             background: transparent;
             text-transform: uppercase;
             font-weight: medium;
-            white-space: nowrap; /* Prevent text wrapping */
-            flex: 1; /* Allow buttons to grow equally */
-            max-width: 200px; /* Limit max width */
+            white-space: nowrap;
+            flex: 1;
+            max-width: 200px;
             text-align: center;
         }
         .btn-animate:hover {
@@ -412,12 +412,26 @@
                 margin-top: 1.5rem;
             }
             .hero-section .flex {
-                gap: 0.5rem; /* Reduce gap on small screens */
+                gap: 0.5rem;
             }
             .btn-animate {
                 padding: clamp(0.5rem, 1.5vw, 0.75rem) clamp(0.75rem, 2vw, 1rem);
                 font-size: clamp(0.625rem, 1.25vw, 0.75rem);
-                max-width: 150px; /* Smaller max width for mobile */
+                max-width: 150px;
+            }
+            .section.bg-black .flex {
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 1rem;
+            }
+            .section.bg-black .btn-animate {
+               width: auto; /* Allow button to take full content width */
+        min-width: 200px; /* Ensure enough width for text */
+        max-width: none; /* Remove max-width constraint */
+        margin-left: auto;
+        margin-right: auto;
+        padding: 0.75rem 1.5rem;
             }
         }
         footer {
@@ -459,7 +473,6 @@
     </style>
 </head>
 <body class="bg-white text-black">
-    <!-- Navigation -->
     <nav class="desktop-nav-bar fixed top-0 left-0 right-0 bg-white bg-opacity-90 shadow-sm z-50 flex items-center">
         <div class="container flex justify-between items-center">
             <a href="index.html" class="font-bold tracking-wider" aria-label="Beige Home">BEIGE</a>
@@ -469,6 +482,8 @@
                 <a href="models.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase" aria-label="Models">MODELS</a>
                 <a href="booking.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase" aria-label="Book a Model">BOOK A MODEL</a>
                 <a href="become-model.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase" aria-label="Become a Model">BECOME A MODEL</a>
+                <a href="contact.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase" aria-label="Contact">CONTACT</a>
+                <a href="discount.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase" aria-label="10% Discount">10% OFF</a>
             </div>
             <div class="menu-toggle" onclick="toggleMenu()" aria-label="Toggle Menu">
                 <span></span>
@@ -482,6 +497,13 @@
             <a href="models.html" aria-label="Models">MODELS</a>
             <a href="booking.html" aria-label="Book a Model">BOOK A MODEL</a>
             <a href="become-model.html" aria-label="Become a Model">BECOME A MODEL</a>
+            <a href="contact.html" aria-label="Contact">CONTACT</a>
+            <a href="discount.html" aria-label="10% Discount" 
+               style="background-color: black; color: white; padding: 8px 16px; 
+                      text-decoration: none; display: inline-block; 
+                      border-radius: 4px; font-weight: bold;">
+                10% OFF
+            </a>
         </div>
     </nav>
     <!-- Hero Section -->
@@ -661,370 +683,370 @@
         </div>
     </footer>
     <script>
-       const config = { 
-    apiBaseUrl: window.location.hostname === 'localhost' ? 'http://localhost:3000/api' : '/api'
-};
+        const config = { 
+            apiBaseUrl: window.location.hostname === 'localhost' ? 'http://localhost:3000/api' : '/api'
+        };
 
-function escapeHtml(str) {
-    if (typeof str !== 'string') return str || '';
-    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-}
-
-function clampValue(min, value, max) {
-    return Math.min(Math.max(value, min), max);
-}
-
-function toggleMenu() {
-    const mobileMenu = document.querySelector('.mobile-menu');
-    const menuToggle = document.querySelector('.menu-toggle');
-    mobileMenu.classList.toggle('active');
-    menuToggle.classList.toggle('active'); // Added to toggle hamburger icon state
-    mobileMenu.setAttribute('aria-hidden', !mobileMenu.classList.contains('active'));
-}
-
-function adjustHeroPadding() {
-    const heroSection = document.querySelector('.hero-section');
-    const navBar = document.querySelector('.desktop-nav-bar');
-    if (heroSection && navBar) {
-        const navHeight = navBar.offsetHeight;
-        heroSection.style.paddingTop = window.innerWidth < 640 ? `${Math.max(navHeight + 16, 112)}px` : `${Math.max(navHeight + 16, 80)}px`;
-        console.log('Adjusted hero padding-top:', heroSection.style.paddingTop);
-    }
-}
-
-function setupAutoScroll() {
-    const modelGrid = document.getElementById('model-grid');
-    if (!modelGrid || window.innerWidth >= 640) return;
-
-    let autoScrollInterval = null;
-    const scrollSpeed = 3000;
-    const pauseDuration = 5000;
-
-    function startAutoScroll() {
-        if (modelGrid.children.length < 2) {
-            console.log('Auto-scroll disabled: fewer than 2 cards');
-            return;
+        function escapeHtml(str) {
+            if (typeof str !== 'string') return str || '';
+            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         }
-        autoScrollInterval = setInterval(() => {
-            const cardWidth = modelGrid.querySelector('.model-card')?.offsetWidth || 300;
-            const currentScroll = modelGrid.scrollLeft;
-            const maxScroll = modelGrid.scrollWidth - modelGrid.clientWidth;
-            let nextScroll = currentScroll + cardWidth + 16;
-            if (nextScroll >= maxScroll) {
-                nextScroll = 0;
+
+        function clampValue(min, value, max) {
+            return Math.min(Math.max(value, min), max);
+        }
+
+        function toggleMenu() {
+            const mobileMenu = document.querySelector('.mobile-menu');
+            const menuToggle = document.querySelector('.menu-toggle');
+            mobileMenu.classList.toggle('active');
+            menuToggle.classList.toggle('active');
+            mobileMenu.setAttribute('aria-hidden', !mobileMenu.classList.contains('active'));
+        }
+
+        function adjustHeroPadding() {
+            const heroSection = document.querySelector('.hero-section');
+            const navBar = document.querySelector('.desktop-nav-bar');
+            if (heroSection && navBar) {
+                const navHeight = navBar.offsetHeight;
+                heroSection.style.paddingTop = window.innerWidth < 640 ? `${Math.max(navHeight + 16, 112)}px` : `${Math.max(navHeight + 16, 80)}px`;
+                console.log('Adjusted hero padding-top:', heroSection.style.paddingTop);
             }
-            modelGrid.scrollTo({
-                left: nextScroll,
-                behavior: 'smooth'
-            });
-            console.log('Auto-scroll to:', nextScroll);
-        }, scrollSpeed);
-        console.log('Auto-scroll started for model-grid');
-    }
-
-    function pauseAutoScroll() {
-        if (autoScrollInterval) {
-            clearInterval(autoScrollInterval);
-            autoScrollInterval = null;
-            console.log('Auto-scroll paused due to user interaction');
-            setTimeout(startAutoScroll, pauseDuration);
         }
-    }
 
-    modelGrid.addEventListener('touchstart', pauseAutoScroll);
-    modelGrid.addEventListener('mousedown', pauseAutoScroll);
-    modelGrid.addEventListener('scroll', pauseAutoScroll);
+        function setupAutoScroll() {
+            const modelGrid = document.getElementById('model-grid');
+            if (!modelGrid || window.innerWidth >= 640) return;
 
-    startAutoScroll();
-}
+            let autoScrollInterval = null;
+            const scrollSpeed = 3000;
+            const pauseDuration = 5000;
 
-const revealElements = document.querySelectorAll('.reveal');
-const revealOnScroll = () => {
-    const windowHeight = window.innerHeight;
-    const revealPoint = 150;
-    document.querySelectorAll('.reveal:not(.model-hidden)').forEach(element => {
-        const elementTop = element.getBoundingClientRect().top;
-        if (elementTop < windowHeight - revealPoint) {
-            element.classList.add('active');
-        }
-    });
-};
-
-async function fetchWithRetry(url, retries = 3, delay = 1000) {
-    for (let i = 0; i < retries; i++) {
-        try {
-            const response = await fetch(url, { method: 'GET', headers: { 'Accept': 'application/json' } });
-            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-            const contentType = response.headers.get('content-type');
-            if (!contentType || !contentType.includes('application/json')) throw new Error('Server response is not JSON');
-            return await response.json();
-        } catch (error) {
-            if (i === retries - 1) throw error;
-            await new Promise(resolve => setTimeout(resolve, delay));
-        }
-    }
-}
-
-function createModelCard(model) {
-    const card = document.createElement('a');
-    card.className = 'model-card reveal aspect-[3/4] bg-gray-200 relative';
-    card.href = model._id ? `/model-details.html?id=${encodeURIComponent(model._id)}` : '#';
-    card.setAttribute('role', 'article');
-    card.setAttribute('aria-labelledby', `model-name-${model._id || 'placeholder'}`);
-    card.setAttribute('aria-label', `View details for ${escapeHtml(model.name || 'Unknown Model')}`);
-    card.setAttribute('data-category', escapeHtml(model.category || 'unknown'));
-    card.innerHTML = `
-        <div class="gradient-overlay absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-0 transition-opacity duration-300"></div>
-        <div class="model-image absolute inset-0">
-            <img src="${escapeHtml(model.imageUrl || '/placeholder.jpg')}" alt="Portrait of ${escapeHtml(model.name || 'Unknown Model')}" class="w-full h-full object-cover" loading="lazy">
-        </div>
-        <div class="model-name absolute bottom-[-50px] left-0 w-full p-4 transition-all duration-300 opacity-0" id="model-name-${escapeHtml(model._id || 'placeholder')}">
-            <h3 class="text-lg font-bold">${escapeHtml(model.name || 'Unknown Model').toUpperCase()}</h3>
-            <p class="text-xs">${escapeHtml(model.category || 'unknown').charAt(0).toUpperCase() + escapeHtml(model.category || 'unknown').slice(1)} Model</p>
-        </div>
-    `;
-    addHoverEffects(card);
-    return card;
-}
-
-function addHoverEffects(card) {
-    const img = card.querySelector('img');
-    img.addEventListener('error', () => {
-        img.src = '/placeholder.jpg';
-        console.warn(`Failed to load image for ${card.querySelector('.model-name h3').textContent}`);
-    });
-    card.addEventListener('mouseover', () => {
-        card.style.transform = 'translateY(-10px)';
-        card.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
-        const gradientOverlay = card.querySelector('.gradient-overlay');
-        const modelName = card.querySelector('.model-name');
-        if (gradientOverlay) gradientOverlay.style.opacity = '1';
-        if (modelName) {
-            modelName.style.bottom = '0';
-            modelName.style.opacity = '1';
-        }
-    });
-    card.addEventListener('mouseout', () => {
-        card.style.transform = 'translateY(0)';
-        card.style.boxShadow = 'none';
-        const gradientOverlay = card.querySelector('.gradient-overlay');
-        const modelName = card.querySelector('.model-name');
-        if (gradientOverlay) gradientOverlay.style.opacity = '0';
-        if (modelName) {
-            modelName.style.bottom = '-50px';
-            modelName.style.opacity = '0';
-        }
-    });
-}
-
-function createViewMoreButton() {
-    const buttonContainer = document.createElement('div');
-    buttonContainer.className = 'view-more-container';
-    buttonContainer.innerHTML = `
-        <a href="models.html" class="btn-animate view-more-btn inline-block bg-white text-black px-6 py-3 rounded-none hover:bg-gray-200 focus:outline focus:outline-2 focus:outline-[black] focus:outline-offset-2 transition-all duration-300 uppercase tracking-wider text-sm font-medium reveal">
-            View More
-        </a>
-    `;
-    return buttonContainer;
-}
-
-let page = 1;
-let isLoading = false;
-const modelGrid = document.getElementById('model-grid');
-const errorMessage = document.getElementById('model-error');
-const loadingState = document.getElementById('loading-state');
-const viewMoreContainer = document.getElementById('view-more-container');
-
-async function fetchModels(reset = false) {
-    if (isLoading) return;
-    isLoading = true;
-    errorMessage.classList.add('hidden');
-    loadingState.classList.remove('hidden');
-    modelGrid.classList.add('opacity-50');
-    try {
-        if (reset) {
-            page = 1;
-            modelGrid.innerHTML = '';
-            viewMoreContainer.innerHTML = '';
-        }
-        const url = `${config.apiBaseUrl}/models?page=${page}&limit=6`;
-        console.log('Fetching models from:', url);
-        const data = await fetchWithRetry(url);
-        if (!data || !Array.isArray(data.models) || typeof data.total !== 'number') throw new Error('Invalid API response format');
-        const { models, total } = data;
-        if (models.length === 0 && page === 1) {
-            errorMessage.innerHTML = 'No models found. <a href="#" class="text-blue-500 hover:underline focus:outline focus:outline-2 focus:outline-[black] focus:outline-offset-2" id="retry-fetch">Try again</a>';
-            errorMessage.classList.remove('hidden');
-            document.getElementById('retry-fetch')?.addEventListener('click', () => fetchModels(true));
-            const card = createModelCard({ name: 'Placeholder Model', category: 'Fashion' });
-            modelGrid.appendChild(card);
-            const viewMoreButton = createViewMoreButton();
-            viewMoreContainer.appendChild(viewMoreButton);
-        } else {
-            let modelCount = modelGrid.children.length;
-            models.forEach((model, index) => {
-                if (!model._id) {
-                    console.warn('Invalid model data:', model);
+            function startAutoScroll() {
+                if (modelGrid.children.length < 2) {
+                    console.log('Auto-scroll disabled: fewer than 2 cards');
                     return;
                 }
-                const card = createModelCard(model);
-                modelGrid.appendChild(card);
-                modelCount++;
-                if (modelCount === 3) {
-                    const viewMoreButton = createViewMoreButton();
-                    viewMoreContainer.appendChild(viewMoreButton);
+                autoScrollInterval = setInterval(() => {
+                    const cardWidth = modelGrid.querySelector('.model-card')?.offsetWidth || 300;
+                    const currentScroll = modelGrid.scrollLeft;
+                    const maxScroll = modelGrid.scrollWidth - modelGrid.clientWidth;
+                    let nextScroll = currentScroll + cardWidth + 16;
+                    if (nextScroll >= maxScroll) {
+                        nextScroll = 0;
+                    }
+                    modelGrid.scrollTo({
+                        left: nextScroll,
+                        behavior: 'smooth'
+                    });
+                    console.log('Auto-scroll to:', nextScroll);
+                }, scrollSpeed);
+                console.log('Auto-scroll started for model-grid');
+            }
+
+            function pauseAutoScroll() {
+                if (autoScrollInterval) {
+                    clearInterval(autoScrollInterval);
+                    autoScrollInterval = null;
+                    console.log('Auto-scroll paused due to user interaction');
+                    setTimeout(startAutoScroll, pauseDuration);
+                }
+            }
+
+            modelGrid.addEventListener('touchstart', pauseAutoScroll);
+            modelGrid.addEventListener('mousedown', pauseAutoScroll);
+            modelGrid.addEventListener('scroll', pauseAutoScroll);
+
+            startAutoScroll();
+        }
+
+        const revealElements = document.querySelectorAll('.reveal');
+        const revealOnScroll = () => {
+            const windowHeight = window.innerHeight;
+            const revealPoint = 150;
+            document.querySelectorAll('.reveal:not(.model-hidden)').forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                if (elementTop < windowHeight - revealPoint) {
+                    element.classList.add('active');
                 }
             });
-            page++;
-        }
-        revealOnScroll();
-        if (page > 1) {
-            observer.disconnect();
-            console.log('Infinite scroll disabled after first page');
-        }
-        if (window.innerWidth < 640) {
-            setupAutoScroll();
-        }
-    } catch (error) {
-        console.error('Error fetching models:', error, error.stack);
-        errorMessage.innerHTML = `Failed to load models. <a href="#" class="text-blue-500 hover:underline focus:outline focus:outline-2 focus:outline-[black] focus:outline-offset-2" id="retry-fetch">Try again</a>`;
-        errorMessage.classList.remove('hidden');
-        document.getElementById('retry-fetch')?.addEventListener('click', () => fetchModels(true));
-    } finally {
-        isLoading = false;
-        loadingState.classList.add('hidden');
-        modelGrid.classList.remove('opacity-50');
-    }
-}
+        };
 
-const sentinel = document.getElementById('sentinel');
-const observer = new IntersectionObserver((entries) => {
-    if (entries[0].isIntersecting && page === 1) {
-        fetchModels();
-    }
-}, { threshold: 0.1 });
-observer.observe(sentinel);
-
-document.addEventListener('DOMContentLoaded', () => {
-    adjustHeroPadding();
-    revealOnScroll();
-    const heroTitle = document.getElementById('heroTitle');
-    const heroSubhead = document.querySelector('.hero-subhead');
-    if (heroTitle) heroTitle.classList.add('active');
-    if (heroSubhead) heroSubhead.classList.add('active');
-    console.log('Initial model fetch');
-    fetchModels();
-    try {
-        console.log('Body font-family:', getComputedStyle(document.body).fontFamily);
-        const logo = document.querySelector('.desktop-nav-bar a[href="index.html"]');
-        console.log('Nav logo font-family:', logo ? getComputedStyle(logo).fontFamily : 'Not found');
-        console.log('Nav logo font-size:', logo ? getComputedStyle(logo).fontSize : 'Not found');
-        console.log('Nav logo font-weight:', logo ? getComputedStyle(logo).fontWeight : 'Not found');
-        console.log('Hero title font-family:', heroTitle ? getComputedStyle(heroTitle).fontFamily : 'Not found');
-        console.log('Hero title font-size:', heroTitle ? getComputedStyle(heroTitle).fontSize : 'Not found');
-        console.log('Hero title font-weight:', heroTitle ? getComputedStyle(heroTitle).fontWeight : 'Not found');
-        console.log('Hero title text:', heroTitle ? heroTitle.textContent.trim() : 'Not found');
-        console.log('Hero title opacity:', heroTitle ? getComputedStyle(heroTitle).opacity : 'Not found');
-        console.log('Hero title letter-spacing:', heroTitle ? getComputedStyle(heroTitle).letterSpacing : 'Not found');
-        console.log('Hero title text-stroke:', heroTitle ? getComputedStyle(heroTitle).webkitTextStroke : 'Not found');
-        console.log('Hero subhead font-size:', heroSubhead ? getComputedStyle(heroSubhead).fontSize : 'Not found');
-        console.log('Hero section top padding:', document.querySelector('.hero-section') ? getComputedStyle(document.querySelector('.hero-section')).paddingTop : 'Not found');
-        if (window.innerWidth < 640) {
-            const desktopNav = document.querySelector('.desktop-nav-bar .desktop-nav');
-            const menuToggle = document.querySelector('.menu-toggle'); // Fixed: Changed from burgerIcon
-            const mobileNavLinks = document.querySelectorAll('.mobile-menu a');
-            console.log('Mobile view (< 640px): Desktop nav links display:', desktopNav ? (desktopNav.style.display || getComputedStyle(desktopNav).display) : 'Not found');
-            console.log('Mobile view (< 640px): Menu toggle display:', menuToggle ? (menuToggle.style.display || getComputedStyle(menuToggle).display) : 'Not found');
-            console.log('Mobile view (< 640px): Logo display:', logo ? (logo.style.display || getComputedStyle(logo).display) : 'Not found');
-            console.log('Mobile view (< 640px): Mobile nav link count:', mobileNavLinks.length);
-            mobileNavLinks.forEach((link, index) => {
-                console.log(`Mobile nav link ${index + 1} text:`, link.textContent.trim());
-            });
-            if (logo) {
-                const rect = logo.getBoundingClientRect();
-                console.log('Mobile view (< 640px): Logo position:', { top: rect.top, left: rect.left, right: rect.right });
+        async function fetchWithRetry(url, retries = 3, delay = 1000) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, { method: 'GET', headers: { 'Accept': 'application/json' } });
+                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                    const contentType = response.headers.get('content-type');
+                    if (!contentType || !contentType.includes('application/json')) throw new Error('Server response is not JSON');
+                    return await response.json();
+                } catch (error) {
+                    if (i === retries - 1) throw error;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
             }
-            if (menuToggle) {
-                const rect = menuToggle.getBoundingClientRect();
-                console.log('Mobile view (< 640px): Menu toggle position:', { top: rect.top, left: rect.left, right: rect.right });
+        }
+
+        function createModelCard(model) {
+            const card = document.createElement('a');
+            card.className = 'model-card reveal aspect-[3/4] bg-gray-200 relative';
+            card.href = model._id ? `/model-details.html?id=${encodeURIComponent(model._id)}` : '#';
+            card.setAttribute('role', 'article');
+            card.setAttribute('aria-labelledby', `model-name-${model._id || 'placeholder'}`);
+            card.setAttribute('aria-label', `View details for ${escapeHtml(model.name || 'Unknown Model')}`);
+            card.setAttribute('data-category', escapeHtml(model.category || 'unknown'));
+            card.innerHTML = `
+                <div class="gradient-overlay absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-0 transition-opacity duration-300"></div>
+                <div class="model-image absolute inset-0">
+                    <img src="${escapeHtml(model.imageUrl || '/placeholder.jpg')}" alt="Portrait of ${escapeHtml(model.name || 'Unknown Model')}" class="w-full h-full object-cover" loading="lazy">
+                </div>
+                <div class="model-name absolute bottom-[-50px] left-0 w-full p-4 transition-all duration-300 opacity-0" id="model-name-${escapeHtml(model._id || 'placeholder')}">
+                    <h3 class="text-lg font-bold">${escapeHtml(model.name || 'Unknown Model').toUpperCase()}</h3>
+                    <p class="text-xs">${escapeHtml(model.category || 'unknown').charAt(0).toUpperCase() + escapeHtml(model.category || 'unknown').slice(1)} Model</p>
+                </div>
+            `;
+            addHoverEffects(card);
+            return card;
+        }
+
+        function addHoverEffects(card) {
+            const img = card.querySelector('img');
+            img.addEventListener('error', () => {
+                img.src = '/placeholder.jpg';
+                console.warn(`Failed to load image for ${card.querySelector('.model-name h3').textContent}`);
+            });
+            card.addEventListener('mouseover', () => {
+                card.style.transform = 'translateY(-10px)';
+                card.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
+                const gradientOverlay = card.querySelector('.gradient-overlay');
+                const modelName = card.querySelector('.model-name');
+                if (gradientOverlay) gradientOverlay.style.opacity = '1';
+                if (modelName) {
+                    modelName.style.bottom = '0';
+                    modelName.style.opacity = '1';
+                }
+            });
+            card.addEventListener('mouseout', () => {
+                card.style.transform = 'translateY(0)';
+                card.style.boxShadow = 'none';
+                const gradientOverlay = card.querySelector('.gradient-overlay');
+                const modelName = card.querySelector('.model-name');
+                if (gradientOverlay) gradientOverlay.style.opacity = '0';
+                if (modelName) {
+                    modelName.style.bottom = '-50px';
+                    modelName.style.opacity = '0';
+                }
+            });
+        }
+
+        function createViewMoreButton() {
+            const buttonContainer = document.createElement('div');
+            buttonContainer.className = 'view-more-container';
+            buttonContainer.innerHTML = `
+                <a href="models.html" class="btn-animate view-more-btn inline-block bg-white text-black px-6 py-3 rounded-none hover:bg-gray-200 focus:outline focus:outline-2 focus:outline-[black] focus:outline-offset-2 transition-all duration-300 uppercase tracking-wider text-sm font-medium reveal">
+                    View More
+                </a>
+            `;
+            return buttonContainer;
+        }
+
+        let page = 1;
+        let isLoading = false;
+        const modelGrid = document.getElementById('model-grid');
+        const errorMessage = document.getElementById('model-error');
+        const loadingState = document.getElementById('loading-state');
+        const viewMoreContainer = document.getElementById('view-more-container');
+
+        async function fetchModels(reset = false) {
+            if (isLoading) return;
+            isLoading = true;
+            errorMessage.classList.add('hidden');
+            loadingState.classList.remove('hidden');
+            modelGrid.classList.add('opacity-50');
+            try {
+                if (reset) {
+                    page = 1;
+                    modelGrid.innerHTML = '';
+                    viewMoreContainer.innerHTML = '';
+                }
+                const url = `${config.apiBaseUrl}/models?page=${page}&limit=6`;
+                console.log('Fetching models from:', url);
+                const data = await fetchWithRetry(url);
+                if (!data || !Array.isArray(data.models) || typeof data.total !== 'number') throw new Error('Invalid API response format');
+                const { models, total } = data;
+                if (models.length === 0 && page === 1) {
+                    errorMessage.innerHTML = 'No models found. <a href="#" class="text-blue-500 hover:underline focus:outline focus:outline-2 focus:outline-[black] focus:outline-offset-2" id="retry-fetch">Try again</a>';
+                    errorMessage.classList.remove('hidden');
+                    document.getElementById('retry-fetch')?.addEventListener('click', () => fetchModels(true));
+                    const card = createModelCard({ name: 'Placeholder Model', category: 'Fashion' });
+                    modelGrid.appendChild(card);
+                    const viewMoreButton = createViewMoreButton();
+                    viewMoreContainer.appendChild(viewMoreButton);
+                } else {
+                    let modelCount = modelGrid.children.length;
+                    models.forEach((model, index) => {
+                        if (!model._id) {
+                            console.warn('Invalid model data:', model);
+                            return;
+                        }
+                        const card = createModelCard(model);
+                        modelGrid.appendChild(card);
+                        modelCount++;
+                        if (modelCount === 3) {
+                            const viewMoreButton = createViewMoreButton();
+                            viewMoreContainer.appendChild(viewMoreButton);
+                        }
+                    });
+                    page++;
+                }
+                revealOnScroll();
+                if (page > 1) {
+                    observer.disconnect();
+                    console.log('Infinite scroll disabled after first page');
+                }
+                if (window.innerWidth < 640) {
+                    setupAutoScroll();
+                }
+            } catch (error) {
+                console.error('Error fetching models:', error, error.stack);
+                errorMessage.innerHTML = `Failed to load models. <a href="#" class="text-blue-500 hover:underline focus:outline focus:outline-2 focus:outline-[black] focus:outline-offset-2" id="retry-fetch">Try again</a>`;
+                errorMessage.classList.remove('hidden');
+                document.getElementById('retry-fetch')?.addEventListener('click', () => fetchModels(true));
+            } finally {
+                isLoading = false;
+                loadingState.classList.add('hidden');
+                modelGrid.classList.remove('opacity-50');
             }
-        } else {
-            const desktopNavLinks = document.querySelectorAll('.desktop-nav a');
-            console.log('Desktop view (≥640px): Desktop nav link count:', desktopNavLinks.length);
-            desktopNavLinks.forEach((link, index) => {
-                console.log(`Desktop nav link ${index + 1} text:`, link.textContent.trim());
-            });
         }
-    } catch (error) {
-        console.error('Error in DOMContentLoaded handler:', error);
-    }
-});
 
-window.addEventListener('resize', () => {
-    adjustHeroPadding();
-    setupAutoScroll();
-});
+        const sentinel = document.getElementById('sentinel');
+        const observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting && page === 1) {
+                fetchModels();
+            }
+        }, { threshold: 0.1 });
+        observer.observe(sentinel);
 
-window.addEventListener('scroll', revealOnScroll);
-
-document.querySelectorAll('.mobile-menu a').forEach(link => {
-    link.addEventListener('click', toggleMenu);
-});
-
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function(e) {
-        e.preventDefault();
-        const targetId = this.getAttribute('href');
-        const targetElement = document.querySelector(targetId);
-        if (targetElement) {
-            const navHeight = document.querySelector('.desktop-nav-bar').offsetHeight;
-            window.scrollTo({
-                top: targetElement.offsetTop - clampValue(64, navHeight + 16, 96),
-                behavior: 'smooth'
-            });
-        }
-    });
-});
-
-const video = document.querySelector('.hero-video');
-video.addEventListener('error', () => {
-    console.error('Video failed to load');
-    video.style.display = 'none';
-    document.querySelector('.hero-section').style.backgroundImage = `url(${video.poster})`;
-});
-
-document.getElementById('newsletter-submit').addEventListener('click', async () => {
-    const emailInput = document.getElementById('newsletter-email');
-    const feedback = document.getElementById('newsletter-feedback');
-    const email = emailInput.value;
-
-    if (!email.match(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/)) {
-        feedback.className = 'text-red-500 text-center mb-4';
-        feedback.textContent = 'Please enter a valid email address';
-        feedback.classList.remove('hidden');
-        return;
-    }
-
-    try {
-        const response = await fetch(`${config.apiBaseUrl}/newsletter`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email }),
+        document.addEventListener('DOMContentLoaded', () => {
+            adjustHeroPadding();
+            revealOnScroll();
+            const heroTitle = document.getElementById('heroTitle');
+            const heroSubhead = document.querySelector('.hero-subhead');
+            if (heroTitle) heroTitle.classList.add('active');
+            if (heroSubhead) heroSubhead.classList.add('active');
+            console.log('Initial model fetch');
+            fetchModels();
+            try {
+                console.log('Body font-family:', getComputedStyle(document.body).fontFamily);
+                const logo = document.querySelector('.desktop-nav-bar a[href="index.html"]');
+                console.log('Nav logo font-family:', logo ? getComputedStyle(logo).fontFamily : 'Not found');
+                console.log('Nav logo font-size:', logo ? getComputedStyle(logo).fontSize : 'Not found');
+                console.log('Nav logo font-weight:', logo ? getComputedStyle(logo).fontWeight : 'Not found');
+                console.log('Hero title font-family:', heroTitle ? getComputedStyle(heroTitle).fontFamily : 'Not found');
+                console.log('Hero title font-size:', heroTitle ? getComputedStyle(heroTitle).fontSize : 'Not found');
+                console.log('Hero title font-weight:', heroTitle ? getComputedStyle(heroTitle).fontWeight : 'Not found');
+                console.log('Hero title text:', heroTitle ? heroTitle.textContent.trim() : 'Not found');
+                console.log('Hero title opacity:', heroTitle ? getComputedStyle(heroTitle).opacity : 'Not found');
+                console.log('Hero title letter-spacing:', heroTitle ? getComputedStyle(heroTitle).letterSpacing : 'Not found');
+                console.log('Hero title text-stroke:', heroTitle ? getComputedStyle(heroTitle).webkitTextStroke : 'Not found');
+                console.log('Hero subhead font-size:', heroSubhead ? getComputedStyle(heroSubhead).fontSize : 'Not found');
+                console.log('Hero section top padding:', document.querySelector('.hero-section') ? getComputedStyle(document.querySelector('.hero-section')).paddingTop : 'Not found');
+                if (window.innerWidth < 640) {
+                    const desktopNav = document.querySelector('.desktop-nav-bar .desktop-nav');
+                    const menuToggle = document.querySelector('.menu-toggle');
+                    const mobileNavLinks = document.querySelectorAll('.mobile-menu a');
+                    console.log('Mobile view (< 640px): Desktop nav links display:', desktopNav ? (desktopNav.style.display || getComputedStyle(desktopNav).display) : 'Not found');
+                    console.log('Mobile view (< 640px): Menu toggle display:', menuToggle ? (menuToggle.style.display || getComputedStyle(menuToggle).display) : 'Not found');
+                    console.log('Mobile view (< 640px): Logo display:', logo ? (logo.style.display || getComputedStyle(logo).display) : 'Not found');
+                    console.log('Mobile view (< 640px): Mobile nav link count:', mobileNavLinks.length);
+                    mobileNavLinks.forEach((link, index) => {
+                        console.log(`Mobile nav link ${index + 1} text:`, link.textContent.trim());
+                    });
+                    if (logo) {
+                        const rect = logo.getBoundingClientRect();
+                        console.log('Mobile view (< 640px): Logo position:', { top: rect.top, left: rect.left, right: rect.right });
+                    }
+                    if (menuToggle) {
+                        const rect = menuToggle.getBoundingClientRect();
+                        console.log('Mobile view (< 640px): Menu toggle position:', { top: rect.top, left: rect.left, right: rect.right });
+                    }
+                } else {
+                    const desktopNavLinks = document.querySelectorAll('.desktop-nav a');
+                    console.log('Desktop view (≥640px): Desktop nav link count:', desktopNavLinks.length);
+                    desktopNavLinks.forEach((link, index) => {
+                        console.log(`Desktop nav link ${index + 1} text:`, link.textContent.trim());
+                    });
+                }
+            } catch (error) {
+                console.error('Error in DOMContentLoaded handler:', error);
+            }
         });
-        const result = await response.json();
-        feedback.className = response.ok ? 'text-green-500 text-center mb-4' : 'text-red-500 text-center mb-4';
-        feedback.textContent = result.message || 'An error occurred';
-        feedback.classList.remove('hidden');
-        if (response.ok) {
-            emailInput.value = '';
-            setTimeout(() => feedback.classList.add('hidden'), 3000);
-        }
-    } catch (error) {
-        feedback.className = 'text-red-500 text-center mb-4';
-        feedback.textContent = 'Server error';
-        feedback.classList.remove('hidden');
-    }
-});
+
+        window.addEventListener('resize', () => {
+            adjustHeroPadding();
+            setupAutoScroll();
+        });
+
+        window.addEventListener('scroll', revealOnScroll);
+
+        document.querySelectorAll('.mobile-menu a').forEach(link => {
+            link.addEventListener('click', toggleMenu);
+        });
+
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    const navHeight = document.querySelector('.desktop-nav-bar').offsetHeight;
+                    window.scrollTo({
+                        top: targetElement.offsetTop - clampValue(64, navHeight + 16, 96),
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        const video = document.querySelector('.hero-video');
+        video.addEventListener('error', () => {
+            console.error('Video failed to load');
+            video.style.display = 'none';
+            document.querySelector('.hero-section').style.backgroundImage = `url(${video.poster})`;
+        });
+
+        document.getElementById('newsletter-submit').addEventListener('click', async () => {
+            const emailInput = document.getElementById('newsletter-email');
+            const feedback = document.getElementById('newsletter-feedback');
+            const email = emailInput.value;
+
+            if (!email.match(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/)) {
+                feedback.className = 'text-red-500 text-center mb-4';
+                feedback.textContent = 'Please enter a valid email address';
+                feedback.classList.remove('hidden');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${config.apiBaseUrl}/newsletter`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email }),
+                });
+                const result = await response.json();
+                feedback.className = response.ok ? 'text-green-500 text-center mb-4' : 'text-red-500 text-center mb-4';
+                feedback.textContent = result.message || 'An error occurred';
+                feedback.classList.remove('hidden');
+                if (response.ok) {
+                    emailInput.value = '';
+                    setTimeout(() => feedback.classList.add('hidden'), 3000);
+                }
+            } catch (error) {
+                feedback.className = 'text-red-500 text-center mb-4';
+                feedback.textContent = 'Server error';
+                feedback.classList.remove('hidden');
+            }
+        });
     </script>
 </body>
 </html>
