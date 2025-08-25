@@ -661,7 +661,7 @@
         </div>
     </footer>
     <script>
-       const config = { 
+    const config = { 
     apiBaseUrl: window.location.hostname === 'localhost' ? 'http://localhost:3000/api' : '/api'
 };
 
@@ -678,7 +678,7 @@ function toggleMenu() {
     const mobileMenu = document.querySelector('.mobile-menu');
     const menuToggle = document.querySelector('.menu-toggle');
     mobileMenu.classList.toggle('active');
-    menuToggle.classList.toggle('active'); // Added to toggle hamburger icon state
+    menuToggle.classList.toggle('active'); // Added for hamburger icon animation
     mobileMenu.setAttribute('aria-hidden', !mobileMenu.classList.contains('active'));
 }
 
@@ -751,9 +751,16 @@ const revealOnScroll = () => {
 };
 
 async function fetchWithRetry(url, retries = 3, delay = 1000) {
+    const authToken = 'YOUR_AUTH_TOKEN_HERE'; // Replace with your actual Bearer token or API key
     for (let i = 0; i < retries; i++) {
         try {
-            const response = await fetch(url, { method: 'GET', headers: { 'Accept': 'application/json' } });
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${authToken}` // Added to fix "No Authorization header provided"
+                }
+            });
             if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
             const contentType = response.headers.get('content-type');
             if (!contentType || !contentType.includes('application/json')) throw new Error('Server response is not JSON');
@@ -1008,8 +1015,11 @@ document.getElementById('newsletter-submit').addEventListener('click', async () 
     try {
         const response = await fetch(`${config.apiBaseUrl}/newsletter`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email }),
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer YOUR_AUTH_TOKEN_HERE` // Added to fix "No Authorization header provided"
+            },
+            body: JSON.stringify({ email })
         });
         const result = await response.json();
         feedback.className = response.ok ? 'text-green-500 text-center mb-4' : 'text-red-500 text-center mb-4';
