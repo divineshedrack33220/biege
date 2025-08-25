@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Learn about Beige Model Agency, our mission, and vision.">
-    <meta name="keywords" content="Beige agency, model agency, about us, talent management">
+    <meta name="description" content="Discover detailed information about our talented models at Beige Model Agency, including their portfolios and attributes.">
+    <meta name="keywords" content="Beige model agency, model details, model portfolio, talent management">
     <meta name="robots" content="index, follow">
-    <title>About | Beige</title>
+    <title>Model Details | Beige</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com?cache_bust=20250812"></script>
@@ -15,25 +15,12 @@
         * {
             box-sizing: border-box;
         }
-        html, body {
-            height: 100%;
-            margin: 0;
-        }
         body {
             font-family: 'Playfair Display', serif;
             line-height: 1.6;
             margin: 0;
             background: #FFFFFF;
             color: #000000;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-        main {
-            flex: 1 0 auto;
-        }
-        footer {
-            flex-shrink: 0;
         }
         .container {
             max-width: 900px;
@@ -47,31 +34,30 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 60px;
-            padding: 0 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #FFFFFF;
+            background: rgba(255, 255, 255, 0.9);
             z-index: 50;
+            padding: 1rem 0;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            min-height: 64px;
         }
         .desktop-nav-bar a[href="index.html"] {
-            font-family: 'Playfair Display', serif;
-            font-size: 20px;
-            font-weight: normal;
-            color: #000000;
+            font-size: clamp(1.5rem, 2.5vw, 3rem);
+            font-weight: 300;
+            color: black;
             text-decoration: none;
             text-transform: uppercase;
+            letter-spacing: 0.08em;
+            max-width: 90vw;
+        }
+        .desktop-nav-bar a[href="home.html"] {
+            font-size: clamp(1rem, 1.5vw, 1.25rem);
         }
         .burger-icon {
-            font-size: 22px;
-            cursor: pointer;
-            color: #000000;
-            z-index: 60;
-        }
-        .desktop-nav {
             display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: black;
+            z-index: 60;
         }
         .mobile-menu {
             position: fixed;
@@ -93,13 +79,15 @@
             transform: translateY(0);
         }
         .mobile-menu a {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
             font-size: clamp(1rem, 4vw, 1.5rem);
-            color: #000000;
+            color: black;
             text-decoration: none;
             text-transform: uppercase;
             margin: 1rem 0;
             transition: color 0.3s ease, transform 0.3s ease;
+        }
+        .mobile-menu a[href="home.html"] {
+            font-size: clamp(1.25rem, 5vw, 1.75rem);
         }
         .mobile-menu a:hover, .mobile-menu a:focus {
             color: #4b5563;
@@ -166,8 +154,143 @@
             text-align: left;
             margin: 40px 0 0;
         }
+        .profile-subtitle {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            line-height: 32px;
+            font-weight: bold;
+            text-align: left;
+            margin: 0 0 20px;
+        }
+        .form-input {
+            transition: border 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid #000000;
+            padding: 0.75rem;
+            width: 100%;
+        }
+        .form-input:focus {
+            border-color: #000000;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2);
+        }
         .section {
             padding: 20px 0;
+        }
+        label, p, input {
+            font-size: clamp(0.875rem, 2.5vw, 1rem);
+            color: #000000;
+        }
+        .error-message {
+            color: #dc2626;
+        }
+        .model-image {
+            border: 1px solid #000000;
+            max-width: 100%;
+            margin: 0;
+            display: flex;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            scrollbar-color: #000000 #f5f5f5;
+        }
+        .model-image::-webkit-scrollbar {
+            height: 8px;
+        }
+        .model-image::-webkit-scrollbar-track {
+            background: #f5f5f5;
+        }
+        .model-image::-webkit-scrollbar-thumb {
+            background: #000000;
+            border-radius: 4px;
+        }
+        .model-image img {
+            max-width: 200px;
+            flex-shrink: 0;
+        }
+        #model-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 36px;
+            line-height: 42px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .model-attributes h3 {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-weight: bold;
+            font-size: 16px;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+        }
+        .model-attributes .measurements-grid {
+            display: flex;
+            gap: 10px;
+            text-align: center;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            scrollbar-color: #000000 #f5f5f5;
+        }
+        .model-attributes .measurements-grid::-webkit-scrollbar {
+            height: 8px;
+        }
+        .model-attributes .measurements-grid::-webkit-scrollbar-track {
+            background: #f5f5f5;
+        }
+        .model-attributes .measurements-grid::-webkit-scrollbar-thumb {
+            background: #000000;
+            border-radius: 4px;
+        }
+        .model-attributes .measurements-grid p {
+            margin: 0;
+            min-width: 80px;
+            flex-shrink: 0;
+        }
+        .model-attributes .measurements-grid strong {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-weight: bold;
+            font-size: 12px;
+            text-transform: uppercase;
+            display: block;
+        }
+        .model-attributes .measurements-grid span {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-size: 12px;
+            display: block;
+        }
+        .model-social {
+            justify-content: flex-start;
+            min-height: 40px;
+        }
+        .model-social a {
+            font-size: clamp(1rem, 3vw, 1.25rem);
+            color: #000000;
+        }
+        .model-social a:hover {
+            color: #4b5563;
+        }
+        .portfolio-item {
+            border: 1px solid #000000;
+            max-width: 200px;
+            flex-shrink: 0;
+        }
+        #portfolio-grid {
+            display: flex;
+            gap: 4px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            scrollbar-color: #000000 #f5f5f5;
+        }
+        #portfolio-grid::-webkit-scrollbar {
+            height: 8px;
+        }
+        #portfolio-grid::-webkit-scrollbar-track {
+            background: #f5f5f5;
+        }
+        #portfolio-grid::-webkit-scrollbar-thumb {
+            background: #000000;
+            border-radius: 4px;
         }
         .section.bg-white .text-gray-600 {
             color: #000000;
@@ -176,30 +299,57 @@
         .section.bg-white .text-gray-400 {
             color: #4b5563;
         }
-        /* Ensure the image is centered and responsive */
-        .about-image {
-            max-width: 100%;
-            height: auto;
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
+        #image-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
         }
-        /* Style for Contact Us section */
-        .contact-us {
-            text-align: center;
+        #image-modal img {
+            max-width: 90%;
+            max-height: 90vh;
+            object-fit: contain;
         }
-        /* Adjust spacing for smaller screens */
-        @media (max-width: 639px) {
-            .about-image {
-                max-width: 90%;
-            }
-            .contact-us p {
-                font-size: clamp(0.875rem, 3vw, 1rem);
-            }
-            .container {
-                padding-left: 10px;
-                padding-right: 10px;
-            }
+        #close-modal {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        .modal-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+        }
+        .modal-nav:hover {
+            background: rgba(0, 0, 0, 0.7);
+        }
+        #prev-image {
+            left: 20px;
+        }
+        #next-image {
+            right: 20px;
+        }
+        #model-description {
+            text-align: left;
+            max-width: none;
+        }
+        #model-content .text-center {
+            text-align: left;
         }
         @media (min-width: 640px) {
             .container {
@@ -219,6 +369,29 @@
                 max-width: 800px;
                 text-align: left;
             }
+            .model-attributes .measurements-grid {
+                display: grid;
+                grid-template-columns: repeat(7, 1fr);
+                gap: 5px;
+                overflow-x: visible;
+            }
+            .model-image {
+                max-width: 300px;
+                display: flex;
+                overflow-x: auto;
+            }
+            .model-image img {
+                max-width: 300px;
+            }
+            #portfolio-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 4px;
+                overflow-x: visible;
+            }
+            .portfolio-item {
+                max-width: 200px;
+            }
         }
         @media (max-width: 639px) {
             .desktop-nav-bar .desktop-nav {
@@ -232,6 +405,31 @@
             .burger-icon {
                 display: flex;
                 align-items: center;
+            }
+            .container {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+            .model-attributes .measurements-grid {
+                display: flex;
+                gap: 10px;
+                overflow-x: auto;
+                padding-bottom: 10px;
+            }
+            .model-image {
+                max-width: 150px;
+            }
+            .model-image img {
+                max-width: 150px;
+            }
+            .portfolio-item {
+                max-width: 150px;
+            }
+            footer .container {
+                max-width: none;
+                width: 100%;
+                padding-left: 10px;
+                padding-right: 10px;
             }
         }
         footer {
@@ -265,6 +463,7 @@
                 <a href="models.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase" aria-label="Models">MODELS</a>
                 <a href="booking.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase" aria-label="Book a Model">BOOK A MODEL</a>
                 <a href="become-model.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase" aria-label="Become a Model">BECOME A MODEL</a>
+                
             </div>
             <div class="burger-icon" onclick="toggleMenu()">☰</div>
         </div>
@@ -277,33 +476,94 @@
             <a href="models.html" aria-label="Models">MODELS</a>
             <a href="booking.html" aria-label="Book a Model">BOOK A MODEL</a>
             <a href="become-model.html" aria-label="Become a Model">BECOME A MODEL</a>
+           
         </div>
     </nav>
 
-    <!-- About Section -->
-    <section id="about" class="section bg-white">
+    <!-- Model Details Section -->
+    <section id="model-details" class="section bg-white">
         <div class="container">
-            <div class="mb-12 reveal">
-                <h2 class="hero-title" id="aboutTitle">ABOUT BEIGE</h2>
-                <div class="w-16 h-px bg-black mb-4"></div>
-                <p id="aboutDescription" class="text-gray-600">Beige Model Agency is dedicated to discovering and nurturing talent, redefining beauty standards, and collaborating with top brands worldwide.</p>
-            </div>
-            <!-- Centered Image -->
-            <div class="mb-12 reveal">
-                <img src="/images/about-image.jpg" alt="About Beige Model Agency" class="about-image">
-            </div>
-            <!-- Contact Us Section -->
-            <div class="mb-12 reveal contact-us">
-                <h3 class="text-2xl font-bold uppercase mb-4">CONTACT US</h3>
-                <p class="text-gray-600">
-                    LAGOS<br>
-                    6th floor, Landmark Towers,<br>
-                    Victoria Island, Lagos, Nigeria.<br>
-                    08189403506 | <a href="mailto:info@fewmodels.com" class="underline hover:text-gray-800">info@fewmodels.com</a>
+            <!-- Error Message -->
+            <div id="error-message" class="hidden mb-8">
+                <p class="text-red-500 font-medium"></p>
+                <p class="mt-4">
+                    <a href="#" class="text-blue-500 hover:underline font-medium" id="retry-fetch">Try again</a> or 
+                    <a href="models.html" class="text-blue-500 hover:underline font-medium">Browse all models</a>
                 </p>
+            </div>
+            <!-- Loading State -->
+            <div id="loading-state" class="animate-pulse flex flex-col gap-8 hidden">
+                <div class="bg-gray-200 aspect-[3/4] rounded" style="max-width: 150px;"></div>
+                <div>
+                    <div class="h-8 bg-gray-200 rounded w-3/4 mb-4"></div>
+                    <div class="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                    <div class="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                    <div class="h-4 bg-gray-200 rounded w-1/2 mb-6"></div>
+                    <div class="h-6 bg-gray-200 rounded w-1/4"></div>
+                </div>
+            </div>
+            <!-- Model Content -->
+            <div id="model-content">
+                <!-- Name -->
+                <div class="mb-12 reveal">
+                    <h2 id="model-name" class="hero-title"></h2>
+                    <h3 class="profile-subtitle">PROFILE</h3>
+                </div>
+                <!-- Measurement -->
+                <div id="model-attributes" class="model-attributes reveal">
+                    <h3>MEASUREMENT</h3>
+                    <div class="measurements-grid">
+                        <p><strong>HEIGHT</strong><span></span></p>
+                        <p><strong>BUST</strong><span></span></p>
+                        <p><strong>WAIST</strong><span></span></p>
+                        <p><strong>HIPS</strong><span></span></p>
+                        <p><strong>HAIR</strong><span></span></p>
+                        <p><strong>EYES</strong><span></span></p>
+                        <p><strong>SHOES</strong><span></span></p>
+                    </div>
+                </div>
+                <!-- Social Links -->
+                <div id="social-links" class="mt-12 reveal">
+                    <h3>SOCIAL</h3>
+                    <div class="model-social flex space-x-4">
+                        <p class="text-gray-600">No social links available</p>
+                    </div>
+                </div>
+                 <div class="mt-12 reveal">
+                    <a id="book-now-btn" href="booking.html" class="btn-animate">Book Now</a>
+                </div>
+                <!-- Image -->
+                <div class="mt-12 reveal">
+                    <div id="model-image" class="model-image aspect-[3/4] flex items-center">
+                        <span class="text-gray-600"></span>
+                    </div>
+                </div>
+                <!-- About the Model -->
+                <div class="mt-12 reveal">
+                    <p id="model-description" class="text-gray-600"></p>
+                </div>
+                <!-- Portfolio -->
+                <div class="mt-12 reveal">
+                    <h3 class="hero-title">Portfolio</h3>
+                    <div class="w-16 h-px bg-black mb-4"></div>
+                    <div id="portfolio-grid" class="flex gap-4">
+                        <div class="portfolio-item aspect-[3/4] flex items-center justify-center">
+                            <span class="text-gray-600"></span>
+                        </div>
+                    </div>
+                </div>
+           
             </div>
         </div>
     </section>
+
+    <!-- Image Modal -->
+    <div id="image-modal" class="flex" role="dialog" aria-label="Portfolio Image Viewer">
+        <span id="close-modal" onclick="closeModal()" aria-label="Close Image Modal">&times;</span>
+        <span id="prev-image" class="modal-nav" onclick="prevImage()" aria-label="Previous Image"><i class="fas fa-chevron-left"></i></span>
+        <span id="next-image" class="modal-nav" onclick="nextImage()" aria-label="Next Image"><i class="fas fa-chevron-right"></i></span>
+        <img id="modal-image" src="" alt="Full screen portfolio image">
+    </div>
 
     <!-- Footer -->
     <footer class="bg-black text-white py-12">
@@ -326,6 +586,7 @@
                     <ul class="space-y-2 text-sm">
                         <li><a href="privacy.html" class="hover:underline focus:outline focus:outline-2 focus:outline-[black] focus:outline-offset-2">Privacy Policy</a></li>
                         <li><a href="terms-of-service.html" class="hover:underline focus:outline focus:outline-2 focus:outline-[black] focus:outline-offset-2">Terms of Service</a></li>
+                        
                     </ul>
                 </div>
                 <div>
@@ -346,14 +607,10 @@
     </footer>
 
 <script>
+    // Define API base URL for browser environment
     const config = { 
         apiBaseUrl: window.location.hostname === 'localhost' ? 'http://localhost:3000/api' : '/api'
     };
-
-    function escapeHtml(str) {
-        if (typeof str !== 'string') return str || '';
-        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    }
 
     function clampValue(min, value, max) {
         return Math.min(Math.max(value, min), max);
@@ -366,15 +623,20 @@
     }
 
     function adjustSectionPadding() {
-        const section = document.querySelector('#about');
+        const section = document.querySelector('#model-details');
         const navBar = document.querySelector('.desktop-nav-bar');
         if (section && navBar) {
             const navHeight = navBar.offsetHeight;
             section.style.paddingTop = window.innerWidth < 640 ? `${Math.max(navHeight + 16, 112)}px` : `${Math.max(navHeight + 16, 80)}px`;
-            console.log('Adjusted about section padding-top:', section.style.paddingTop);
+            console.log('Adjusted model-details section padding-top:', section.style.paddingTop);
         }
     }
 
+    document.querySelectorAll('.mobile-menu a').forEach(link => {
+        link.addEventListener('click', toggleMenu);
+    });
+
+    // Scroll Reveal Animation
     const revealElements = document.querySelectorAll('.reveal');
     const revealOnScroll = () => {
         const windowHeight = window.innerHeight;
@@ -387,13 +649,14 @@
         });
     };
 
+    // Fetch Model Details with Retry
     async function fetchWithRetry(url, retries = 3, delay = 1000) {
         for (let i = 0; i < retries; i++) {
             try {
-                const response = await fetch(url, { method: 'GET', headers: { 'Accept': 'application/json' } });
-                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-                const contentType = response.headers.get('content-type');
-                if (!contentType || !contentType.includes('application/json')) throw new Error('Server response is not JSON');
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(response.status === 404 ? 'Model not found' : `Failed to fetch model data (Status: ${response.status})`);
+                }
                 return await response.json();
             } catch (error) {
                 if (i === retries - 1) throw error;
@@ -402,18 +665,307 @@
         }
     }
 
+    let currentImageIndex = 0;
+    const portfolioImages = [];
+
+    async function fetchModelDetails() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const modelId = urlParams.get('id');
+        const modelDetails = document.getElementById('model-details');
+        const loadingState = document.getElementById('loading-state');
+        const modelContent = document.getElementById('model-content');
+        const errorMessage = document.getElementById('error-message');
+
+        if (!modelId) {
+            errorMessage.innerHTML = `
+                <p class="text-red-500 font-medium">No model ID provided in the URL</p>
+                <p class="mt-4">
+                    <a href="models.html" class="text-blue-500 hover:underline font-medium">Browse all models</a>
+                </p>
+            `;
+            errorMessage.classList.remove('hidden');
+            loadingState.classList.add('hidden');
+            modelContent.classList.add('hidden');
+            console.error('No model ID provided in URL');
+            return;
+        }
+
+        if (!loadingState || !modelContent || !errorMessage) {
+            console.error('Required DOM elements not found:', {
+                loadingState: !!loadingState,
+                modelContent: !!modelContent,
+                errorMessage: !!errorMessage
+            });
+            return;
+        }
+
+        loadingState.classList.remove('hidden');
+        modelContent.classList.add('opacity-50');
+        errorMessage.classList.add('hidden');
+
+        try {
+            console.log(`Fetching model data from ${config.apiBaseUrl}/models/${modelId}`);
+            const model = await fetchWithRetry(`${config.apiBaseUrl}/models/${modelId}`);
+            console.log('Fetched model data:', JSON.stringify(model, null, 2));
+
+            if (!model || typeof model !== 'object') {
+                throw new Error('Invalid model data received from server');
+            }
+
+            // Update Book Now Button
+            const bookNowBtn = document.getElementById('book-now-btn');
+            if (bookNowBtn) {
+                bookNowBtn.href = `booking.html?modelId=${model._id}&modelName=${encodeURIComponent(model.name)}&imageUrl=${encodeURIComponent(model.imageUrl)}`;
+                console.log('Updated Book Now button href:', bookNowBtn.href);
+            } else {
+                console.error('Element #book-now-btn not found');
+            }
+
+            // Handle measurements with simplified logic
+            const measurements = model.measurements || { bust: null, waist: null, hips: null };
+            console.log('Raw measurements from server:', model.measurements);
+            console.log('Processed measurements:', measurements);
+
+            // Update Meta Tags for SEO
+            document.querySelector('meta[name="description"]').setAttribute('content', model.description || 'Discover detailed information about our talented models at Beige Model Agency.');
+            document.title = `${model.name || 'Model'} Details | Beige`;
+
+            // Update Model Name
+            const modelName = document.getElementById('model-name');
+            if (modelName) modelName.textContent = model.name || 'N/A';
+            else console.error('Element #model-name not found');
+
+            // Update Measurement
+            const attributes = document.getElementById('model-attributes');
+            if (attributes) {
+                const measurementsGrid = attributes.querySelector('.measurements-grid');
+                if (measurementsGrid) {
+                    measurementsGrid.innerHTML = `
+                        <p><strong>HEIGHT</strong><span>${model.height || 'N/A'}</span></p>
+                        <p><strong>BUST</strong><span>${measurements.bust !== null && measurements.bust !== undefined ? measurements.bust : 'N/A'}</span></p>
+                        <p><strong>WAIST</strong><span>${measurements.waist !== null && measurements.waist !== undefined ? measurements.waist : 'N/A'}</span></p>
+                        <p><strong>HIPS</strong><span>${measurements.hips !== null && measurements.hips !== undefined ? measurements.hips : 'N/A'}</span></p>
+                        <p><strong>HAIR</strong><span>${model.hair || 'N/A'}</span></p>
+                        <p><strong>EYES</strong><span>${model.eyes || 'N/A'}</span></p>
+                        <p><strong>SHOES</strong><span>${model.shoes || 'N/A'}</span></p>
+                    `;
+                } else console.error('Element .measurements-grid not found');
+            } else console.error('Element #model-attributes not found');
+
+            // Update Social Links
+            const socialLinksDiv = document.getElementById('social-links');
+            if (socialLinksDiv) {
+                const socialGrid = socialLinksDiv.querySelector('.model-social');
+                if (socialGrid) {
+                    console.log('Social links data:', model.socialLinks);
+                    socialGrid.innerHTML = '';
+                    if (model.socialLinks && (model.socialLinks.instagram || model.socialLinks.tiktok)) {
+                        if (model.socialLinks.instagram) {
+                            socialGrid.innerHTML += `
+                                <a href="${model.socialLinks.instagram}" target="_blank" class="hover:text-gray-600" aria-label="Instagram profile for ${model.name || 'Model'}">
+                                    <i class="fab fa-instagram mr-2"></i>Instagram
+                                </a>
+                            `;
+                            console.log('Added Instagram link:', model.socialLinks.instagram);
+                        }
+                        if (model.socialLinks.tiktok) {
+                            socialGrid.innerHTML += `
+                                <a href="${model.socialLinks.tiktok}" target="_blank" class="hover:text-gray-600" aria-label="TikTok profile for ${model.name || 'Model'}">
+                                    <i class="fab fa-tiktok mr-2"></i>TikTok
+                                </a>
+                            `;
+                            console.log('Added TikTok link:', model.socialLinks.tiktok);
+                        }
+                    } else {
+                        socialGrid.innerHTML = '<p class="text-gray-600">No social links available</p>';
+                        console.log('Set socialGrid to "No social links available"');
+                    }
+                } else console.error('Element .model-social not found');
+            } else console.error('Element #social-links not found');
+
+            // Update Image
+            const modelImage = document.getElementById('model-image');
+            if (modelImage) {
+                portfolioImages.length = 0;
+                if (model.imageUrl) {
+                    portfolioImages.push(model.imageUrl);
+                    modelImage.innerHTML = `<img src="${model.imageUrl}" alt="${model.name || 'Model'}'s profile image" class="h-full object-cover" loading="lazy" onclick="openModal(0)">`;
+                    console.log('Set model image:', model.imageUrl);
+                } else {
+                    modelImage.innerHTML = '<p class="text-gray-600">No image available</p>';
+                    console.log('Set model image to "No image available"');
+                }
+            } else console.error('Element #model-image not found');
+
+            // Update About the Model
+            const modelDescription = document.getElementById('model-description');
+            if (modelDescription) {
+                modelDescription.textContent = model.description || 'No description available';
+                console.log('Set model description:', model.description || 'No description available');
+            } else console.error('Element #model-description not found');
+
+            // Update Portfolio Gallery
+            const portfolioGrid = document.getElementById('portfolio-grid');
+            if (portfolioGrid) {
+                portfolioGrid.innerHTML = '';
+                if (Array.isArray(model.portfolioImages) && model.portfolioImages.length > 0) {
+                    model.portfolioImages.forEach((image, index) => {
+                        if (image.url) {
+                            portfolioImages.push(image.url);
+                            const div = document.createElement('div');
+                            div.className = 'portfolio-item aspect-[3/4] flex items-center';
+                            div.setAttribute('role', 'img');
+                            div.setAttribute('aria-label', `Portfolio Image ${index + 1} for ${model.name || 'Model'}`);
+                            div.innerHTML = `<img src="${image.url}" alt="Portfolio Image ${index + 1} for ${model.name || 'Model'}" class="h-full object-cover" loading="lazy" onclick="openModal(${portfolioImages.length - 1})">`;
+                            portfolioGrid.appendChild(div);
+                            console.log(`Added portfolio image ${index + 1}:`, image.url);
+                        }
+                    });
+                    if (portfolioGrid.children.length === 0) {
+                        portfolioGrid.innerHTML = '<p class="text-gray-600">No portfolio images available</p>';
+                        console.log('Set portfolioGrid to "No portfolio images available"');
+                    }
+                } else {
+                    portfolioGrid.innerHTML = '<p class="text-gray-600">No portfolio images available</p>';
+                    console.log('Set portfolioGrid to "No portfolio images available"');
+                }
+            } else console.error('Element #portfolio-grid not found');
+
+            loadingState.classList.add('hidden');
+            modelContent.classList.remove('opacity-50');
+            errorMessage.classList.add('hidden');
+            revealOnScroll();
+        } catch (error) {
+            console.error('Error fetching model details:', error);
+            let message = 'Unable to load model details';
+            if (error.message.includes('Failed to fetch')) {
+                message = 'Unable to connect to the server. Please check your network or server status.';
+            } else if (error.message.includes('Model not found')) {
+                message = 'The requested model was not found.';
+            } else if (error.message.includes('Invalid model data')) {
+                message = 'Invalid model data received from server.';
+            }
+            errorMessage.innerHTML = `
+                <p class="text-red-500 font-medium">${message}</p>
+                <p class="mt-4">
+                    <a href="#" class="text-blue-500 hover:underline font-medium" id="retry-fetch">Try again</a> or 
+                    <a href="models.html" class="text-blue-500 hover:underline font-medium">Browse all models</a>
+                </p>
+            `;
+            errorMessage.classList.remove('hidden');
+            loadingState.classList.add('hidden');
+            modelContent.classList.add('hidden');
+            document.getElementById('retry-fetch').addEventListener('click', (e) => {
+                e.preventDefault();
+                fetchModelDetails();
+            });
+        }
+    }
+
+    function openModal(index) {
+        currentImageIndex = index;
+        const modalImage = document.getElementById('modal-image');
+        const modal = document.getElementById('image-modal');
+        const prevButton = document.getElementById('prev-image');
+        const nextButton = document.getElementById('next-image');
+        if (portfolioImages.length > 0 && index >= 0 && index < portfolioImages.length) {
+            modalImage.src = portfolioImages[index];
+            modalImage.alt = index === 0 ? `Profile image` : `Portfolio Image ${index}`;
+            console.log('Opened modal with image:', portfolioImages[index], 'at index:', index);
+        } else {
+            modalImage.src = '';
+            modalImage.alt = 'No image available';
+            console.log('No valid image for modal at index:', index);
+        }
+        modal.style.display = 'flex';
+        prevButton.style.display = index > 0 ? 'block' : 'none';
+        nextButton.style.display = index < portfolioImages.length - 1 ? 'block' : 'none';
+        modal.focus();
+        document.addEventListener('touchstart', handleTouchStart, false);
+        document.addEventListener('touchmove', handleTouchMove, false);
+        document.addEventListener('keydown', handleKeydown);
+    }
+
+    function closeModal() {
+        const modal = document.getElementById('image-modal');
+        modal.style.display = 'none';
+        document.removeEventListener('touchstart', handleTouchStart, false);
+        document.removeEventListener('touchmove', handleTouchMove, false);
+        document.removeEventListener('keydown', handleKeydown);
+        console.log('Modal closed');
+    }
+
+    function prevImage() {
+        if (currentImageIndex > 0) {
+            currentImageIndex--;
+            const modalImage = document.getElementById('modal-image');
+            modalImage.src = portfolioImages[currentImageIndex];
+            modalImage.alt = currentImageIndex === 0 ? `Profile image` : `Portfolio Image ${currentImageIndex}`;
+            document.getElementById('prev-image').style.display = currentImageIndex > 0 ? 'block' : 'none';
+            document.getElementById('next-image').style.display = 'block';
+            console.log('Navigated to previous image:', portfolioImages[currentImageIndex], 'at index:', currentImageIndex);
+        }
+    }
+
+    function nextImage() {
+        if (currentImageIndex < portfolioImages.length - 1) {
+            currentImageIndex++;
+            const modalImage = document.getElementById('modal-image');
+            modalImage.src = portfolioImages[currentImageIndex];
+            modalImage.alt = currentImageIndex === 0 ? `Profile image` : `Portfolio Image ${currentImageIndex}`;
+            document.getElementById('prev-image').style.display = 'block';
+            document.getElementById('next-image').style.display = currentImageIndex < portfolioImages.length - 1 ? 'block' : 'none';
+            console.log('Navigated to next image:', portfolioImages[currentImageIndex], 'at index:', currentImageIndex);
+        }
+    }
+
+    function handleKeydown(event) {
+        if (event.key === 'ArrowLeft') {
+            prevImage();
+        } else if (event.key === 'ArrowRight') {
+            nextImage();
+        } else if (event.key === 'Escape') {
+            closeModal();
+        }
+    }
+
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    function handleTouchStart(event) {
+        touchStartX = event.changedTouches[0].screenX;
+    }
+
+    function handleTouchMove(event) {
+        touchEndX = event.changedTouches[0].screenX;
+        handleSwipe();
+    }
+
+    function handleSwipe() {
+        const minSwipeDistance = 50;
+        if (touchEndX < touchStartX - minSwipeDistance && currentImageIndex < portfolioImages.length - 1) {
+            nextImage();
+        } else if (touchEndX > touchStartX + minSwipeDistance && currentImageIndex > 0) {
+            prevImage();
+        }
+        touchStartX = touchEndX;
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
         adjustSectionPadding();
         revealOnScroll();
-        const aboutTitle = document.getElementById('aboutTitle');
-        if (aboutTitle) aboutTitle.classList.add('active');
+        fetchModelDetails();
+        const modelTitle = document.querySelector('#model-name');
+        if (modelTitle) modelTitle.classList.add('active');
         try {
             console.log('Body font-family:', getComputedStyle(document.body).fontFamily);
             const logo = document.querySelector('.desktop-nav-bar a[href="index.html"]');
             console.log('Nav logo font-size: 20px');
             console.log('Nav logo computed font-size:', logo ? getComputedStyle(logo).fontSize : 'Not found');
-            console.log('About title font-size:', aboutTitle ? getComputedStyle(aboutTitle).fontSize : 'Not found');
-            console.log('About section padding-top:', document.querySelector('#about') ? getComputedStyle(document.querySelector('#about')).paddingTop : 'Not found');
+            console.log('Model title font-size:', modelTitle ? getComputedStyle(modelTitle).fontSize : 'Not found');
+            console.log('Model title position:', modelTitle ? modelTitle.getBoundingClientRect() : 'Not found');
+            console.log('Nav bar height:', document.querySelector('.desktop-nav-bar').offsetHeight);
+            console.log('Model-details section padding-top:', document.querySelector('#model-details') ? getComputedStyle(document.querySelector('#model-details')).paddingTop : 'Not found');
             if (window.innerWidth < 640) {
                 const desktopNav = document.querySelector('.desktop-nav-bar .desktop-nav');
                 const burgerIcon = document.querySelector('.burger-icon');
@@ -443,60 +995,10 @@
         } catch (error) {
             console.error('Error in DOMContentLoaded handler:', error);
         }
-
-        fetchWithRetry(`${config.apiBaseUrl}/about`)
-            .then(data => {
-                const aboutDescription = document.getElementById('aboutDescription');
-                const contactSection = document.querySelector('.contact-us p');
-                const aboutImage = document.querySelector('.about-image');
-                if (data.text) {
-                    aboutDescription.textContent = escapeHtml(data.text);
-                } else {
-                    aboutDescription.textContent = 'Beige Model Agency is dedicated to discovering and nurturing talent, redefining beauty standards, and collaborating with top brands worldwide.';
-                }
-                if (data.contact) {
-                    // Split address into lines for display
-                    const addressLines = escapeHtml(data.contact.address).split(',').map(line => line.trim());
-                    contactSection.innerHTML = `
-                        ${addressLines.join('<br>')}<br>
-                        ${escapeHtml(data.contact.phone)} | <a href="mailto:${escapeHtml(data.contact.email)}" class="underline hover:text-gray-800">${escapeHtml(data.contact.email)}</a>
-                    `;
-                } else {
-                    contactSection.innerHTML = `
-                        LAGOS<br>
-                        6th floor, Landmark Towers,<br>
-                        Victoria Island, Lagos, Nigeria.<br>
-                        08189403506 | <a href="mailto:info@fewmodels.com" class="underline hover:text-gray-800">info@fewmodels.com</a>
-                    `;
-                }
-                if (data.imageUrl) {
-                    aboutImage.src = data.imageUrl;
-                    aboutImage.alt = 'About Beige Model Agency';
-                } else {
-                    aboutImage.src = '/images/about-image.jpg';
-                    aboutImage.alt = 'About Beige Model Agency';
-                }
-                console.log('About data:', data);
-            })
-            .catch(error => {
-                console.error('Error fetching about section:', error);
-                document.getElementById('aboutDescription').textContent = 'Failed to load description';
-                document.querySelector('.contact-us p').innerHTML = `
-                    LAGOS<br>
-                    6th floor, Landmark Towers,<br>
-                    Victoria Island, Lagos, Nigeria.<br>
-                    08189403506 | <a href="mailto:info@fewmodels.com" class="underline hover:text-gray-800">info@fewmodels.com</a>
-                `;
-                document.querySelector('.about-image').src = '/images/about-image.jpg';
-            });
     });
 
     window.addEventListener('resize', adjustSectionPadding);
     window.addEventListener('scroll', revealOnScroll);
-
-    document.querySelectorAll('.mobile-menu a').forEach(link => {
-        link.addEventListener('click', toggleMenu);
-    });
 
     document.getElementById('newsletter-submit').addEventListener('click', async () => {
         const emailInput = document.getElementById('newsletter-email');
