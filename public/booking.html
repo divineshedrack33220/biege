@@ -367,9 +367,9 @@
                         <select id="shoot-type" class="w-full form-input" required>
                             <option value="">Select a shoot type</option>
                             <option value="beauty">Beauty Shoot</option>
-                            <option value="editorial">Editorials </option>
+                            <option value="editorial">Editorials</option>
                             <option value="bridal">Bridal Shoot</option>
-                            <option value="commercial">Commercials </option>
+                            <option value="commercial">Commercials</option>
                             <option value="fashion">Fashion Shoot</option>
                             <option value="brand">Brand Shoot</option>
                             <option value="fittings">Fittings</option>
@@ -378,7 +378,7 @@
                             <option value="video">Video Shoot</option>
                         </select>
                         <p class="text-red-500 text-xs mt-1 hidden error-message" id="shoot-type-error">Shoot type is required</p>
-                        <label id="bookingTitle" class="block mb-2 hidden">Booked Model</label>
+                        <label id="model-label" class="block mb-2 hidden">Selected Model</label>
                         <div id="model-card" class="model-card hidden">
                             <img id="model-image" src="" alt="Selected Model" class="model-image">
                             <p id="model-name" class="model-name"></p>
@@ -433,8 +433,8 @@
         <!-- Confirmation Modal -->
         <div id="confirmationModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden" role="dialog" aria-labelledby="modal-title" aria-describedby="modal-message">
             <div class="bg-white p-8 max-w-md mx-4 modal-content transform scale-95 opacity-0 transition-all duration-300">
-                <h3 id="modal-title" class="text-xl font-bold mb-4">Booking Request Received</h3>
-                <p id="modal-message" class="mb-6 text-sm">Thank you for your booking request. We will review your information and contact you shortly via your preferred method.</p>
+                <h3 id="modal-title" class="text-xl font-bold mb-4">Booking Confirmation</h3>
+                <p id="modal-message" class="mb-6 text-sm">We received their message and would get back to them immediately.</p>
                 <button onclick="closeModal()" class="btn-animate w-full">OK</button>
             </div>
         </div>
@@ -541,10 +541,6 @@
                 title: 'Brand Shoot',
                 description: 'Price: TBD<br>Duration: TBD<br>Description: Promotion of a brand’s identity or products.'
             },
-            'makeup': {
-                title: 'Makeup Shoot',
-                description: 'Price: TBD<br>Duration: TBD<br>Description: Focused on showcasing makeup artistry.'
-            },
             'fittings': {
                 title: 'Fittings',
                 description: 'Price: 10,000 Naira<br>Duration: 1 hour<br>Description: For activities involving the model’s presence before shoot day.'
@@ -623,11 +619,11 @@
                 const modelImage = document.getElementById('model-image');
                 const modelNameElement = document.getElementById('model-name');
                 const modelIdInput = document.getElementById('model-id');
-                const bookingTitle = document.getElementById('bookingTitle');
-                if (imageUrl && modelCard && modelImage && bookingTitle) {
+                const modelLabel = document.getElementById('model-label');
+                if (imageUrl && modelCard && modelImage && modelLabel) {
                     modelImage.src = decodeURIComponent(imageUrl);
                     modelCard.classList.remove('hidden');
-                    bookingTitle.classList.remove('hidden');
+                    modelLabel.classList.remove('hidden');
                 }
                 if (modelName && modelNameElement) {
                     modelNameElement.textContent = decodeURIComponent(modelName);
@@ -638,7 +634,7 @@
 
                 // Trigger reveal animations
                 revealOnScroll();
-                if (bookingTitle) bookingTitle.classList.add('active');
+                if (titleElement) titleElement.classList.add('active');
             } catch (error) {
                 console.error('Error in window.load handler:', error);
             }
@@ -724,7 +720,8 @@
         const modalMessage = document.getElementById('modal-message');
         const submitBtn = document.getElementById('submit-btn');
         const modelCard = document.getElementById('model-card');
-        const bookingTitle = document.getElementById('bookingTitle');
+        const modelLabel = document.getElementById('model-label');
+        const formError = document.getElementById('form-error');
 
         function validateForm() {
             let isValid = true;
@@ -752,6 +749,10 @@
                     errorElement.classList.add('hidden');
                 }
             });
+            // Explicitly ensure model-id is not validated
+            const modelIdInput = document.getElementById('model-id');
+            const modelError = document.getElementById('model-id-error');
+            if (modelError) modelError.classList.add('hidden');
             return isValid;
         }
 
@@ -773,7 +774,10 @@
         if (form && confirmationModal) {
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
+                formError.classList.add('hidden');
                 if (!validateForm()) {
+                    formError.textContent = 'Please correct the errors in the form.';
+                    formError.classList.remove('hidden');
                     return;
                 }
                 submitBtn.disabled = true;
@@ -812,22 +816,21 @@
                     });
                     const data = await response.json();
                     if (response.ok) {
-                        modalMessage.textContent = 'Thank you for your booking request. We will review your information and contact you shortly via your preferred method.';
+                        modalMessage.textContent = 'We received your message and would get back to you immediately.';
                         confirmationModal.classList.remove('hidden');
                         confirmationModal.querySelector('.modal-content').classList.remove('scale-95', 'opacity-0');
                         confirmationModal.querySelector('.modal-content').classList.add('scale-100', 'opacity-100');
+                        // Hide model card and label
+                        modelCard.classList.add('hidden');
+                        modelLabel.classList.add('hidden');
                     } else {
-                        modalMessage.textContent = data.message || 'Error submitting booking request. Please try again.';
-                        confirmationModal.classList.remove('hidden');
-                        confirmationModal.querySelector('.modal-content').classList.remove('scale-95', 'opacity-0');
-                        confirmationModal.querySelector('.modal-content').classList.add('scale-100', 'opacity-100');
+                        formError.textContent = data.message || 'Error submitting your booking. Please try again.';
+                        formError.classList.remove('hidden');
                     }
                 } catch (error) {
                     console.error('Submission Error:', error);
-                    modalMessage.textContent = 'Server error. Please try again later.';
-                    confirmationModal.classList.remove('hidden');
-                    confirmationModal.querySelector('.modal-content').classList.remove('scale-95', 'opacity-0');
-                    confirmationModal.querySelector('.modal-content').classList.add('scale-100', 'opacity-100');
+                    formError.textContent = 'Server error. Please try again later.';
+                    formError.classList.remove('hidden');
                 } finally {
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'BOOK NOW';
@@ -838,14 +841,13 @@
         function closeModal() {
             if (confirmationModal) {
                 confirmationModal.classList.add('hidden');
-                if (modalMessage.textContent.includes('Thank you')) {
-                    form.reset();
-                    document.querySelectorAll('.error-message').forEach(el => el.classList.add('hidden'));
-                    modelCard.classList.add('hidden');
-                    bookingTitle.classList.add('hidden');
-                    document.getElementById('model-image').src = '';
-                    document.getElementById('model-name').textContent = '';
-                }
+                form.reset();
+                document.querySelectorAll('.error-message').forEach(el => el.classList.add('hidden'));
+                modelCard.classList.add('hidden');
+                modelLabel.classList.add('hidden');
+                document.getElementById('model-image').src = '';
+                document.getElementById('model-name').textContent = '';
+                window.location.reload();
             }
         }
 
