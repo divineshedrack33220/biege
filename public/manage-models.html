@@ -903,13 +903,12 @@ async function loadModels() {
             throw new Error(data.message || `HTTP error: ${response.status}`);
         }
         const data = await response.json();
-        console.log('API Response Models:', data.models); // Debug: Log API response
+        console.log('API Response Models:', data.models);
         if (!data.models || !Array.isArray(data.models)) {
             throw new Error('Invalid API response format');
         }
-        modelGrid.innerHTML = ''; // Clear previous content
+        modelGrid.innerHTML = '';
         data.models.forEach((model, index) => {
-            // Ensure model has required fields
             if (!model.name || !model.category || !model.imageUrl) {
                 console.warn(`Skipping invalid model at index ${index}:`, model);
                 return;
@@ -919,7 +918,7 @@ async function loadModels() {
             const placementsDisplay = model.placements && model.placements.length > 0 ? 
                 model.placements.map(p => `${sanitizeInput(p.city || 'N/A')} (${sanitizeInput(p.agency || 'N/A')})`).join(', ') : 'N/A';
             const locationDisplay = sanitizeInput(model.location || 'N/A');
-            console.log(`Model ${model.name}: measurementsDisplay=${measurementsDisplay}, location=${locationDisplay}`); // Debug: Log rendered values
+            console.log(`Model ${model.name}: measurementsDisplay=${measurementsDisplay}, location=${locationDisplay}`);
             const div = document.createElement('div');
             div.className = 'card bg-white rounded-lg overflow-hidden';
             div.style.animationDelay = `${index * 0.05}s`;
@@ -940,7 +939,7 @@ async function loadModels() {
                         <h4 class="text-sm font-semibold truncate">${sanitizeInput(model.name)}</h4>
                         <p class="text-xs text-gray-500">${sanitizeInput(model.category.charAt(0).toUpperCase() + model.category.slice(1))}</p>
                         <button onclick="toggleDetails(this)" class="text-blue-500 hover:text-blue-700 text-xs mt-1" aria-label="Toggle Model Details">View Details</button>
-                        <div class="details-collapse mt-1">
+                        <div class="details-collapse mt-1 open">
                             <ul class="text-xs space-y-1">
                                 <li><i class="fas fa-ruler-vertical mr-1 text-primary-500"></i><strong>Height:</strong> ${sanitizeInput(model.height || 'N/A')}</li>
                                 <li><i class="fas fa-tape mr-1 text-primary-500"></i><strong>Measurements:</strong> ${sanitizeInput(measurementsDisplay)}</li>
@@ -975,12 +974,18 @@ async function loadModels() {
                     </div>
                 `;
                 modelGrid.appendChild(div);
-                console.log(`Rendered HTML for model ${model.name}:`, div.innerHTML); // Debug: Log rendered HTML
+                console.log(`Rendered HTML for model ${model.name}:`, div.innerHTML);
+                // Ensure details section is visible for debugging
+                const details = div.querySelector('.details-collapse');
+                if (details) {
+                    console.log(`Details section found for ${model.name}, open: ${details.classList.contains('open')}`);
+                } else {
+                    console.error(`Details section not found for ${model.name}`);
+                }
             } catch (error) {
                 console.error(`Error rendering model ${model.name}:`, error);
             }
         });
-        // Verify model cards were added
         console.log(`Total model cards rendered: ${modelGrid.children.length}`);
     } catch (error) {
         console.error('Error in loadModels:', error);
@@ -998,7 +1003,14 @@ function toggleDetails(button) {
         return;
     }
     details.classList.toggle('open');
-    console.log('Details toggled, open:', details.classList.contains('open')); // Debug: Log toggle state
+    // Force height recalculation for smooth transition
+    if (details.classList.contains('open')) {
+        const height = details.scrollHeight;
+        details.style.maxHeight = `${height}px`;
+    } else {
+        details.style.maxHeight = '0';
+    }
+    console.log('Details toggled for', button.previousElementSibling?.textContent || 'unknown model', 'open:', details.classList.contains('open'));
     button.textContent = details.classList.contains('open') ? 'Hide Details' : 'View Details';
     button.setAttribute('aria-expanded', details.classList.contains('open'));
 }
@@ -1361,5 +1373,6 @@ document.getElementById('close-error-alert').addEventListener('click', () => {
 </script>
 </body>
 </html>
+
 
 
