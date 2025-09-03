@@ -660,7 +660,6 @@
             </div>
         </div>
     </div>
-
 <script>
 function sanitizeInput(input) {
     if (!input) return input;
@@ -888,6 +887,7 @@ document.getElementById('photo-modal').addEventListener('keydown', (e) => {
 async function loadModels() {
     modelLoading.classList.remove('hidden');
     modelError.classList.add('hidden');
+    const modelGrid = document.getElementById('model-grid');
     try {
         const response = await fetch('/api/models?page=1&limit=100', {
             headers: { 'Authorization': `Bearer ${token}` }
@@ -907,71 +907,81 @@ async function loadModels() {
         if (!data.models || !Array.isArray(data.models)) {
             throw new Error('Invalid API response format');
         }
-        const modelGrid = document.getElementById('model-grid');
-        modelGrid.innerHTML = '';
+        modelGrid.innerHTML = ''; // Clear previous content
         data.models.forEach((model, index) => {
-            const div = document.createElement('div');
-            div.className = 'card bg-white rounded-lg overflow-hidden';
-            div.style.animationDelay = `${index * 0.05}s`;
-            // Updated measurementsDisplay to handle empty or null measurements
+            // Ensure model has required fields
+            if (!model.name || !model.category || !model.imageUrl) {
+                console.warn(`Skipping invalid model at index ${index}:`, model);
+                return;
+            }
             const measurementsDisplay = model.measurements && (model.measurements.bust || model.measurements.waist || model.measurements.hips) ?
                 `Bust: ${sanitizeInput(model.measurements.bust || 'N/A')}, Waist: ${sanitizeInput(model.measurements.waist || 'N/A')}, Hips: ${sanitizeInput(model.measurements.hips || 'N/A')}` : 'N/A';
             const placementsDisplay = model.placements && model.placements.length > 0 ? 
                 model.placements.map(p => `${sanitizeInput(p.city || 'N/A')} (${sanitizeInput(p.agency || 'N/A')})`).join(', ') : 'N/A';
-            console.log(`Model ${model.name}: measurementsDisplay=${measurementsDisplay}, location=${model.location || 'N/A'}`); // Debug: Log rendered values
-            div.innerHTML = `
-                <div class="relative">
-                    <img src="${sanitizeInput(model.imageUrl)}" alt="${sanitizeInput(model.name)}" class="model-image w-full h-48 object-cover" loading="lazy">
-                    <div class="absolute top-1 right-1 flex space-x-1">
-                        <button onclick="editModel('${sanitizeInput(model._id)}', '${sanitizeInput(model.name)}', '${sanitizeInput(model.category)}', '${sanitizeInput(model.imageUrl)}', '${sanitizeInput(model.imagePublicId || '')}', '${sanitizeInput(model.description || '')}', '${sanitizeInput(model.height || '')}', '${sanitizeInput(model.measurements?.bust || '')}', '${sanitizeInput(model.measurements?.waist || '')}', '${sanitizeInput(model.measurements?.hips || '')}', '${sanitizeInput(model.hair || '')}', '${sanitizeInput(model.eyes || '')}', '${sanitizeInput(model.shoes || '')}', '${sanitizeInput(model.location || '')}', '${sanitizeInput(model.socialLinks?.instagram || '')}', '${sanitizeInput(model.socialLinks?.tiktok || '')}', '${sanitizeInput(JSON.stringify(model.placements || []))}')" class="tooltip text-white bg-primary-500 hover:bg-primary-600 p-1.5 rounded-full" data-tooltip="Edit Model" aria-label="Edit Model">
-                            <i class="fas fa-edit text-xs"></i>
-                        </button>
-                        <button onclick="deleteModel('${sanitizeInput(model._id)}', '${sanitizeInput(model.imagePublicId || '')}')" class="tooltip text-white bg-red-500 hover:bg-red-600 p-1.5 rounded-full" data-tooltip="Delete Model" aria-label="Delete Model">
-                            <i class="fas fa-trash text-xs"></i>
-                        </button>
+            const locationDisplay = sanitizeInput(model.location || 'N/A');
+            console.log(`Model ${model.name}: measurementsDisplay=${measurementsDisplay}, location=${locationDisplay}`); // Debug: Log rendered values
+            const div = document.createElement('div');
+            div.className = 'card bg-white rounded-lg overflow-hidden';
+            div.style.animationDelay = `${index * 0.05}s`;
+            try {
+                div.innerHTML = `
+                    <div class="relative">
+                        <img src="${sanitizeInput(model.imageUrl)}" alt="${sanitizeInput(model.name)}" class="model-image w-full h-48 object-cover" loading="lazy">
+                        <div class="absolute top-1 right-1 flex space-x-1">
+                            <button onclick="editModel('${sanitizeInput(model._id)}', '${sanitizeInput(model.name)}', '${sanitizeInput(model.category)}', '${sanitizeInput(model.imageUrl)}', '${sanitizeInput(model.imagePublicId || '')}', '${sanitizeInput(model.description || '')}', '${sanitizeInput(model.height || '')}', '${sanitizeInput(model.measurements?.bust || '')}', '${sanitizeInput(model.measurements?.waist || '')}', '${sanitizeInput(model.measurements?.hips || '')}', '${sanitizeInput(model.hair || '')}', '${sanitizeInput(model.eyes || '')}', '${sanitizeInput(model.shoes || '')}', '${sanitizeInput(model.location || '')}', '${sanitizeInput(model.socialLinks?.instagram || '')}', '${sanitizeInput(model.socialLinks?.tiktok || '')}', '${sanitizeInput(JSON.stringify(model.placements || []))}')" class="tooltip text-white bg-primary-500 hover:bg-primary-600 p-1.5 rounded-full" data-tooltip="Edit Model" aria-label="Edit Model">
+                                <i class="fas fa-edit text-xs"></i>
+                            </button>
+                            <button onclick="deleteModel('${sanitizeInput(model._id)}', '${sanitizeInput(model.imagePublicId || '')}')" class="tooltip text-white bg-red-500 hover:bg-red-600 p-1.5 rounded-full" data-tooltip="Delete Model" aria-label="Delete Model">
+                                <i class="fas fa-trash text-xs"></i>
+                            </button>
+                        </div>
                     </div>
-                </div>
-                <div class="p-3">
-                    <h4 class="text-sm font-semibold truncate">${sanitizeInput(model.name)}</h4>
-                    <p class="text-xs text-gray-500">${sanitizeInput(model.category.charAt(0).toUpperCase() + model.category.slice(1))}</p>
-                    <button onclick="toggleDetails(this)" class="text-blue-500 hover:text-blue-700 text-xs mt-1" aria-label="Toggle Model Details">View Details</button>
-                    <div class="details-collapse mt-1">
-                        <ul class="text-xs space-y-1">
-                            <li><i class="fas fa-ruler-vertical mr-1 text-primary-500"></i><strong>Height:</strong> ${sanitizeInput(model.height || 'N/A')}</li>
-                            <li><i class="fas fa-tape mr-1 text-primary-500"></i><strong>Measurements:</strong> ${sanitizeInput(measurementsDisplay)}</li>
-                            <li><i class="fas fa-map-marker-alt mr-1 text-primary-500"></i><strong>Location:</strong> ${sanitizeInput(model.location || 'N/A')}</li>
-                            <li><i class="fas fa-building mr-1 text-primary-500"></i><strong>Placements:</strong> ${sanitizeInput(placementsDisplay)}</li>
-                            <li><i class="fas fa-hair mr-1 text-primary-500"></i><strong>Hair:</strong> ${sanitizeInput(model.hair || 'N/A')}</li>
-                            <li><i class="fas fa-eye mr-1 text-primary-500"></i><strong>Eyes:</strong> ${sanitizeInput(model.eyes || 'N/A')}</li>
-                            <li><i class="fas fa-shoe-prints mr-1 text-primary-500"></i><strong>Shoes:</strong> ${sanitizeInput(model.shoes || 'N/A')}</li>
-                            <li><i class="fab fa-instagram mr-1 text-primary-500"></i><strong>Instagram:</strong> ${model.socialLinks?.instagram ? `<a href="${sanitizeInput(model.socialLinks.instagram)}" target="_blank" class="text-blue-500 hover:underline">Link</a>` : 'N/A'}</li>
-                            <li><i class="fab fa-tiktok mr-1 text-primary-500"></i><strong>TikTok:</strong> ${model.socialLinks?.tiktok ? `<a href="${sanitizeInput(model.socialLinks.tiktok)}" target="_blank" class="text-blue-500 hover:underline">Link</a>` : 'N/A'}</li>
-                            <li><i class="fas fa-info-circle mr-1 text-primary-500"></i><strong>Description:</strong> ${sanitizeInput(model.description || 'N/A')}</li>
-                        </ul>
+                    <div class="p-3">
+                        <h4 class="text-sm font-semibold truncate">${sanitizeInput(model.name)}</h4>
+                        <p class="text-xs text-gray-500">${sanitizeInput(model.category.charAt(0).toUpperCase() + model.category.slice(1))}</p>
+                        <button onclick="toggleDetails(this)" class="text-blue-500 hover:text-blue-700 text-xs mt-1" aria-label="Toggle Model Details">View Details</button>
+                        <div class="details-collapse mt-1">
+                            <ul class="text-xs space-y-1">
+                                <li><i class="fas fa-ruler-vertical mr-1 text-primary-500"></i><strong>Height:</strong> ${sanitizeInput(model.height || 'N/A')}</li>
+                                <li><i class="fas fa-tape mr-1 text-primary-500"></i><strong>Measurements:</strong> ${sanitizeInput(measurementsDisplay)}</li>
+                                <li><i class="fas fa-map-marker-alt mr-1 text-primary-500"></i><strong>Location:</strong> ${locationDisplay}</li>
+                                <li><i class="fas fa-building mr-1 text-primary-500"></i><strong>Placements:</strong> ${sanitizeInput(placementsDisplay)}</li>
+                                <li><i class="fas fa-hair mr-1 text-primary-500"></i><strong>Hair:</strong> ${sanitizeInput(model.hair || 'N/A')}</li>
+                                <li><i class="fas fa-eye mr-1 text-primary-500"></i><strong>Eyes:</strong> ${sanitizeInput(model.eyes || 'N/A')}</li>
+                                <li><i class="fas fa-shoe-prints mr-1 text-primary-500"></i><strong>Shoes:</strong> ${sanitizeInput(model.shoes || 'N/A')}</li>
+                                <li><i class="fab fa-instagram mr-1 text-primary-500"></i><strong>Instagram:</strong> ${model.socialLinks?.instagram ? `<a href="${sanitizeInput(model.socialLinks.instagram)}" target="_blank" class="text-blue-500 hover:underline">Link</a>` : 'N/A'}</li>
+                                <li><i class="fab fa-tiktok mr-1 text-primary-500"></i><strong>TikTok:</strong> ${model.socialLinks?.tiktok ? `<a href="${sanitizeInput(model.socialLinks.tiktok)}" target="_blank" class="text-blue-500 hover:underline">Link</a>` : 'N/A'}</li>
+                                <li><i class="fas fa-info-circle mr-1 text-primary-500"></i><strong>Description:</strong> ${sanitizeInput(model.description || 'N/A')}</li>
+                            </ul>
+                        </div>
+                        <div class="mt-2">
+                            <p class="text-xs font-medium">Portfolio Images: <span class="text-blue-500 hover:underline cursor-pointer" onclick='showPhotoModal(${JSON.stringify(model.portfolioImages)})'>View ${model.portfolioImages?.length || 0} photo(s)</span></p>
+                            ${model.portfolioImages?.length > 0 ? `
+                                <div class="grid grid-cols-3 gap-2 mt-1">
+                                    ${model.portfolioImages.map((img, i) => `
+                                        <div class="relative">
+                                            <img src="${sanitizeInput(img.url)}" alt="Portfolio ${i + 1}" class="photo-thumbnail w-full h-20 object-cover" onclick='showPhotoModal(${JSON.stringify(model.portfolioImages)}, ${i})'>
+                                            <button onclick="deletePortfolioImage('${sanitizeInput(model._id)}', ${i})" class="absolute top-0.5 right-0.5 text-red-500 hover:text-red-700 text-xs tooltip" data-tooltip="Delete Image" aria-label="Delete Portfolio Image">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : '<p class="text-xs text-gray-500">No portfolio images</p>'}
+                            <button onclick="setPortfolioModelId('${sanitizeInput(model._id)}')" class="text-blue-500 hover:text-blue-700 text-xs mt-1 tooltip" data-tooltip="Add Portfolio Image" aria-label="Add Portfolio Image">
+                                <i class="fas fa-plus mr-1"></i>Add Image
+                            </button>
+                        </div>
                     </div>
-                    <div class="mt-2">
-                        <p class="text-xs font-medium">Portfolio Images: <span class="text-blue-500 hover:underline cursor-pointer" onclick='showPhotoModal(${JSON.stringify(model.portfolioImages)})'>View ${model.portfolioImages?.length || 0} photo(s)</span></p>
-                        ${model.portfolioImages?.length > 0 ? `
-                            <div class="grid grid-cols-3 gap-2 mt-1">
-                                ${model.portfolioImages.map((img, i) => `
-                                    <div class="relative">
-                                        <img src="${sanitizeInput(img.url)}" alt="Portfolio ${i + 1}" class="photo-thumbnail w-full h-20 object-cover" onclick='showPhotoModal(${JSON.stringify(model.portfolioImages)}, ${i})'>
-                                        <button onclick="deletePortfolioImage('${sanitizeInput(model._id)}', ${i})" class="absolute top-0.5 right-0.5 text-red-500 hover:text-red-700 text-xs tooltip" data-tooltip="Delete Image" aria-label="Delete Portfolio Image">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        ` : '<p class="text-xs text-gray-500">No portfolio images</p>'}
-                        <button onclick="setPortfolioModelId('${sanitizeInput(model._id)}')" class="text-blue-500 hover:text-blue-700 text-xs mt-1 tooltip" data-tooltip="Add Portfolio Image" aria-label="Add Portfolio Image">
-                            <i class="fas fa-plus mr-1"></i>Add Image
-                        </button>
-                    </div>
-                </div>
-            `;
-            console.log(`Rendered HTML for model ${model.name}:`, div.innerHTML); // Debug: Log rendered HTML
-            modelGrid.appendChild(div);
+                `;
+                modelGrid.appendChild(div);
+                console.log(`Rendered HTML for model ${model.name}:`, div.innerHTML); // Debug: Log rendered HTML
+            } catch (error) {
+                console.error(`Error rendering model ${model.name}:`, error);
+            }
         });
+        // Verify model cards were added
+        console.log(`Total model cards rendered: ${modelGrid.children.length}`);
     } catch (error) {
         console.error('Error in loadModels:', error);
         modelError.textContent = sanitizeInput(error.message || 'Error loading models');
@@ -983,6 +993,10 @@ async function loadModels() {
 
 function toggleDetails(button) {
     const details = button.nextElementSibling;
+    if (!details || !details.classList.contains('details-collapse')) {
+        console.error('Details element not found or invalid:', details);
+        return;
+    }
     details.classList.toggle('open');
     console.log('Details toggled, open:', details.classList.contains('open')); // Debug: Log toggle state
     button.textContent = details.classList.contains('open') ? 'Hide Details' : 'View Details';
@@ -1347,4 +1361,5 @@ document.getElementById('close-error-alert').addEventListener('click', () => {
 </script>
 </body>
 </html>
+
 
