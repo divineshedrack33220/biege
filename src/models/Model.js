@@ -41,33 +41,31 @@ const modelSchema = new mongoose.Schema({
     trim: true,
     maxlength: [20, 'Height cannot exceed 20 characters'],
   },
-  measurements: {
-    bust: {
-      type: String,
-      trim: true,
-      maxlength: [20, 'Bust measurement cannot exceed 20 characters'],
-      validate: {
-        validator: (value) => !value || /^\d+(\.\d+)?\s*cm$/.test(value),
-        message: 'Bust must be a number followed by "cm" (e.g., 86 cm)',
-      },
+  bust: {
+    type: String,
+    trim: true,
+    maxlength: [20, 'Bust measurement cannot exceed 20 characters'],
+    validate: {
+      validator: (value) => !value || /^\d+(\.\d+)?\s*cm$/.test(value),
+      message: 'Bust must be a number followed by "cm" (e.g., 86 cm)',
     },
-    waist: {
-      type: String,
-      trim: true,
-      maxlength: [20, 'Waist measurement cannot exceed 20 characters'],
-      validate: {
-        validator: (value) => !value || /^\d+(\.\d+)?\s*cm$/.test(value),
-        message: 'Waist must be a number followed by "cm" (e.g., 86 cm)',
-      },
+  },
+  waist: {
+    type: String,
+    trim: true,
+    maxlength: [20, 'Waist measurement cannot exceed 20 characters'],
+    validate: {
+      validator: (value) => !value || /^\d+(\.\d+)?\s*cm$/.test(value),
+      message: 'Waist must be a number followed by "cm" (e.g., 61 cm)',
     },
-    hips: {
-      type: String,
-      trim: true,
-      maxlength: [20, 'Hips measurement cannot exceed 20 characters'],
-      validate: {
-        validator: (value) => !value || /^\d+(\.\d+)?\s*cm$/.test(value),
-        message: 'Hips must be a number followed by "cm" (e.g., 86 cm)',
-      },
+  },
+  hips: {
+    type: String,
+    trim: true,
+    maxlength: [20, 'Hips measurement cannot exceed 20 characters'],
+    validate: {
+      validator: (value) => !value || /^\d+(\.\d+)?\s*cm$/.test(value),
+      message: 'Hips must be a number followed by "cm" (e.g., 89 cm)',
     },
   },
   hair: {
