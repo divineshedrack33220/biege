@@ -426,7 +426,7 @@
     </style>
 </head>
 <body class="bg-white text-black">
- <nav class="desktop-nav-bar fixed top-0 left-0 right-0 bg-white bg-opacity-90 shadow-sm z-50 flex items-center">
+    <nav class="desktop-nav-bar fixed top-0 left-0 right-0 bg-white bg-opacity-90 shadow-sm z-50 flex items-center">
         <div class="container flex justify-between items-center">
             <a href="index.html" class="font-bold tracking-wider" aria-label="Beige Home">BEIGE</a>
             <div class="desktop-nav flex space-x-8">
@@ -451,13 +451,12 @@
             <a href="booking.html" aria-label="Book a Model">BOOK A MODEL</a>
             <a href="become-model.html" aria-label="Become a Model">BECOME A MODEL</a>
             <a href="contact.html" aria-label="Contact">CONTACT</a>
-           <a href="discount.html" aria-label="10% Discount" 
-   style="background-color: black; color: white; padding: 8px 16px; 
-          text-decoration: none; display: inline-block; 
-          border-radius: 4px; font-weight: bold;">
-   EXCLUSIVE OFFERS
-</a>
-
+            <a href="discount.html" aria-label="10% Discount" 
+               style="background-color: black; color: white; padding: 8px 16px; 
+                      text-decoration: none; display: inline-block; 
+                      border-radius: 4px; font-weight: bold;">
+                EXCLUSIVE OFFERS
+            </a>
         </div>
     </nav>
 
@@ -468,6 +467,13 @@
                 <h2 class="text-2xl md:text-3xl font-bold mb-4">FEATURED MODELS</h2>
                 <div class="w-16 h-px bg-black mx-auto mb-4"></div>
                 <p class="text-gray-600 max-w-xl mx-auto text-sm md:text-base">Discover our exclusive selection of top-tier modeling talent</p>
+            </div>
+            <!-- Search Input -->
+            <div class="search-bar mb-4 flex justify-center">
+                <div class="flex w-full max-w-xs">
+                    <label for="search-input" class="sr-only">Search models by name</label>
+                    <input type="text" id="search-input" placeholder="Search models..." class="px-4 py-2 w-full text-black form-input focus:outline focus:outline-2 focus:outline-[#4b5563] focus:outline-offset-2 border border-black" aria-label="Search models by name">
+                </div>
             </div>
             <!-- Filter Bar -->
             <div class="filter-bar mb-8 bg-gray-100">
@@ -762,12 +768,14 @@
         let isLoading = false;
         let totalModels = Infinity;
         let currentCategory = 'all';
+        let currentSearchQuery = '';
         const modelGrid = document.getElementById('model-grid');
         const errorMessage = document.getElementById('error-message');
         const loadingMessage = document.getElementById('loading-message');
         const viewMoreContainer = document.getElementById('view-more-container');
+        const searchInput = document.getElementById('search-input');
 
-        async function fetchModels(category = 'all', reset = false) {
+        async function fetchModels(category = 'all', searchQuery = '', reset = false, retryCount = 0, maxRetries = 3) {
             if (isLoading || (modelGrid.children.length >= totalModels && !reset)) return;
             isLoading = true;
             errorMessage.classList.add('hidden');
@@ -781,13 +789,16 @@
                     modelGrid.innerHTML = '';
                     viewMoreContainer.innerHTML = '';
                     if (scrollObserver) scrollObserver.disconnect();
-                    console.log('Grid reset for category:', category);
+                    console.log('Grid reset for category:', category, 'search:', searchQuery);
                 }
                 currentCategory = category;
+                currentSearchQuery = searchQuery;
 
-                const formattedCategory = category === 'all' ? '' : encodeURIComponent(category.toLowerCase());
-                const url = `${config.apiBaseUrl}/models?page=${page}&limit=6${formattedCategory ? `&category=${formattedCategory}` : ''}`;
-                console.log('Fetching models for category:', category, 'URL:', url);
+                // Use title case for category and encode search query
+                const formattedCategory = category === 'all' ? '' : encodeURIComponent(category.trim());
+                const formattedSearch = searchQuery ? `&name=${encodeURIComponent(searchQuery.trim())}` : '';
+                const url = `${config.apiBaseUrl}/models?page=${page}&limit=6${formattedCategory ? `&category=${formattedCategory}` : ''}${formattedSearch}`;
+                console.log('Fetching models for category:', category, 'search:', searchQuery, 'URL:', url, 'Retry attempt:', retryCount + 1);
 
                 let response;
                 try {
@@ -800,11 +811,24 @@
                     });
                     clearTimeout(timeoutId);
                 } catch (fetchError) {
+                    if (fetchError.name === 'AbortError') {
+                        throw new Error('Request timed out after 5 seconds');
+                    }
                     throw new Error(`Fetch failed: ${fetchError.message}`);
                 }
 
                 if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
+                    let errorDetails = `HTTP error! Status: ${response.status} ${response.statusText}`;
+                    if (response.status === 400) {
+                        try {
+                            const errorBody = await response.json();
+                            console.error('400 Bad Request response body:', errorBody);
+                            errorDetails += `. Details: ${errorBody.errors?.[0]?.msg || errorBody.message || 'Unknown error'}`;
+                        } catch (e) {
+                            console.error('Failed to parse 400 error response:', e.message);
+                        }
+                    }
+                    throw new Error(errorDetails);
                 }
 
                 const text = await response.text();
@@ -828,7 +852,10 @@
                 console.log('Parsed models:', models.length, 'Total:', total);
 
                 if (models.length === 0 && page === 1) {
-                    errorMessage.innerHTML = `No models available for ${category === 'all' ? 'any' : category} category. <a href="#" class="text-blue-500 hover:underline focus:outline focus:outline-2 focus:outline-[#4b5563] focus:outline-offset-2" id="reset-filters">Reset filters</a>`;
+                    const errorText = searchQuery
+                        ? `No models found for "${escapeHtml(searchQuery)}"${category !== 'all' ? ` in ${category} category` : ''}. Try a different search or category.`
+                        : `No models found for ${category === 'all' ? 'any' : category} category. Try a different category or check back later.`;
+                    errorMessage.innerHTML = `${errorText} <a href="#" class="text-blue-500 hover:underline focus:outline focus:outline-2 focus:outline-[#4b5563] focus:outline-offset-2" id="reset-filters">Reset filters</a>`;
                     errorMessage.classList.remove('hidden');
                 } else {
                     models.forEach((model) => {
@@ -848,8 +875,16 @@
                     updateScrollObserver();
                 }
             } catch (error) {
-                console.error('Error fetching models for category:', category, 'Error:', error.message, error.stack);
-                errorMessage.innerHTML = `Failed to load models for ${category === 'all' ? 'all' : category}. Please try again. <a href="#" class="text-blue-500 hover:underline focus:outline focus:outline-2 focus:outline-[#4b5563] focus:outline-offset-2" id="retry-fetch">Try again</a>`;
+                console.error('Error fetching models for category:', category, 'search:', searchQuery, 'Error:', error.message, error.stack);
+                if (retryCount < maxRetries) {
+                    const delay = Math.pow(2, retryCount) * 1000; // Exponential backoff: 1s, 2s, 4s
+                    console.log(`Retrying fetch in ${delay}ms... (Attempt ${retryCount + 2}/${maxRetries + 1})`);
+                    setTimeout(() => {
+                        fetchModels(category, searchQuery, reset, retryCount + 1, maxRetries);
+                    }, delay);
+                    return;
+                }
+                errorMessage.innerHTML = `Failed to load models for ${category === 'all' ? 'all' : category}${searchQuery ? ` with search "${escapeHtml(searchQuery)}"` : ''}. ${error.message.includes('timeout') ? 'Request timed out.' : `Invalid request (Status: ${error.message.includes('HTTP error') ? error.message.split('Status: ')[1].split('.')[0] : 'Unknown error'}). Please try a different category or contact support.`} <a href="#" class="text-blue-500 hover:underline focus:outline focus:outline-2 focus:outline-[#4b5563] focus:outline-offset-2" id="retry-fetch">Try again</a>`;
                 errorMessage.classList.remove('hidden');
             } finally {
                 isLoading = false;
@@ -870,8 +905,8 @@
             scrollObserver = new IntersectionObserver(
                 (entries) => {
                     if (entries[0].isIntersecting && !isLoading) {
-                        console.log('Fetch triggered for page:', page, 'category:', currentCategory);
-                        debouncedFetchModels(currentCategory);
+                        console.log('Fetch triggered for page:', page, 'category:', currentCategory, 'search:', currentSearchQuery);
+                        debouncedFetchModels(currentCategory, currentSearchQuery);
                     }
                 },
                 { threshold: 0.5 }
@@ -895,12 +930,26 @@
                     });
                     button.classList.add('active');
                     button.setAttribute('aria-pressed', 'true');
-                    fetchModels(category, true);
+                    // Clear search input on category change
+                    if (searchInput) {
+                        searchInput.value = '';
+                        currentSearchQuery = '';
+                    }
+                    fetchModels(category, '', true);
                 } catch (error) {
                     console.error('Error in filter click handler:', error);
                 }
             });
         });
+
+        // Search Functionality
+        if (searchInput) {
+            searchInput.addEventListener('input', debounce(() => {
+                const searchQuery = searchInput.value;
+                console.log('Search query:', searchQuery);
+                fetchModels(currentCategory, searchQuery, true);
+            }, 300));
+        }
 
         // Reset Filters
         document.addEventListener('click', (e) => {
@@ -915,7 +964,11 @@
                         btn.setAttribute('aria-pressed', 'true');
                     }
                 });
-                fetchModels('all', true);
+                if (searchInput) {
+                    searchInput.value = '';
+                    currentSearchQuery = '';
+                }
+                fetchModels('all', '', true);
             }
         });
 
@@ -924,7 +977,7 @@
             if (e.target.id === 'retry-fetch') {
                 e.preventDefault();
                 console.log('Retry fetch clicked');
-                fetchModels(currentCategory, true);
+                fetchModels(currentCategory, currentSearchQuery, true);
             }
         });
 
