@@ -13,7 +13,7 @@ const measurementValidation = (field) =>
     .optional()
     .trim()
     .matches(/^\d+(\.\d+)?\s*cm$/)
-    .withMessage(`${field.split('.')[1]} must be a number followed by "cm" (e.g., 86 cm)`);
+    .withMessage(`${field} must be a number followed by "cm" (e.g., 86 cm)`);
 
 // Public: Get all models with pagination
 router.get(
@@ -53,21 +53,17 @@ router.get(
         .lean();
       const total = await Model.countDocuments(query);
 
-      // Ensure socialLinks, location, and measurements are always included
+      // Ensure socialLinks, location, bust, waist, hips are always included
       const modelsWithDefaults = models.map((model) => ({
         ...model,
         socialLinks: model.socialLinks || { instagram: null, tiktok: null },
         location: model.location || undefined,
-        measurements: model.measurements
-          ? {
-              bust: model.measurements.bust || undefined,
-              waist: model.measurements.waist || undefined,
-              hips: model.measurements.hips || undefined,
-            }
-          : undefined,
+        bust: model.bust || undefined,
+        waist: model.waist || undefined,
+        hips: model.hips || undefined,
       }));
 
-      console.log('GET /api/models: Sending models:', modelsWithDefaults); // Debug log
+      console.log('GET /api/models: Sending models:', modelsWithDefaults);
       res.json({ models: modelsWithDefaults, total });
     } catch (error) {
       console.error('Error fetching models:', error.message);
@@ -86,20 +82,16 @@ router.get('/:id', async (req, res) => {
     if (!model) {
       return res.status(404).json({ message: 'Model not found' });
     }
-    // Ensure socialLinks, location, and measurements are always included
+    // Ensure socialLinks, location, bust, waist, hips are always included
     const modelWithDefaults = {
       ...model,
       socialLinks: model.socialLinks || { instagram: null, tiktok: null },
       location: model.location || undefined,
-      measurements: model.measurements
-        ? {
-            bust: model.measurements.bust || undefined,
-            waist: model.measurements.waist || undefined,
-            hips: model.measurements.hips || undefined,
-          }
-        : undefined,
+      bust: model.bust || undefined,
+      waist: model.waist || undefined,
+      hips: model.hips || undefined,
     };
-    console.log(`GET /api/models/${req.params.id}: Sending model:`, modelWithDefaults); // Debug log
+    console.log(`GET /api/models/${req.params.id}: Sending model:`, modelWithDefaults);
     res.json(modelWithDefaults);
   } catch (error) {
     console.error('Error fetching model by ID:', error.message);
@@ -127,9 +119,9 @@ router.post(
       .trim()
       .isLength({ max: 20 })
       .withMessage('Height cannot exceed 20 characters'),
-    measurementValidation('measurements.bust'),
-    measurementValidation('measurements.waist'),
-    measurementValidation('measurements.hips'),
+    measurementValidation('bust'),
+    measurementValidation('waist'),
+    measurementValidation('hips'),
     body('hair')
       .optional()
       .trim()
@@ -195,6 +187,7 @@ router.post(
       .withMessage('Valid TikTok URL is required'),
   ],
   async (req, res) => {
+    console.log('POST /api/models: Raw request body:', req.body);
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -206,7 +199,7 @@ router.post(
       }
 
       const data = matchedData(req);
-      const { name, category, description, height, measurements, hair, eyes, shoes, location, placements, socialLinks } = data;
+      const { name, category, description, height, bust, waist, hips, hair, eyes, shoes, location, placements, socialLinks } = data;
 
       // Upload main image to Cloudinary
       const mimeType = req.file.mimetype;
@@ -225,13 +218,9 @@ router.post(
         imagePublicId: result.public_id,
         description: description || undefined,
         height: height || undefined,
-        measurements: measurements && (measurements.bust || measurements.waist || measurements.hips)
-          ? {
-              bust: measurements.bust || undefined,
-              waist: measurements.waist || undefined,
-              hips: measurements.hips || undefined,
-            }
-          : undefined,
+        bust: bust || undefined,
+        waist: waist || undefined,
+        hips: hips || undefined,
         hair: hair || undefined,
         eyes: eyes || undefined,
         shoes: shoes || undefined,
@@ -250,7 +239,7 @@ router.post(
 
       const model = new Model(modelData);
       await model.save();
-      console.log('POST /api/models: Created model:', modelData); // Debug log
+      console.log('POST /api/models: Created model:', modelData);
       res.status(201).json(model);
     } catch (error) {
       console.error('Error adding model:', error.message);
@@ -281,9 +270,9 @@ router.put(
       .trim()
       .isLength({ max: 20 })
       .withMessage('Height cannot exceed 20 characters'),
-    measurementValidation('measurements.bust'),
-    measurementValidation('measurements.waist'),
-    measurementValidation('measurements.hips'),
+    measurementValidation('bust'),
+    measurementValidation('waist'),
+    measurementValidation('hips'),
     body('hair')
       .optional()
       .trim()
@@ -349,6 +338,7 @@ router.put(
       .withMessage('Valid TikTok URL is required'),
   ],
   async (req, res) => {
+    console.log('PUT /api/models/:id: Raw request body:', req.body);
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -360,20 +350,16 @@ router.put(
       }
 
       const data = matchedData(req);
-      const { name, category, description, height, measurements, hair, eyes, shoes, location, placements, socialLinks, imagePublicId } = data;
+      const { name, category, description, height, bust, waist, hips, hair, eyes, shoes, location, placements, socialLinks, imagePublicId } = data;
 
       const updateData = {
         name,
         category,
         description: description || undefined,
         height: height || undefined,
-        measurements: measurements && (measurements.bust || measurements.waist || measurements.hips)
-          ? {
-              bust: measurements.bust || undefined,
-              waist: measurements.waist || undefined,
-              hips: measurements.hips || undefined,
-            }
-          : undefined,
+        bust: bust || undefined,
+        waist: waist || undefined,
+        hips: hips || undefined,
         hair: hair || undefined,
         eyes: eyes || undefined,
         shoes: shoes || undefined,
@@ -418,20 +404,16 @@ router.put(
       if (!model) {
         return res.status(404).json({ message: 'Model not found' });
       }
-      // Ensure socialLinks, location, and measurements are always included in response
+      // Ensure socialLinks, location, bust, waist, hips are always included in response
       const modelWithDefaults = {
         ...model.toObject(),
         socialLinks: model.socialLinks || { instagram: null, tiktok: null },
         location: model.location || undefined,
-        measurements: model.measurements
-          ? {
-              bust: model.measurements.bust || undefined,
-              waist: model.measurements.waist || undefined,
-              hips: model.measurements.hips || undefined,
-            }
-          : undefined,
+        bust: model.bust || undefined,
+        waist: model.waist || undefined,
+        hips: model.hips || undefined,
       };
-      console.log(`PUT /api/models/${req.params.id}: Updated model:`, modelWithDefaults); // Debug log
+      console.log(`PUT /api/models/${req.params.id}: Updated model:`, modelWithDefaults);
       res.json(modelWithDefaults);
     } catch (error) {
       console.error('Error updating model:', error.message);
@@ -476,20 +458,16 @@ router.post(
         );
         return res.status(404).json({ message: 'Model not found' });
       }
-      // Ensure socialLinks, location, and measurements are always included in response
+      // Ensure socialLinks, location, bust, waist, hips are always included in response
       const modelWithDefaults = {
         ...model.toObject(),
         socialLinks: model.socialLinks || { instagram: null, tiktok: null },
         location: model.location || undefined,
-        measurements: model.measurements
-          ? {
-              bust: model.measurements.bust || undefined,
-              waist: model.measurements.waist || undefined,
-              hips: model.measurements.hips || undefined,
-            }
-          : undefined,
+        bust: model.bust || undefined,
+        waist: model.waist || undefined,
+        hips: model.hips || undefined,
       };
-      console.log(`POST /api/models/${req.params.id}/portfolio: Updated model:`, modelWithDefaults); // Debug log
+      console.log(`POST /api/models/${req.params.id}/portfolio: Updated model:`, modelWithDefaults);
       res.json(modelWithDefaults);
     } catch (error) {
       console.error('Error adding portfolio image:', error.message);
@@ -523,20 +501,16 @@ router.delete(
       }
       model.portfolioImages.splice(imageIndex, 1);
       await model.save();
-      // Ensure socialLinks, location, and measurements are always included in response
+      // Ensure socialLinks, location, bust, waist, hips are always included in response
       const modelWithDefaults = {
         ...model.toObject(),
         socialLinks: model.socialLinks || { instagram: null, tiktok: null },
         location: model.location || undefined,
-        measurements: model.measurements
-          ? {
-              bust: model.measurements.bust || undefined,
-              waist: model.measurements.waist || undefined,
-              hips: model.measurements.hips || undefined,
-            }
-          : undefined,
+        bust: model.bust || undefined,
+        waist: model.waist || undefined,
+        hips: model.hips || undefined,
       };
-      console.log(`DELETE /api/models/${req.params.id}/portfolio/${imageIndex}: Updated model:`, modelWithDefaults); // Debug log
+      console.log(`DELETE /api/models/${req.params.id}/portfolio/${imageIndex}: Updated model:`, modelWithDefaults);
       res.json(modelWithDefaults);
     } catch (error) {
       console.error('Error deleting portfolio image:', error.message);
@@ -573,7 +547,7 @@ router.delete(
         }
       }
       await Model.findByIdAndDelete(req.params.id);
-      console.log(`DELETE /api/models/${req.params.id}: Model deleted`); // Debug log
+      console.log(`DELETE /api/models/${req.params.id}: Model deleted`);
       res.json({ message: 'Model deleted' });
     } catch (error) {
       console.error('Error deleting model:', error.message);
