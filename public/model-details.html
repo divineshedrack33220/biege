@@ -93,6 +93,13 @@
             color: #4b5563;
             transform: scale(1.1);
         }
+        .mobile-menu a[href="discount.html"] {
+            background-color: black;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
         .close-icon {
             position: absolute;
             top: 1rem;
@@ -450,11 +457,37 @@
         footer a:hover {
             color: #ccc;
         }
+        .menu-toggle {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+        }
+        .menu-toggle span {
+            width: 25px;
+            height: 3px;
+            background: #000000;
+            margin: 2px 0;
+            transition: all 0.3s ease;
+        }
+        .menu-toggle.active span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+        .menu-toggle.active span:nth-child(2) {
+            opacity: 0;
+        }
+        .menu-toggle.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -7px);
+        }
+        @media (max-width: 639px) {
+            .menu-toggle {
+                display: flex;
+            }
+        }
     </style>
 </head>
 <body class="bg-white text-black">
     <!-- Navigation -->
-   <nav class="desktop-nav-bar fixed top-0 left-0 right-0 bg-white bg-opacity-90 shadow-sm z-50 flex items-center">
+    <nav class="desktop-nav-bar fixed top-0 left-0 right-0 bg-white bg-opacity-90 shadow-sm z-50 flex items-center">
         <div class="container flex justify-between items-center">
             <a href="index.html" class="font-bold tracking-wider" aria-label="Beige Home">BEIGE</a>
             <div class="desktop-nav flex space-x-8">
@@ -464,7 +497,7 @@
                 <a href="booking.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase" aria-label="Book a Model">BOOK A MODEL</a>
                 <a href="become-model.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase" aria-label="Become a Model">BECOME A MODEL</a>
                 <a href="contact.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase" aria-label="Contact">CONTACT</a>
-                <a href="discount.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase" aria-label="10% Discount">EXCLUSIVE OFFERS</a>
+                <a href="discount.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase" aria-label="Exclusive Offers">EXCLUSIVE OFFERS</a>
             </div>
             <div class="menu-toggle" onclick="toggleMenu()" aria-label="Toggle Menu">
                 <span></span>
@@ -473,19 +506,14 @@
             </div>
         </div>
         <div class="mobile-menu" role="dialog" aria-label="Mobile Navigation Menu">
+            <span class="close-icon" onclick="toggleMenu()" aria-label="Close Menu">&times;</span>
             <a href="home.html" aria-label="Home">HOME</a>
             <a href="about.html" aria-label="About Us">ABOUT US</a>
             <a href="models.html" aria-label="Models">MODELS</a>
             <a href="booking.html" aria-label="Book a Model">BOOK A MODEL</a>
             <a href="become-model.html" aria-label="Become a Model">BECOME A MODEL</a>
             <a href="contact.html" aria-label="Contact">CONTACT</a>
-           <a href="discount.html" aria-label="10% Discount" 
-   style="background-color: black; color: white; padding: 8px 16px; 
-          text-decoration: none; display: inline-block; 
-          border-radius: 4px; font-weight: bold;">
-   EXCLUSIVE OFFERS
-</a>
-
+            <a href="discount.html" aria-label="Exclusive Offers">EXCLUSIVE OFFERS</a>
         </div>
     </nav>
 
@@ -532,8 +560,14 @@
                     </div>
                 </div>
                 <!-- Social Links -->
-                
-                 <div class="mt-12 reveal">
+                <div id="social-links" class="mt-12 reveal">
+                    <h3>SOCIAL</h3>
+                    <div class="model-social flex space-x-4">
+                        <p class="text-gray-600">No social links available</p>
+                    </div>
+                </div>
+                <!-- Book Now Button -->
+                <div class="mt-12 reveal">
                     <a id="book-now-btn" href="booking.html" class="btn-animate">Book Now</a>
                 </div>
                 <!-- Image -->
@@ -554,12 +588,6 @@
                         <div class="portfolio-item aspect-[3/4] flex items-center justify-center">
                             <span class="text-gray-600"></span>
                         </div>
-                    </div>
-                </div>
-                 <div id="social-links" class="mt-12 reveal">
-                    <h3>SOCIAL</h3>
-                    <div class="model-social flex space-x-4">
-                        <p class="text-gray-600">No social links available</p>
                     </div>
                 </div>
             </div>
@@ -595,7 +623,6 @@
                     <ul class="space-y-2 text-sm">
                         <li><a href="privacy.html" class="hover:underline focus:outline focus:outline-2 focus:outline-[black] focus:outline-offset-2">Privacy Policy</a></li>
                         <li><a href="terms-of-service.html" class="hover:underline focus:outline focus:outline-2 focus:outline-[black] focus:outline-offset-2">Terms of Service</a></li>
-                        
                     </ul>
                 </div>
                 <div>
@@ -615,432 +642,456 @@
         </div>
     </footer>
 
-<script>
-    // Define API base URL for browser environment
-    const config = { 
-        apiBaseUrl: window.location.hostname === 'localhost' ? 'http://localhost:3000/api' : '/api'
-    };
+    <script>
+        // Define API base URL for browser environment
+        const config = { 
+            apiBaseUrl: window.location.hostname === 'localhost' ? 'http://localhost:3000/api' : '/api'
+        };
 
-    function clampValue(min, value, max) {
-        return Math.min(Math.max(value, min), max);
-    }
-
-    function toggleMenu() {
-        const mobileMenu = document.querySelector('.mobile-menu');
-        mobileMenu.classList.toggle('active');
-        mobileMenu.setAttribute('aria-hidden', !mobileMenu.classList.contains('active'));
-    }
-
-    function adjustSectionPadding() {
-        const section = document.querySelector('#model-details');
-        const navBar = document.querySelector('.desktop-nav-bar');
-        if (section && navBar) {
-            const navHeight = navBar.offsetHeight;
-            section.style.paddingTop = window.innerWidth < 640 ? `${Math.max(navHeight + 16, 112)}px` : `${Math.max(navHeight + 16, 80)}px`;
-            console.log('Adjusted model-details section padding-top:', section.style.paddingTop);
+        function clampValue(min, value, max) {
+            return Math.min(Math.max(value, min), max);
         }
-    }
 
-    document.querySelectorAll('.mobile-menu a').forEach(link => {
-        link.addEventListener('click', toggleMenu);
-    });
+        function toggleMenu() {
+            const mobileMenu = document.querySelector('.mobile-menu');
+            const menuToggle = document.querySelector('.menu-toggle');
+            mobileMenu.classList.toggle('active');
+            menuToggle.classList.toggle('active');
+            mobileMenu.setAttribute('aria-hidden', !mobileMenu.classList.contains('active'));
+        }
 
-    // Scroll Reveal Animation
-    const revealElements = document.querySelectorAll('.reveal');
-    const revealOnScroll = () => {
-        const windowHeight = window.innerHeight;
-        const revealPoint = 150;
-        revealElements.forEach(element => {
-            const elementTop = element.getBoundingClientRect().top;
-            if (elementTop < windowHeight - revealPoint) {
-                element.classList.add('active');
+        function adjustSectionPadding() {
+            const section = document.querySelector('#model-details');
+            const navBar = document.querySelector('.desktop-nav-bar');
+            if (section && navBar) {
+                const navHeight = navBar.offsetHeight;
+                section.style.paddingTop = window.innerWidth < 640 ? `${Math.max(navHeight + 16, 112)}px` : `${Math.max(navHeight + 16, 80)}px`;
+                console.log('Adjusted model-details section padding-top:', section.style.paddingTop);
             }
+        }
+
+        document.querySelectorAll('.mobile-menu a, .mobile-menu .close-icon').forEach(element => {
+            element.addEventListener('click', toggleMenu);
         });
-    };
 
-    // Fetch Model Details with Retry
-    async function fetchWithRetry(url, retries = 3, delay = 1000) {
-        for (let i = 0; i < retries; i++) {
-            try {
-                const response = await fetch(url);
-                if (!response.ok) {
-                    throw new Error(response.status === 404 ? 'Model not found' : `Failed to fetch model data (Status: ${response.status})`);
+        // Scroll Reveal Animation
+        const revealElements = document.querySelectorAll('.reveal');
+        const revealOnScroll = () => {
+            const windowHeight = window.innerHeight;
+            const revealPoint = 150;
+            revealElements.forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                if (elementTop < windowHeight - revealPoint) {
+                    element.classList.add('active');
                 }
-                return await response.json();
-            } catch (error) {
-                if (i === retries - 1) throw error;
-                await new Promise(resolve => setTimeout(resolve, delay));
-            }
-        }
-    }
-
-    let currentImageIndex = 0;
-    const portfolioImages = [];
-
-    async function fetchModelDetails() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const modelId = urlParams.get('id');
-        const modelDetails = document.getElementById('model-details');
-        const loadingState = document.getElementById('loading-state');
-        const modelContent = document.getElementById('model-content');
-        const errorMessage = document.getElementById('error-message');
-
-        if (!modelId) {
-            errorMessage.innerHTML = `
-                <p class="text-red-500 font-medium">No model ID provided in the URL</p>
-                <p class="mt-4">
-                    <a href="models.html" class="text-blue-500 hover:underline font-medium">Browse all models</a>
-                </p>
-            `;
-            errorMessage.classList.remove('hidden');
-            loadingState.classList.add('hidden');
-            modelContent.classList.add('hidden');
-            console.error('No model ID provided in URL');
-            return;
-        }
-
-        if (!loadingState || !modelContent || !errorMessage) {
-            console.error('Required DOM elements not found:', {
-                loadingState: !!loadingState,
-                modelContent: !!modelContent,
-                errorMessage: !!errorMessage
             });
-            return;
+        };
+
+        // Fetch Model Details with Retry
+        async function fetchWithRetry(url, retries = 3, delay = 1000) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url);
+                    if (!response.ok) {
+                        throw new Error(response.status === 404 ? 'Model not found' : `Failed to fetch model data (Status: ${response.status})`);
+                    }
+                    return await response.json();
+                } catch (error) {
+                    if (i === retries - 1) throw error;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+            }
         }
 
-        loadingState.classList.remove('hidden');
-        modelContent.classList.add('opacity-50');
-        errorMessage.classList.add('hidden');
+        let currentImageIndex = 0;
+        const portfolioImages = [];
 
-        try {
-            console.log(`Fetching model data from ${config.apiBaseUrl}/models/${modelId}`);
-            const model = await fetchWithRetry(`${config.apiBaseUrl}/models/${modelId}`);
-            console.log('Fetched model data:', JSON.stringify(model, null, 2));
+        async function fetchModelDetails() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const modelId = urlParams.get('id');
+            const modelDetails = document.getElementById('model-details');
+            const loadingState = document.getElementById('loading-state');
+            const modelContent = document.getElementById('model-content');
+            const errorMessage = document.getElementById('error-message');
 
-            if (!model || typeof model !== 'object') {
-                throw new Error('Invalid model data received from server');
+            if (!modelId) {
+                errorMessage.innerHTML = `
+                    <p class="text-red-500 font-medium">No model ID provided in the URL</p>
+                    <p class="mt-4">
+                        <a href="models.html" class="text-blue-500 hover:underline font-medium">Browse all models</a>
+                    </p>
+                `;
+                errorMessage.classList.remove('hidden');
+                loadingState.classList.add('hidden');
+                modelContent.classList.add('hidden');
+                console.error('No model ID provided in URL');
+                return;
             }
 
-            // Update Book Now Button
-            const bookNowBtn = document.getElementById('book-now-btn');
-            if (bookNowBtn) {
-                bookNowBtn.href = `booking.html?modelId=${model._id}&modelName=${encodeURIComponent(model.name)}&imageUrl=${encodeURIComponent(model.imageUrl)}`;
-                console.log('Updated Book Now button href:', bookNowBtn.href);
-            } else {
-                console.error('Element #book-now-btn not found');
+            if (!loadingState || !modelContent || !errorMessage) {
+                console.error('Required DOM elements not found:', {
+                    loadingState: !!loadingState,
+                    modelContent: !!modelContent,
+                    errorMessage: !!errorMessage
+                });
+                return;
             }
 
-            // Handle measurements with simplified logic
-            const measurements = model.measurements || { bust: null, waist: null, hips: null };
-            console.log('Raw measurements from server:', model.measurements);
-            console.log('Processed measurements:', measurements);
+            loadingState.classList.remove('hidden');
+            modelContent.classList.add('opacity-50');
+            errorMessage.classList.add('hidden');
 
-            // Update Meta Tags for SEO
-            document.querySelector('meta[name="description"]').setAttribute('content', model.description || 'Discover detailed information about our talented models at Beige Model Agency.');
-            document.title = `${model.name || 'Model'} Details | Beige`;
+            try {
+                console.log(`Fetching model data from ${config.apiBaseUrl}/models/${modelId}`);
+                const model = await fetchWithRetry(`${config.apiBaseUrl}/models/${modelId}`);
+                console.log('Fetched model data:', JSON.stringify(model, null, 2));
 
-            // Update Model Name
-            const modelName = document.getElementById('model-name');
-            if (modelName) modelName.textContent = model.name || 'N/A';
-            else console.error('Element #model-name not found');
+                if (!model || typeof model !== 'object') {
+                    throw new Error('Invalid model data received from server');
+                }
 
-            // Update Measurement
-            const attributes = document.getElementById('model-attributes');
-            if (attributes) {
-                const measurementsGrid = attributes.querySelector('.measurements-grid');
-                if (measurementsGrid) {
-                    measurementsGrid.innerHTML = `
-                        <p><strong>HEIGHT</strong><span>${model.height || 'N/A'}</span></p>
-                        <p><strong>BUST</strong><span>${measurements.bust !== null && measurements.bust !== undefined ? measurements.bust : 'N/A'}</span></p>
-                        <p><strong>WAIST</strong><span>${measurements.waist !== null && measurements.waist !== undefined ? measurements.waist : 'N/A'}</span></p>
-                        <p><strong>HIPS</strong><span>${measurements.hips !== null && measurements.hips !== undefined ? measurements.hips : 'N/A'}</span></p>
-                        <p><strong>HAIR</strong><span>${model.hair || 'N/A'}</span></p>
-                        <p><strong>EYES</strong><span>${model.eyes || 'N/A'}</span></p>
-                        <p><strong>SHOES</strong><span>${model.shoes || 'N/A'}</span></p>
-                    `;
-                } else console.error('Element .measurements-grid not found');
-            } else console.error('Element #model-attributes not found');
+                // Update Book Now Button
+                const bookNowBtn = document.getElementById('book-now-btn');
+                if (bookNowBtn) {
+                    bookNowBtn.href = `booking.html?modelId=${encodeURIComponent(model._id)}&modelName=${encodeURIComponent(model.name)}&imageUrl=${encodeURIComponent(model.imageUrl)}`;
+                    console.log('Updated Book Now button href:', bookNowBtn.href);
+                } else {
+                    console.error('Element #book-now-btn not found');
+                }
 
-            // Update Social Links
-            const socialLinksDiv = document.getElementById('social-links');
-            if (socialLinksDiv) {
-                const socialGrid = socialLinksDiv.querySelector('.model-social');
-                if (socialGrid) {
-                    console.log('Social links data:', model.socialLinks);
-                    socialGrid.innerHTML = '';
-                    if (model.socialLinks && (model.socialLinks.instagram || model.socialLinks.tiktok)) {
-                        if (model.socialLinks.instagram) {
-                            socialGrid.innerHTML += `
-                                <a href="${model.socialLinks.instagram}" target="_blank" class="hover:text-gray-600" aria-label="Instagram profile for ${model.name || 'Model'}">
-                                    <i class="fab fa-instagram mr-2"></i>Instagram
-                                </a>
-                            `;
-                            console.log('Added Instagram link:', model.socialLinks.instagram);
-                        }
-                        if (model.socialLinks.tiktok) {
-                            socialGrid.innerHTML += `
-                                <a href="${model.socialLinks.tiktok}" target="_blank" class="hover:text-gray-600" aria-label="TikTok profile for ${model.name || 'Model'}">
-                                    <i class="fab fa-tiktok mr-2"></i>TikTok
-                                </a>
-                            `;
-                            console.log('Added TikTok link:', model.socialLinks.tiktok);
+                // Update Meta Tags for SEO
+                document.querySelector('meta[name="description"]').setAttribute('content', model.description || 'Discover detailed information about our talented models at Beige Model Agency.');
+                document.title = `${model.name || 'Model'} Details | Beige`;
+
+                // Update Model Name
+                const modelName = document.getElementById('model-name');
+                if (modelName) {
+                    modelName.textContent = model.name || 'N/A';
+                    console.log('Set model name:', model.name || 'N/A');
+                } else {
+                    console.error('Element #model-name not found');
+                }
+
+                // Update Measurement
+                const attributes = document.getElementById('model-attributes');
+                if (attributes) {
+                    const measurementsGrid = attributes.querySelector('.measurements-grid');
+                    if (measurementsGrid) {
+                        measurementsGrid.innerHTML = `
+                            <p><strong>HEIGHT</strong><span>${model.height || 'N/A'}</span></p>
+                            <p><strong>BUST</strong><span>${model.bust !== null && model.bust !== undefined ? model.bust : 'N/A'}</span></p>
+                            <p><strong>WAIST</strong><span>${model.waist !== null && model.waist !== undefined ? model.waist : 'N/A'}</span></p>
+                            <p><strong>HIPS</strong><span>${model.hips !== null && model.hips !== undefined ? model.hips : 'N/A'}</span></p>
+                            <p><strong>HAIR</strong><span>${model.hair || 'N/A'}</span></p>
+                            <p><strong>EYES</strong><span>${model.eyes || 'N/A'}</span></p>
+                            <p><strong>SHOES</strong><span>${model.shoes || 'N/A'}</span></p>
+                        `;
+                        console.log('Updated measurements grid:', {
+                            height: model.height || 'N/A',
+                            bust: model.bust !== null && model.bust !== undefined ? model.bust : 'N/A',
+                            waist: model.waist !== null && model.waist !== undefined ? model.waist : 'N/A',
+                            hips: model.hips !== null && model.hips !== undefined ? model.hips : 'N/A',
+                            hair: model.hair || 'N/A',
+                            eyes: model.eyes || 'N/A',
+                            shoes: model.shoes || 'N/A'
+                        });
+                    } else {
+                        console.error('Element .measurements-grid not found');
+                    }
+                } else {
+                    console.error('Element #model-attributes not found');
+                }
+
+                // Update Social Links
+                const socialLinksDiv = document.getElementById('social-links');
+                if (socialLinksDiv) {
+                    const socialGrid = socialLinksDiv.querySelector('.model-social');
+                    if (socialGrid) {
+                        console.log('Social links data:', model.socialLinks);
+                        socialGrid.innerHTML = '';
+                        if (model.socialLinks && (model.socialLinks.instagram || model.socialLinks.tiktok)) {
+                            if (model.socialLinks.instagram) {
+                                socialGrid.innerHTML += `
+                                    <a href="${model.socialLinks.instagram}" target="_blank" class="hover:text-gray-600" aria-label="Instagram profile for ${model.name || 'Model'}">
+                                        <i class="fab fa-instagram mr-2"></i>Instagram
+                                    </a>
+                                `;
+                                console.log('Added Instagram link:', model.socialLinks.instagram);
+                            }
+                            if (model.socialLinks.tiktok) {
+                                socialGrid.innerHTML += `
+                                    <a href="${model.socialLinks.tiktok}" target="_blank" class="hover:text-gray-600" aria-label="TikTok profile for ${model.name || 'Model'}">
+                                        <i class="fab fa-tiktok mr-2"></i>TikTok
+                                    </a>
+                                `;
+                                console.log('Added TikTok link:', model.socialLinks.tiktok);
+                            }
+                        } else {
+                            socialGrid.innerHTML = '<p class="text-gray-600">No social links available</p>';
+                            console.log('Set socialGrid to "No social links available"');
                         }
                     } else {
-                        socialGrid.innerHTML = '<p class="text-gray-600">No social links available</p>';
-                        console.log('Set socialGrid to "No social links available"');
+                        console.error('Element .model-social not found');
                     }
-                } else console.error('Element .model-social not found');
-            } else console.error('Element #social-links not found');
-
-            // Update Image
-            const modelImage = document.getElementById('model-image');
-            if (modelImage) {
-                portfolioImages.length = 0;
-                if (model.imageUrl) {
-                    portfolioImages.push(model.imageUrl);
-                    modelImage.innerHTML = `<img src="${model.imageUrl}" alt="${model.name || 'Model'}'s profile image" class="h-full object-cover" loading="lazy" onclick="openModal(0)">`;
-                    console.log('Set model image:', model.imageUrl);
                 } else {
-                    modelImage.innerHTML = '<p class="text-gray-600">No image available</p>';
-                    console.log('Set model image to "No image available"');
+                    console.error('Element #social-links not found');
                 }
-            } else console.error('Element #model-image not found');
 
-            // Update About the Model
-            const modelDescription = document.getElementById('model-description');
-            if (modelDescription) {
-                modelDescription.textContent = model.description || 'No description available';
-                console.log('Set model description:', model.description || 'No description available');
-            } else console.error('Element #model-description not found');
+                // Update Image
+                const modelImage = document.getElementById('model-image');
+                if (modelImage) {
+                    portfolioImages.length = 0;
+                    if (model.imageUrl) {
+                        portfolioImages.push(model.imageUrl);
+                        modelImage.innerHTML = `<img src="${model.imageUrl}" alt="${model.name || 'Model'}'s profile image" class="h-full object-cover" loading="lazy" onclick="openModal(0)">`;
+                        console.log('Set model image:', model.imageUrl);
+                    } else {
+                        modelImage.innerHTML = '<p class="text-gray-600">No image available</p>';
+                        console.log('Set model image to "No image available"');
+                    }
+                } else {
+                    console.error('Element #model-image not found');
+                }
 
-            // Update Portfolio Gallery
-            const portfolioGrid = document.getElementById('portfolio-grid');
-            if (portfolioGrid) {
-                portfolioGrid.innerHTML = '';
-                if (Array.isArray(model.portfolioImages) && model.portfolioImages.length > 0) {
-                    model.portfolioImages.forEach((image, index) => {
-                        if (image.url) {
-                            portfolioImages.push(image.url);
-                            const div = document.createElement('div');
-                            div.className = 'portfolio-item aspect-[3/4] flex items-center';
-                            div.setAttribute('role', 'img');
-                            div.setAttribute('aria-label', `Portfolio Image ${index + 1} for ${model.name || 'Model'}`);
-                            div.innerHTML = `<img src="${image.url}" alt="Portfolio Image ${index + 1} for ${model.name || 'Model'}" class="h-full object-cover" loading="lazy" onclick="openModal(${portfolioImages.length - 1})">`;
-                            portfolioGrid.appendChild(div);
-                            console.log(`Added portfolio image ${index + 1}:`, image.url);
+                // Update About the Model
+                const modelDescription = document.getElementById('model-description');
+                if (modelDescription) {
+                    modelDescription.textContent = model.description || 'No description available';
+                    console.log('Set model description:', model.description || 'No description available');
+                } else {
+                    console.error('Element #model-description not found');
+                }
+
+                // Update Portfolio Gallery
+                const portfolioGrid = document.getElementById('portfolio-grid');
+                if (portfolioGrid) {
+                    portfolioGrid.innerHTML = '';
+                    if (Array.isArray(model.portfolioImages) && model.portfolioImages.length > 0) {
+                        model.portfolioImages.forEach((image, index) => {
+                            if (image.url) {
+                                portfolioImages.push(image.url);
+                                const div = document.createElement('div');
+                                div.className = 'portfolio-item aspect-[3/4] flex items-center';
+                                div.setAttribute('role', 'img');
+                                div.setAttribute('aria-label', `Portfolio Image ${index + 1} for ${model.name || 'Model'}`);
+                                div.innerHTML = `<img src="${image.url}" alt="Portfolio Image ${index + 1} for ${model.name || 'Model'}" class="h-full object-cover" loading="lazy" onclick="openModal(${portfolioImages.length - 1})">`;
+                                portfolioGrid.appendChild(div);
+                                console.log(`Added portfolio image ${index + 1}:`, image.url);
+                            }
+                        });
+                        if (portfolioGrid.children.length === 0) {
+                            portfolioGrid.innerHTML = '<p class="text-gray-600">No portfolio images available</p>';
+                            console.log('Set portfolioGrid to "No portfolio images available"');
                         }
-                    });
-                    if (portfolioGrid.children.length === 0) {
+                    } else {
                         portfolioGrid.innerHTML = '<p class="text-gray-600">No portfolio images available</p>';
                         console.log('Set portfolioGrid to "No portfolio images available"');
                     }
                 } else {
-                    portfolioGrid.innerHTML = '<p class="text-gray-600">No portfolio images available</p>';
-                    console.log('Set portfolioGrid to "No portfolio images available"');
+                    console.error('Element #portfolio-grid not found');
                 }
-            } else console.error('Element #portfolio-grid not found');
 
-            loadingState.classList.add('hidden');
-            modelContent.classList.remove('opacity-50');
-            errorMessage.classList.add('hidden');
-            revealOnScroll();
-        } catch (error) {
-            console.error('Error fetching model details:', error);
-            let message = 'Unable to load model details';
-            if (error.message.includes('Failed to fetch')) {
-                message = 'Unable to connect to the server. Please check your network or server status.';
-            } else if (error.message.includes('Model not found')) {
-                message = 'The requested model was not found.';
-            } else if (error.message.includes('Invalid model data')) {
-                message = 'Invalid model data received from server.';
-            }
-            errorMessage.innerHTML = `
-                <p class="text-red-500 font-medium">${message}</p>
-                <p class="mt-4">
-                    <a href="#" class="text-blue-500 hover:underline font-medium" id="retry-fetch">Try again</a> or 
-                    <a href="models.html" class="text-blue-500 hover:underline font-medium">Browse all models</a>
-                </p>
-            `;
-            errorMessage.classList.remove('hidden');
-            loadingState.classList.add('hidden');
-            modelContent.classList.add('hidden');
-            document.getElementById('retry-fetch').addEventListener('click', (e) => {
-                e.preventDefault();
-                fetchModelDetails();
-            });
-        }
-    }
-
-    function openModal(index) {
-        currentImageIndex = index;
-        const modalImage = document.getElementById('modal-image');
-        const modal = document.getElementById('image-modal');
-        const prevButton = document.getElementById('prev-image');
-        const nextButton = document.getElementById('next-image');
-        if (portfolioImages.length > 0 && index >= 0 && index < portfolioImages.length) {
-            modalImage.src = portfolioImages[index];
-            modalImage.alt = index === 0 ? `Profile image` : `Portfolio Image ${index}`;
-            console.log('Opened modal with image:', portfolioImages[index], 'at index:', index);
-        } else {
-            modalImage.src = '';
-            modalImage.alt = 'No image available';
-            console.log('No valid image for modal at index:', index);
-        }
-        modal.style.display = 'flex';
-        prevButton.style.display = index > 0 ? 'block' : 'none';
-        nextButton.style.display = index < portfolioImages.length - 1 ? 'block' : 'none';
-        modal.focus();
-        document.addEventListener('touchstart', handleTouchStart, false);
-        document.addEventListener('touchmove', handleTouchMove, false);
-        document.addEventListener('keydown', handleKeydown);
-    }
-
-    function closeModal() {
-        const modal = document.getElementById('image-modal');
-        modal.style.display = 'none';
-        document.removeEventListener('touchstart', handleTouchStart, false);
-        document.removeEventListener('touchmove', handleTouchMove, false);
-        document.removeEventListener('keydown', handleKeydown);
-        console.log('Modal closed');
-    }
-
-    function prevImage() {
-        if (currentImageIndex > 0) {
-            currentImageIndex--;
-            const modalImage = document.getElementById('modal-image');
-            modalImage.src = portfolioImages[currentImageIndex];
-            modalImage.alt = currentImageIndex === 0 ? `Profile image` : `Portfolio Image ${currentImageIndex}`;
-            document.getElementById('prev-image').style.display = currentImageIndex > 0 ? 'block' : 'none';
-            document.getElementById('next-image').style.display = 'block';
-            console.log('Navigated to previous image:', portfolioImages[currentImageIndex], 'at index:', currentImageIndex);
-        }
-    }
-
-    function nextImage() {
-        if (currentImageIndex < portfolioImages.length - 1) {
-            currentImageIndex++;
-            const modalImage = document.getElementById('modal-image');
-            modalImage.src = portfolioImages[currentImageIndex];
-            modalImage.alt = currentImageIndex === 0 ? `Profile image` : `Portfolio Image ${currentImageIndex}`;
-            document.getElementById('prev-image').style.display = 'block';
-            document.getElementById('next-image').style.display = currentImageIndex < portfolioImages.length - 1 ? 'block' : 'none';
-            console.log('Navigated to next image:', portfolioImages[currentImageIndex], 'at index:', currentImageIndex);
-        }
-    }
-
-    function handleKeydown(event) {
-        if (event.key === 'ArrowLeft') {
-            prevImage();
-        } else if (event.key === 'ArrowRight') {
-            nextImage();
-        } else if (event.key === 'Escape') {
-            closeModal();
-        }
-    }
-
-    let touchStartX = 0;
-    let touchEndX = 0;
-
-    function handleTouchStart(event) {
-        touchStartX = event.changedTouches[0].screenX;
-    }
-
-    function handleTouchMove(event) {
-        touchEndX = event.changedTouches[0].screenX;
-        handleSwipe();
-    }
-
-    function handleSwipe() {
-        const minSwipeDistance = 50;
-        if (touchEndX < touchStartX - minSwipeDistance && currentImageIndex < portfolioImages.length - 1) {
-            nextImage();
-        } else if (touchEndX > touchStartX + minSwipeDistance && currentImageIndex > 0) {
-            prevImage();
-        }
-        touchStartX = touchEndX;
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        adjustSectionPadding();
-        revealOnScroll();
-        fetchModelDetails();
-        const modelTitle = document.querySelector('#model-name');
-        if (modelTitle) modelTitle.classList.add('active');
-        try {
-            console.log('Body font-family:', getComputedStyle(document.body).fontFamily);
-            const logo = document.querySelector('.desktop-nav-bar a[href="index.html"]');
-            console.log('Nav logo font-size: 20px');
-            console.log('Nav logo computed font-size:', logo ? getComputedStyle(logo).fontSize : 'Not found');
-            console.log('Model title font-size:', modelTitle ? getComputedStyle(modelTitle).fontSize : 'Not found');
-            console.log('Model title position:', modelTitle ? modelTitle.getBoundingClientRect() : 'Not found');
-            console.log('Nav bar height:', document.querySelector('.desktop-nav-bar').offsetHeight);
-            console.log('Model-details section padding-top:', document.querySelector('#model-details') ? getComputedStyle(document.querySelector('#model-details')).paddingTop : 'Not found');
-            if (window.innerWidth < 640) {
-                const desktopNav = document.querySelector('.desktop-nav-bar .desktop-nav');
-                const burgerIcon = document.querySelector('.burger-icon');
-                const mobileNavLinks = document.querySelectorAll('.mobile-menu a');
-                console.log('Mobile view (< 640px): Desktop nav links display:', desktopNav ? (desktopNav.style.display || getComputedStyle(desktopNav).display) : 'Not found');
-                console.log('Mobile view (< 640px): Burger icon display:', burgerIcon ? (burgerIcon.style.display || getComputedStyle(burgerIcon).display) : 'Not found');
-                console.log('Mobile view (< 640px): Logo display:', logo ? (logo.style.display || getComputedStyle(logo).display) : 'Not found');
-                console.log('Mobile view (< 640px): Mobile nav link count:', mobileNavLinks.length);
-                mobileNavLinks.forEach((link, index) => {
-                    console.log(`Mobile nav link ${index + 1} text:`, link.textContent.trim());
+                loadingState.classList.add('hidden');
+                modelContent.classList.remove('opacity-50');
+                errorMessage.classList.add('hidden');
+                revealOnScroll();
+            } catch (error) {
+                console.error('Error fetching model details:', error);
+                let message = 'Unable to load model details';
+                if (error.message.includes('Failed to fetch')) {
+                    message = 'Unable to connect to the server. Please check your network or server status.';
+                } else if (error.message.includes('Model not found')) {
+                    message = 'The requested model was not found.';
+                } else if (error.message.includes('Invalid model data')) {
+                    message = 'Invalid model data received from server.';
+                }
+                errorMessage.innerHTML = `
+                    <p class="text-red-500 font-medium">${message}</p>
+                    <p class="mt-4">
+                        <a href="#" class="text-blue-500 hover:underline font-medium" id="retry-fetch">Try again</a> or 
+                        <a href="models.html" class="text-blue-500 hover:underline font-medium">Browse all models</a>
+                    </p>
+                `;
+                errorMessage.classList.remove('hidden');
+                loadingState.classList.add('hidden');
+                modelContent.classList.add('hidden');
+                document.getElementById('retry-fetch').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    fetchModelDetails();
                 });
-                if (logo) {
-                    const rect = logo.getBoundingClientRect();
-                    console.log('Mobile view (< 640px): Logo position:', { top: rect.top, left: rect.left, right: rect.right });
-                }
-                if (burgerIcon) {
-                    const rect = burgerIcon.getBoundingClientRect();
-                    console.log('Mobile view (< 640px): Burger icon position:', { top: rect.top, left: rect.left, right: rect.right });
-                }
+            }
+        }
+
+        function openModal(index) {
+            currentImageIndex = clampValue(0, index, portfolioImages.length - 1);
+            const modalImage = document.getElementById('modal-image');
+            const modal = document.getElementById('image-modal');
+            const prevButton = document.getElementById('prev-image');
+            const nextButton = document.getElementById('next-image');
+            if (portfolioImages.length > 0 && index >= 0 && index < portfolioImages.length) {
+                modalImage.src = portfolioImages[index];
+                modalImage.alt = index === 0 ? `Profile image for ${document.getElementById('model-name').textContent || 'Model'}` : `Portfolio Image ${index} for ${document.getElementById('model-name').textContent || 'Model'}`;
+                console.log('Opened modal with image:', portfolioImages[index], 'at index:', index);
             } else {
-                const desktopNavLinks = document.querySelectorAll('.desktop-nav a');
-                console.log('Desktop view (≥640px): Desktop nav link count:', desktopNavLinks.length);
-                desktopNavLinks.forEach((link, index) => {
-                    console.log(`Desktop nav link ${index + 1} text:`, link.textContent.trim());
+                modalImage.src = '';
+                modalImage.alt = 'No image available';
+                console.log('No valid image for modal at index:', index);
+            }
+            modal.style.display = 'flex';
+            prevButton.style.display = index > 0 ? 'block' : 'none';
+            nextButton.style.display = index < portfolioImages.length - 1 ? 'block' : 'none';
+            modal.focus();
+            document.addEventListener('touchstart', handleTouchStart, false);
+            document.addEventListener('touchmove', handleTouchMove, false);
+            document.addEventListener('keydown', handleKeydown);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('image-modal');
+            modal.style.display = 'none';
+            document.removeEventListener('touchstart', handleTouchStart, false);
+            document.removeEventListener('touchmove', handleTouchMove, false);
+            document.removeEventListener('keydown', handleKeydown);
+            console.log('Modal closed');
+        }
+
+        function prevImage() {
+            if (currentImageIndex > 0) {
+                currentImageIndex--;
+                const modalImage = document.getElementById('modal-image');
+                modalImage.src = portfolioImages[currentImageIndex];
+                modalImage.alt = currentImageIndex === 0 ? `Profile image for ${document.getElementById('model-name').textContent || 'Model'}` : `Portfolio Image ${currentImageIndex} for ${document.getElementById('model-name').textContent || 'Model'}`;
+                document.getElementById('prev-image').style.display = currentImageIndex > 0 ? 'block' : 'none';
+                document.getElementById('next-image').style.display = 'block';
+                console.log('Navigated to previous image:', portfolioImages[currentImageIndex], 'at index:', currentImageIndex);
+            }
+        }
+
+        function nextImage() {
+            if (currentImageIndex < portfolioImages.length - 1) {
+                currentImageIndex++;
+                const modalImage = document.getElementById('modal-image');
+                modalImage.src = portfolioImages[currentImageIndex];
+                modalImage.alt = currentImageIndex === 0 ? `Profile image for ${document.getElementById('model-name').textContent || 'Model'}` : `Portfolio Image ${currentImageIndex} for ${document.getElementById('model-name').textContent || 'Model'}`;
+                document.getElementById('prev-image').style.display = 'block';
+                document.getElementById('next-image').style.display = currentImageIndex < portfolioImages.length - 1 ? 'block' : 'none';
+                console.log('Navigated to next image:', portfolioImages[currentImageIndex], 'at index:', currentImageIndex);
+            }
+        }
+
+        function handleKeydown(event) {
+            if (event.key === 'ArrowLeft') {
+                prevImage();
+            } else if (event.key === 'ArrowRight') {
+                nextImage();
+            } else if (event.key === 'Escape') {
+                closeModal();
+            }
+        }
+
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        function handleTouchStart(event) {
+            touchStartX = event.changedTouches[0].screenX;
+        }
+
+        function handleTouchMove(event) {
+            touchEndX = event.changedTouches[0].screenX;
+            handleSwipe();
+        }
+
+        function handleSwipe() {
+            const minSwipeDistance = 50;
+            if (touchEndX < touchStartX - minSwipeDistance && currentImageIndex < portfolioImages.length - 1) {
+                nextImage();
+            } else if (touchEndX > touchStartX + minSwipeDistance && currentImageIndex > 0) {
+                prevImage();
+            }
+            touchStartX = touchEndX;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            adjustSectionPadding();
+            revealOnScroll();
+            fetchModelDetails();
+            const modelTitle = document.querySelector('#model-name');
+            if (modelTitle) modelTitle.classList.add('active');
+            try {
+                console.log('Body font-family:', getComputedStyle(document.body).fontFamily);
+                const logo = document.querySelector('.desktop-nav-bar a[href="index.html"]');
+                console.log('Nav logo font-size: 20px');
+                console.log('Nav logo computed font-size:', logo ? getComputedStyle(logo).fontSize : 'Not found');
+                console.log('Model title font-size:', modelTitle ? getComputedStyle(modelTitle).fontSize : 'Not found');
+                console.log('Model title position:', modelTitle ? modelTitle.getBoundingClientRect() : 'Not found');
+                console.log('Nav bar height:', document.querySelector('.desktop-nav-bar').offsetHeight);
+                console.log('Model-details section padding-top:', document.querySelector('#model-details') ? getComputedStyle(document.querySelector('#model-details')).paddingTop : 'Not found');
+                if (window.innerWidth < 640) {
+                    const desktopNav = document.querySelector('.desktop-nav-bar .desktop-nav');
+                    const menuToggle = document.querySelector('.menu-toggle');
+                    const mobileNavLinks = document.querySelectorAll('.mobile-menu a');
+                    console.log('Mobile view (< 640px): Desktop nav links display:', desktopNav ? (desktopNav.style.display || getComputedStyle(desktopNav).display) : 'Not found');
+                    console.log('Mobile view (< 640px): Menu toggle display:', menuToggle ? (menuToggle.style.display || getComputedStyle(menuToggle).display) : 'Not found');
+                    console.log('Mobile view (< 640px): Logo display:', logo ? (logo.style.display || getComputedStyle(logo).display) : 'Not found');
+                    console.log('Mobile view (< 640px): Mobile nav link count:', mobileNavLinks.length);
+                    mobileNavLinks.forEach((link, index) => {
+                        console.log(`Mobile nav link ${index + 1} text:`, link.textContent.trim());
+                    });
+                    if (logo) {
+                        const rect = logo.getBoundingClientRect();
+                        console.log('Mobile view (< 640px): Logo position:', { top: rect.top, left: rect.left, right: rect.right });
+                    }
+                    if (menuToggle) {
+                        const rect = menuToggle.getBoundingClientRect();
+                        console.log('Mobile view (< 640px): Menu toggle position:', { top: rect.top, left: rect.left, right: rect.right });
+                    }
+                } else {
+                    const desktopNavLinks = document.querySelectorAll('.desktop-nav a');
+                    console.log('Desktop view (≥640px): Desktop nav link count:', desktopNavLinks.length);
+                    desktopNavLinks.forEach((link, index) => {
+                        console.log(`Desktop nav link ${index + 1} text:`, link.textContent.trim());
+                    });
+                }
+            } catch (error) {
+                console.error('Error in DOMContentLoaded handler:', error);
+            }
+        });
+
+        window.addEventListener('resize', adjustSectionPadding);
+        window.addEventListener('scroll', revealOnScroll);
+
+        document.getElementById('newsletter-submit').addEventListener('click', async () => {
+            const emailInput = document.getElementById('newsletter-email');
+            const feedback = document.getElementById('newsletter-feedback');
+            const email = emailInput.value;
+
+            if (!email.match(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/)) {
+                feedback.className = 'text-red-500 text-center mb-4';
+                feedback.textContent = 'Please enter a valid email address';
+                feedback.classList.remove('hidden');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${config.apiBaseUrl}/newsletter`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email }),
                 });
+                const result = await response.json();
+                feedback.className = response.ok ? 'text-green-500 text-center mb-4' : 'text-red-500 text-center mb-4';
+                feedback.textContent = result.message || 'An error occurred';
+                feedback.classList.remove('hidden');
+                if (response.ok) {
+                    emailInput.value = '';
+                    setTimeout(() => feedback.classList.add('hidden'), 3000);
+                }
+            } catch (error) {
+                feedback.className = 'text-red-500 text-center mb-4';
+                feedback.textContent = 'Server error';
+                feedback.classList.remove('hidden');
             }
-        } catch (error) {
-            console.error('Error in DOMContentLoaded handler:', error);
-        }
-    });
-
-    window.addEventListener('resize', adjustSectionPadding);
-    window.addEventListener('scroll', revealOnScroll);
-
-    document.getElementById('newsletter-submit').addEventListener('click', async () => {
-        const emailInput = document.getElementById('newsletter-email');
-        const feedback = document.getElementById('newsletter-feedback');
-        const email = emailInput.value;
-
-        if (!email.match(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/)) {
-            feedback.className = 'text-red-500 text-center mb-4';
-            feedback.textContent = 'Please enter a valid email address';
-            feedback.classList.remove('hidden');
-            return;
-        }
-
-        try {
-            const response = await fetch(`${config.apiBaseUrl}/newsletter`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email }),
-            });
-            const result = await response.json();
-            feedback.className = response.ok ? 'text-green-500 text-center mb-4' : 'text-red-500 text-center mb-4';
-            feedback.textContent = result.message || 'An error occurred';
-            feedback.classList.remove('hidden');
-            if (response.ok) {
-                emailInput.value = '';
-                setTimeout(() => feedback.classList.add('hidden'), 3000);
-            }
-        } catch (error) {
-            feedback.className = 'text-red-500 text-center mb-4';
-            feedback.textContent = 'Server error';
-            feedback.classList.remove('hidden');
-        }
-    });
-</script>
+        });
+    </script>
 </body>
 </html>
