@@ -7,13 +7,13 @@ const cloudinary = require('../config/cloudinary');
 const upload = require('../middleware/multer');
 const mongoose = require('mongoose');
 
-// Validation for measurements to enforce "number cm" format
+// Validation for measurements to enforce numeric format
 const measurementValidation = (field) =>
   body(field)
     .optional()
-    .trim()
-    .matches(/^\d+(\.\d+)?\s*cm$/)
-    .withMessage(`${field} must be a number followed by "cm" (e.g., 86 cm)`);
+    .isFloat({ min: 0 })
+    .withMessage(`${field} must be a positive number (e.g., 86 or 86.5)`)
+    .toFloat(); // Convert to number
 
 // Public: Get all models with pagination
 router.get(
@@ -120,11 +120,7 @@ router.post(
     body('category')
       .isIn(['Light Skin', 'Dark Skin', 'Caramel Skin', 'Brown Skin'])
       .withMessage('Invalid category'),
-    body('height')
-      .optional()
-      .trim()
-      .isLength({ max: 20 })
-      .withMessage('Height cannot exceed 20 characters'),
+    measurementValidation('height'),
     measurementValidation('bust'),
     measurementValidation('waist'),
     measurementValidation('hips'),
@@ -222,10 +218,10 @@ router.post(
         imageUrl: result.secure_url,
         imagePublicId: result.public_id,
         description: description || undefined,
-        height: height || undefined,
-        bust: bust || undefined,
-        waist: waist || undefined,
-        hips: hips || undefined,
+        height: height !== undefined ? parseFloat(height) : undefined,
+        bust: bust !== undefined ? parseFloat(bust) : undefined,
+        waist: waist !== undefined ? parseFloat(bust) : undefined,
+        hips: hips !== undefined ? parseFloat(hips) : undefined,
         hair: hair || undefined,
         eyes: eyes || undefined,
         shoes: shoes || undefined,
@@ -270,11 +266,7 @@ router.put(
       .optional()
       .isIn(['Light Skin', 'Dark Skin', 'Caramel Skin', 'Brown Skin'])
       .withMessage('Invalid category'),
-    body('height')
-      .optional()
-      .trim()
-      .isLength({ max: 20 })
-      .withMessage('Height cannot exceed 20 characters'),
+    measurementValidation('height'),
     measurementValidation('bust'),
     measurementValidation('waist'),
     measurementValidation('hips'),
@@ -361,10 +353,10 @@ router.put(
         name,
         category,
         description: description || undefined,
-        height: height || undefined,
-        bust: bust || undefined,
-        waist: waist || undefined,
-        hips: hips || undefined,
+        height: height !== undefined ? parseFloat(height) : undefined,
+        bust: bust !== undefined ? parseFloat(bust) : undefined,
+        waist: waist !== undefined ? parseFloat(waist) : undefined,
+        hips: hips !== undefined ? parseFloat(hips) : undefined,
         hair: hair || undefined,
         eyes: eyes || undefined,
         shoes: shoes || undefined,
