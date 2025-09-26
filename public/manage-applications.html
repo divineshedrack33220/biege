@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beige | Manage Applications</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#faf6f0',
+                            100: '#f5ede1',
+                            200: '#ebdbc3',
+                            300: '#dfc39d',
+                            400: '#d2a16d',
+                            500: '#c8854a',
+                            600: '#ba6f3f',
+                            700: '#9b5835',
+                            800: '#7d4730',
+                            900: '#663b29',
+                            950: '#361e15',
+                        },
+                        secondary: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                            950: '#020617',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .sidebar {
+            transition: width 0.3s ease, box-shadow 0.3s ease;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+            box-shadow: 1px 0 10px rgba(0, 0, 0, 0.05);
+        }
+        .sidebar-collapsed {
+            width: 60px;
+        }
+        .sidebar-collapsed .sidebar-text {
+            display: none;
+        }
+        .sidebar-collapsed .logo-text {
+            display: none;
+        }
+        .sidebar-collapsed .nav-item {
+            justify-content: center;
+        }
+        .content-area {
+            transition: margin-left 0.3s ease;
+            background-color: #f8fafc;
+        }
+        .content-expanded {
+            margin-left: 60px;
+        }
+        .card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            animation: cardEnter 0.4s ease-out forwards;
+        }
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        @keyframes cardEnter {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .modal {
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            backdrop-filter: blur(2px);
+        }
+        .modal-enter {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        .modal-enter-active {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .modal-exit {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .modal-exit-active {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        .alert {
+            animation: slideIn 0.3s ease-out;
+            border-radius: 6px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        .form-input {
+            border: 1px solid #e2e8f0;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            width: 100%;
+            font-size: 0.8125rem;
+            background-color: #fff;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+        }
+        .form-input:focus {
+            border-color: #c8854a;
+            box-shadow: 0 0 0 3px rgba(200, 133, 74, 0.15);
+            background-color: #faf6f0;
+        }
+        .form-select {
+            border: 1px solid #e2e8f0;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            width: 100%;
+            font-size: 0.8125rem;
+            background-color: white;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.25em 1.25em;
+        }
+        .form-select:focus {
+            border-color: #c8854a;
+            box-shadow: 0 0 0 3px rgba(200, 133, 74, 0.15);
+            background-color: #faf6f0;
+        }
+        .form-button {
+            background-color: #c8854a;
+            color: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .form-button:hover {
+            background-color: #ba6f3f;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(200, 133, 74, 0.3);
+        }
+        .form-button:disabled {
+            background-color: #e2e8f0;
+            color: #94a3b8;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .spinner {
+            width: 0.875rem;
+            height: 0.875rem;
+            border: 2px solid #c8854a;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        .tooltip {
+            position: relative;
+        }
+        .tooltip:hover:after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #1e293b;
+            color: white;
+            padding: 0.375rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.6875rem;
+            font-weight: 500;
+            white-space: nowrap;
+            z-index: 10;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+            margin-bottom: 6px;
+        }
+        header {
+            background: linear-gradient(90deg, #ffffff 0%, #f8fafc 100%);
+            box-shadow: 0 1px 8px rgba(0, 0, 0, 0.05);
+        }
+        .nav-item {
+            border-radius: 6px;
+            margin: 0 6px;
+            transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+        }
+        .nav-item:hover {
+            transform: translateX(3px);
+        }
+        .nav-item.active {
+            background-color: #faf6f0;
+            color: #c8854a;
+            font-weight: 600;
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.2rem 0.6rem;
+            border-radius: 9999px;
+            font-size: 0.6875rem;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+        .badge-pending {
+            background-color: #fef3c7;
+            color: #d97706;
+        }
+        .badge-reviewed {
+            background-color: #dbeafe;
+            color: #2563eb;
+        }
+        .badge-accepted {
+            background-color: #d1fae5;
+            color: #059669;
+        }
+        .badge-rejected {
+            background-color: #fee2e2;
+            color: #dc2626;
+        }
+        .photo-thumbnail {
+            object-fit: cover;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .photo-thumbnail:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+        .carousel-container {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+        }
+        .carousel-slide {
+            display: flex;
+            transition: transform 0.3s ease-in-out;
+        }
+        .carousel-image {
+            width: 100%;
+            max-height: 70vh;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+        .carousel-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .carousel-nav:hover {
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+        .carousel-prev {
+            left: 1rem;
+        }
+        .carousel-next {
+            right: 1rem;
+        }
+        .carousel-counter {
+            position: absolute;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <!-- Sidebar -->
+    <div class="sidebar fixed top-0 left-0 h-screen bg-white shadow-md z-50 w-56 flex flex-col">
+        <div class="p-3 flex items-center justify-between border-b border-gray-200">
+            <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-primary-500 flex items-center justify-center text-white font-bold text-sm">
+                    B
+                </div>
+                <span class="logo-text ml-2 text-lg font-semibold">Beige Admin</span>
+            </div>
+            <button id="sidebar-toggle" class="text-gray-500 hover:text-gray-700" aria-label="Toggle Sidebar">
+                <i class="fas fa-bars text-sm"></i>
+            </button>
+        </div>
+        <div class="flex-1 overflow-y-auto py-3">
+            <nav>
+                <div class="px-3 mb-3">
+                    <p class="sidebar-text text-xs font-semibold text-gray-500 uppercase tracking-wider">Dashboard</p>
+                </div>
+                <ul>
+                    <li>
+                        <a href="admin.html" data-section="overview-section" class="nav-item flex items-center px-3 py-2 text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-colors">
+                            <i class="fas fa-tachometer-alt w-5 text-center"></i>
+                            <span class="sidebar-text ml-2 text-sm">Overview</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="manage-models.html" data-section="models-section" class="nav-item flex items-center px-3 py-2 text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-colors">
+                            <i class="fas fa-users w-5 text-center"></i>
+                            <span class="sidebar-text ml-2 text-sm">Models</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="manage-bookings.html" data-section="bookings-section" class="nav-item flex items-center px-3 py-2 text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-colors">
+                            <i class="fas fa-calendar-check w-5 text-center"></i>
+                            <span class="sidebar-text ml-2 text-sm">Bookings</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="manage-applications.html" data-section="applications-section" class="nav-item flex items-center px-3 py-2 text-gray-700 bg-primary-50 text-primary-600 active">
+                            <i class="fas fa-envelope w-5 text-center"></i>
+                            <span class="sidebar-text ml-2 text-sm">Applications</span>
+                        </a>
+                    </li>
+                </ul>
+                <div class="px-3 mt-4 mb-3">
+                    <p class="sidebar-text text-xs font-semibold text-gray-500 uppercase tracking-wider">Content</p>
+                </div>
+                <ul>
+                     <li>
+                        <a href="manage-about-companies.html" data-section="team-section" class="nav-item flex items-center px-3 py-2 text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-colors">
+                            <i class="fas fa-user-tie w-5 text-center"></i>
+                            <span class="sidebar-text ml-2 text-sm">About & Companies</span>
+                        </a>
+                    </li>
+                  
+                    <li>
+                        <a href="manage-team-members.html" data-section="team-section" class="nav-item flex items-center px-3 py-2 text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-colors">
+                            <i class="fas fa-user-tie w-5 text-center"></i>
+                            <span class="sidebar-text ml-2 text-sm">Team</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="manage-newsletter-subscribers.html" data-section="newsletter-section" class="nav-item flex items-center px-3 py-2 text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-colors">
+                            <i class="fas fa-newspaper w-5 text-center"></i>
+                            <span class="sidebar-text ml-2 text-sm">Newsletter</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        <div class="p-3 border-t border-gray-200 flex items-center">
+            <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                <i class="fas fa-user text-gray-500 text-sm"></i>
+            </div>
+            <div class="sidebar-text ml-2">
+                <p class="text-sm font-medium">Admin User</p>
+                <p class="text-xs text-gray-500">Super Admin</p>
+            </div>
+            <button id="logout-btn" class="sidebar-text ml-auto text-gray-500 hover:text-gray-700" aria-label="Logout">
+                <i class="fas fa-sign-out-alt text-sm"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content-area ml-56 min-h-screen">
+        <!-- Top Navigation -->
+        <header class="bg-white shadow-sm py-3 px-4 flex items-center justify-between sticky top-0 z-40">
+            <div class="flex items-center">
+                <h1 class="text-lg font-bold text-gray-900" id="dashboard-title">Manage Applications</h1>
+            </div>
+            <div class="flex items-center space-x-3">
+                <button class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors" aria-label="Notifications">
+                    <i class="fas fa-bell text-sm"></i>
+                </button>
+                <button class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors" aria-label="Messages">
+                    <i class="fas fa-envelope text-sm"></i>
+                </button>
+                <div class="relative">
+                    <button id="user-menu-button" class="flex items-center space-x-1 focus:outline-none" aria-label="User Menu">
+                        <div class="w-6 h-6 rounded-full bg-primary-500 flex items-center justify-center text-white font-medium text-xs">
+                            A
+                        </div>
+                        <span class="hidden md:inline-block text-sm font-medium">Admin User</span>
+                        <i class="fas fa-chevron-down text-xs"></i>
+                    </button>
+                    <div id="user-menu" class="hidden absolute right-0 mt-1 w-40 bg-white rounded-lg shadow-lg py-1 z-50">
+                        <a href="#" class="block px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-colors">Your Profile</a>
+                        <a href="#" class="block px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-colors">Settings</a>
+                        <a href="#" id="menu-logout" class="block px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-colors">Sign out</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Dashboard Content -->
+        <main class="p-4">
+            <div id="dashboard">
+                <!-- Applications Section -->
+                <div id="applications-section">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-base font-semibold text-gray-900">Applications</h2>
+                        <div class="flex items-center space-x-2">
+                            <input type="text" id="search-applications" class="form-input text-xs" placeholder="Search applications..." aria-label="Search applications">
+                            <button class="form-button text-xs" onclick="loadApplications()" aria-label="Refresh Applications">
+                                <i class="fas fa-sync-alt mr-1"></i> Refresh
+                            </button>
+                        </div>
+                    </div>
+                    <div id="application-loading" class="text-center text-xs py-3 hidden">
+                        <span class="spinner"></span> Loading...
+                    </div>
+                    <p id="application-error" class="text-red-500 text-xs py-2 hidden"></p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="application-grid"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Success Alert -->
+    <div id="success-alert" class="fixed top-3 right-3 z-50 hidden">
+        <div class="bg-green-50 border-l-4 border-green-500 p-3">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-check-circle text-green-500 text-sm"></i>
+                </div>
+                <div class="ml-2">
+                    <p id="success-message" class="text-xs font-medium text-green-700">Action completed successfully!</p>
+                </div>
+                <div class="ml-auto pl-2">
+                    <button id="close-success-alert" class="text-green-500 hover:text-green-700" aria-label="Close Success Alert">
+                        <i class="fas fa-times text-sm"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Alert -->
+    <div id="error-alert" class="fixed top-3 right-3 z-50 hidden">
+        <div class="bg-red-50 border-l-4 border-red-500 p-3">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-circle text-red-500 text-sm"></i>
+                </div>
+                <div class="ml-2">
+                    <p id="error-message" class="text-xs font-medium text-red-700">An error occurred.</p>
+                </div>
+                <div class="ml-auto pl-2">
+                    <button id="close-error-alert" class="text-red-500 hover:text-red-700" aria-label="Close Error Alert">
+                        <i class="fas fa-times text-sm"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmation-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-sm">
+            <div class="p-4">
+                <div class="flex items-center justify-center w-10 h-10 mx-auto bg-red-100 rounded-full">
+                    <i class="fas fa-exclamation text-red-600 text-base"></i>
+                </div>
+                <div class="mt-2 text-center sm:mt-3">
+                    <h3 id="confirmation-title" class="text-base font-semibold text-gray-900">Confirm Action</h3>
+                    <div class="mt-1">
+                        <p id="confirmation-message" class="text-xs text-gray-500">Are you sure you want to perform this action?</p>
+                    </div>
+                </div>
+            </div>
+            <div class="px-4 py-3 sm:flex sm:flex-row-reverse bg-gray-50 rounded-b-lg">
+                <button id="confirm-action" type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-3 py-1.5 bg-red-600 text-xs font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-2 sm:w-auto">Confirm</button>
+                <button id="cancel-action" type="button" class="mt-2 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-3 py-1.5 bg-white text-xs font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:mt-0 sm:ml-2 sm:w-auto">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Photo Modal -->
+    <div id="photo-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full">
+            <div class="p-4 flex justify-between items-center border-b border-gray-200">
+                <h3 class="text-base font-semibold text-gray-900">Application Photos</h3>
+                <button id="close-photo-modal" class="text-gray-500 hover:text-gray-700" aria-label="Close Photo Modal">
+                    <i class="fas fa-times text-sm"></i>
+                </button>
+            </div>
+            <div class="p-4">
+                <div class="carousel-container">
+                    <div id="carousel-slide" class="carousel-slide"></div>
+                    <button id="carousel-prev" class="carousel-nav carousel-prev hidden" aria-label="Previous Photo">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button id="carousel-next" class="carousel-nav carousel-next hidden" aria-label="Next Photo">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                    <div id="carousel-counter" class="carousel-counter"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function decodeToken(token) {
+            if (!token) {
+                console.error('No token provided for decoding');
+                return false;
+            }
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                console.log('Token payload:', payload);
+                const exp = payload.exp * 1000;
+                const now = Date.now();
+                console.log('Token expires at:', new Date(exp).toLocaleString());
+                console.log('Current time:', new Date(now).toLocaleString());
+                return exp > now;
+            } catch (error) {
+                console.error('Error decoding token:', error);
+                return false;
+            }
+        }
+
+        const token = localStorage.getItem('token');
+        const dashboard = document.getElementById('dashboard');
+        const applicationError = document.getElementById('application-error');
+        const applicationLoading = document.getElementById('application-loading');
+        const sidebar = document.querySelector('.sidebar');
+        const contentArea = document.querySelector('.content-area');
+        const userMenuButton = document.getElementById('user-menu-button');
+        const userMenu = document.getElementById('user-menu');
+
+        // Initial token check
+        if (!token || !decodeToken(token)) {
+            console.log('No valid token found, redirecting to login');
+            window.location.href = 'admin.html';
+        } else {
+            console.log('Token is valid');
+            dashboard.classList.remove('hidden');
+            loadApplications();
+        }
+
+        // Sidebar toggle
+        document.getElementById('sidebar-toggle').addEventListener('click', () => {
+            sidebar.classList.toggle('sidebar-collapsed');
+            contentArea.classList.toggle('content-expanded');
+        });
+
+        // User menu toggle
+        userMenuButton.addEventListener('click', () => {
+            userMenu.classList.toggle('hidden');
+        });
+
+        // Logout handlers
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            console.log('Logging out, clearing token');
+            localStorage.removeItem('token');
+            window.location.href = 'admin.html';
+            userMenu.classList.add('hidden');
+        });
+
+        document.getElementById('menu-logout').addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log('Logging out via menu, clearing token');
+            localStorage.removeItem('token');
+            window.location.href = 'admin.html';
+            userMenu.classList.add('hidden');
+        });
+
+        // Close alerts
+        document.getElementById('close-success-alert').addEventListener('click', () => {
+            document.getElementById('success-alert').classList.add('hidden');
+        });
+
+        document.getElementById('close-error-alert').addEventListener('click', () => {
+            document.getElementById('error-alert').classList.add('hidden');
+        });
+
+        // Photo modal close
+        document.getElementById('close-photo-modal').addEventListener('click', () => {
+            const photoModal = document.getElementById('photo-modal');
+            photoModal.classList.add('modal-exit-active');
+            setTimeout(() => {
+                photoModal.classList.add('hidden');
+                photoModal.classList.remove('modal-exit-active');
+            }, 200);
+        });
+
+        // Close photo modal on outside click or Escape key
+        document.getElementById('photo-modal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('photo-modal')) {
+                const photoModal = document.getElementById('photo-modal');
+                photoModal.classList.add('modal-exit-active');
+                setTimeout(() => {
+                    photoModal.classList.add('hidden');
+                    photoModal.classList.remove('modal-exit-active');
+                }, 200);
+            }
+        });
+
+        document.getElementById('photo-modal').addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const photoModal = document.getElementById('photo-modal');
+                photoModal.classList.add('modal-exit-active');
+                setTimeout(() => {
+                    photoModal.classList.add('hidden');
+                    photoModal.classList.remove('modal-exit-active');
+                }, 200);
+            } else if (e.key === 'ArrowLeft') {
+                showPrevPhoto();
+            } else if (e.key === 'ArrowRight') {
+                showNextPhoto();
+            }
+        });
+
+        // Search functionality
+        document.getElementById('search-applications').addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const cards = document.querySelectorAll('#application-grid .card');
+            cards.forEach(card => {
+                const name = card.querySelector('h4').textContent.toLowerCase();
+                const email = card.querySelector('p strong').nextSibling.textContent.toLowerCase();
+                card.style.display = name.includes(searchTerm) || email.includes(searchTerm) ? '' : 'none';
+            });
+        });
+
+        let currentPhotoIndex = 0;
+        let photos = [];
+
+        function showPhotoModal(photoArray, startIndex = 0) {
+            if (!Array.isArray(photoArray) || photoArray.length === 0) {
+                console.error('Invalid photo array:', photoArray);
+                return;
+            }
+            photos = photoArray;
+            currentPhotoIndex = Math.min(Math.max(startIndex, 0), photos.length - 1);
+            const photoModal = document.getElementById('photo-modal');
+            const carouselSlide = document.getElementById('carousel-slide');
+            const carouselPrev = document.getElementById('carousel-prev');
+            const carouselNext = document.getElementById('carousel-next');
+            const carouselCounter = document.getElementById('carousel-counter');
+
+            carouselSlide.innerHTML = '';
+            photos.forEach((photo, index) => {
+                const img = document.createElement('img');
+                img.src = photo;
+                img.alt = `Application Photo ${index + 1}`;
+                img.className = 'carousel-image';
+                carouselSlide.appendChild(img);
+            });
+
+            updateCarousel();
+            carouselSlide.style.transform = `translateX(-${currentPhotoIndex * 100}%)`;
+            carouselPrev.classList.toggle('hidden', photos.length <= 1);
+            carouselNext.classList.toggle('hidden', photos.length <= 1);
+            carouselCounter.textContent = `${currentPhotoIndex + 1} / ${photos.length}`;
+
+            photoModal.classList.remove('hidden');
+            photoModal.classList.add('modal-enter-active');
+            setTimeout(() => photoModal.classList.remove('modal-enter-active'), 200);
+
+            // Swipe detection
+            let touchStartX = 0;
+            let touchEndX = 0;
+
+            carouselSlide.addEventListener('touchstart', (e) => {
+                touchStartX = e.changedTouches[0].screenX;
+            });
+
+            carouselSlide.addEventListener('touchend', (e) => {
+                touchEndX = e.changedTouches[0].screenX;
+                if (touchEndX < touchStartX - 50) {
+                    showNextPhoto();
+                } else if (touchEndX > touchStartX + 50) {
+                    showPrevPhoto();
+                }
+            });
+        }
+
+        function showPrevPhoto() {
+            if (currentPhotoIndex > 0) {
+                currentPhotoIndex--;
+                updateCarousel();
+            }
+        }
+
+        function showNextPhoto() {
+            if (currentPhotoIndex < photos.length - 1) {
+                currentPhotoIndex++;
+                updateCarousel();
+            }
+        }
+
+        function updateCarousel() {
+            const carouselSlide = document.getElementById('carousel-slide');
+            const carouselPrev = document.getElementById('carousel-prev');
+            const carouselNext = document.getElementById('carousel-next');
+            const carouselCounter = document.getElementById('carousel-counter');
+
+            carouselSlide.style.transform = `translateX(-${currentPhotoIndex * 100}%)`;
+            carouselPrev.classList.toggle('hidden', currentPhotoIndex === 0);
+            carouselNext.classList.toggle('hidden', currentPhotoIndex === photos.length - 1);
+            carouselCounter.textContent = `${currentPhotoIndex + 1} / ${photos.length}`;
+        }
+
+        document.getElementById('carousel-prev').addEventListener('click', showPrevPhoto);
+        document.getElementById('carousel-next').addEventListener('click', showNextPhoto);
+
+        async function loadApplications() {
+            applicationLoading.classList.remove('hidden');
+            applicationError.classList.add('hidden');
+            try {
+                const token = localStorage.getItem('token');
+                console.log('Sending request with token for applications:', token);
+                if (!token) {
+                    throw new Error('No token found in localStorage');
+                }
+                const response = await fetch('/api/applications', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!response.ok) {
+                    const data = await response.json().catch(() => ({}));
+                    if (response.status === 401) {
+                        console.log('Unauthorized request, clearing token');
+                        localStorage.removeItem('token');
+                        window.location.href = 'admin.html';
+                        return;
+                    }
+                    throw new Error(data.message || `HTTP error: ${response.status}`);
+                }
+                const applications = await response.json();
+                const applicationGrid = document.getElementById('application-grid');
+                applicationGrid.innerHTML = '';
+                applications.forEach((app, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'card bg-white rounded-lg overflow-hidden';
+                    div.style.animationDelay = `${index * 0.05}s`;
+                    div.innerHTML = `
+                        <div class="p-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <h4 class="text-sm font-semibold text-gray-900 truncate">${app.firstName} ${app.lastName}</h4>
+                                <span class="badge badge-${app.status}">${app.status}</span>
+                            </div>
+                            <div class="space-y-1.5 text-xs text-gray-600">
+                                <p><strong>Email:</strong> ${app.email}</p>
+                                <p><strong>Alt Contact:</strong> ${app.altContact}</p>
+                                <p><strong>Bust:</strong> ${app.bust} cm</p>
+                                <p><strong>Waist:</strong> ${app.waist} cm</p>
+                                <p><strong>Hips:</strong> ${app.hips} cm</p>
+                                <p><strong>Agency:</strong> ${app.justCo}</p>
+                                <p><strong>Height:</strong> ${app.height}</p>
+                                <p><strong>Photos:</strong> <span class="text-blue-500 hover:underline cursor-pointer" onclick='showPhotoModal(${JSON.stringify(app.photos)})'>View ${app.photos.length} photo(s)</span></p>
+                                <p><strong>Instagram:</strong> ${app.instagram ? `<a href="${app.instagram}" target="_blank" class="text-blue-500 hover:underline">Link</a>` : 'N/A'}</p>
+                                <p><strong>TikTok:</strong> ${app.tiktok ? `<a href="${app.tiktok}" target="_blank" class="text-blue-500 hover:underline">Link</a>` : 'N/A'}</p>
+                                <p><strong>Location:</strong> ${app.location}</p>
+                                <p><strong>DOB:</strong> ${new Date(app.dob).toLocaleDateString()}</p>
+                                <p><strong>Start Date:</strong> ${app.startDate}</p>
+                            </div>
+                            <div class="mt-3">
+                                <label for="status-${app._id}" class="block text-xs font-medium text-gray-700 mb-1">Status</label>
+                                <select id="status-${app._id}" class="form-select text-xs" aria-label="Application Status">
+                                    <option value="pending" ${app.status === 'pending' ? 'selected' : ''}>Pending</option>
+                                    <option value="reviewed" ${app.status === 'reviewed' ? 'selected' : ''}>Reviewed</option>
+                                    <option value="accepted" ${app.status === 'accepted' ? 'selected' : ''}>Accepted</option>
+                                    <option value="rejected" ${app.status === 'rejected' ? 'selected' : ''}>Rejected</option>
+                                </select>
+                            </div>
+                            <div class="mt-3 flex space-x-2">
+                                <button onclick="updateApplicationStatus('${app._id}')" class="form-button text-xs tooltip" data-tooltip="Update Status" aria-label="Update Application Status">
+                                    <i class="fas fa-save mr-1"></i> Update
+                                </button>
+                                <button onclick="deleteApplication('${app._id}')" class="form-button bg-red-500 hover:bg-red-600 text-xs tooltip" data-tooltip="Delete Application" aria-label="Delete Application">
+                                    <i class="fas fa-trash mr-1"></i> Delete
+                                </button>
+                            </div>
+                            <div class="mt-3 grid grid-cols-3 gap-2">
+                                ${app.photos.map((photo, i) => `
+                                    <img src="${photo}" alt="Application Photo ${i + 1}" class="photo-thumbnail w-full h-20 object-cover" onclick='showPhotoModal(${JSON.stringify(app.photos)}, ${i})'>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                    applicationGrid.appendChild(div);
+                });
+            } catch (error) {
+                applicationError.textContent = error.message || 'Error loading applications';
+                applicationError.classList.remove('hidden');
+                document.getElementById('error-message').textContent = error.message;
+                document.getElementById('error-alert').classList.remove('hidden');
+                setTimeout(() => document.getElementById('error-alert').classList.add('hidden'), 3000);
+            } finally {
+                applicationLoading.classList.add('hidden');
+            }
+        }
+
+        async function updateApplicationStatus(id) {
+            const status = document.getElementById(`status-${id}`).value;
+            const button = document.querySelector(`button[onclick="updateApplicationStatus('${id}')"]`);
+            button.disabled = true;
+            button.innerHTML = '<span class="spinner"></span> Updating...';
+            applicationError.classList.add('hidden');
+            try {
+                const token = localStorage.getItem('token');
+                console.log('Updating application status with token:', token);
+                if (!token) {
+                    throw new Error('No token found in localStorage');
+                }
+                const response = await fetch(`/api/applications/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ status })
+                });
+                if (!response.ok) {
+                    const data = await response.json();
+                    if (response.status === 401) {
+                        console.log('Unauthorized request, clearing token');
+                        localStorage.removeItem('token');
+                        window.location.href = 'admin.html';
+                        return;
+                    }
+                    throw new Error(data.message || 'Error updating application status');
+                }
+                loadApplications();
+                document.getElementById('success-message').textContent = 'Application status updated successfully!';
+                document.getElementById('success-alert').classList.remove('hidden');
+                setTimeout(() => document.getElementById('success-alert').classList.add('hidden'), 3000);
+            } catch (error) {
+                applicationError.textContent = error.message;
+                applicationError.classList.remove('hidden');
+                document.getElementById('error-message').textContent = error.message;
+                document.getElementById('error-alert').classList.remove('hidden');
+                setTimeout(() => document.getElementById('error-alert').classList.add('hidden'), 3000);
+            } finally {
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-save mr-1"></i> Update';
+            }
+        }
+
+        async function deleteApplication(id) {
+            const confirmationModal = document.getElementById('confirmation-modal');
+            const confirmButton = document.getElementById('confirm-action');
+            const cancelButton = document.getElementById('cancel-action');
+            document.getElementById('confirmation-title').textContent = 'Delete Application';
+            document.getElementById('confirmation-message').textContent = 'Are you sure you want to delete this application? This action cannot be undone.';
+            confirmationModal.classList.remove('hidden');
+            confirmationModal.classList.add('modal-enter-active');
+            setTimeout(() => confirmationModal.classList.remove('modal-enter-active'), 200);
+
+            confirmButton.onclick = async () => {
+                applicationError.classList.add('hidden');
+                try {
+                    const token = localStorage.getItem('token');
+                    console.log('Deleting application with token:', token);
+                    if (!token) {
+                        throw new Error('No token found in localStorage');
+                    }
+                    const response = await fetch(`/api/applications/${id}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!response.ok) {
+                        const data = await response.json();
+                        if (response.status === 401) {
+                            console.log('Unauthorized request, clearing token');
+                            localStorage.removeItem('token');
+                            window.location.href = 'admin.html';
+                            return;
+                        }
+                        throw new Error(data.message || 'Error deleting application');
+                    }
+                    loadApplications();
+                    document.getElementById('success-message').textContent = 'Application deleted successfully!';
+                    document.getElementById('success-alert').classList.remove('hidden');
+                    setTimeout(() => document.getElementById('success-alert').classList.add('hidden'), 3000);
+                } catch (error) {
+                    applicationError.textContent = error.message;
+                    applicationError.classList.remove('hidden');
+                    document.getElementById('error-message').textContent = error.message;
+                    document.getElementById('error-alert').classList.remove('hidden');
+                    setTimeout(() => document.getElementById('error-alert').classList.add('hidden'), 3000);
+                } finally {
+                    confirmationModal.classList.add('modal-exit-active');
+                    setTimeout(() => {
+                        confirmationModal.classList.add('hidden');
+                        confirmationModal.classList.remove('modal-exit-active');
+                    }, 200);
+                }
+            };
+
+            cancelButton.onclick = () => {
+                confirmationModal.classList.add('modal-exit-active');
+                setTimeout(() => {
+                    confirmationModal.classList.add('hidden');
+                    confirmationModal.classList.remove('modal-exit-active');
+                }, 200);
+            };
+
+            confirmationModal.addEventListener('click', (e) => {
+                if (e.target === confirmationModal) {
+                    confirmationModal.classList.add('modal-exit-active');
+                    setTimeout(() => {
+                        confirmationModal.classList.add('hidden');
+                        confirmationModal.classList.remove('modal-exit-active');
+                    }, 200);
+                }
+            });
+
+            confirmationModal.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    confirmationModal.classList.add('modal-exit-active');
+                    setTimeout(() => {
+                        confirmationModal.classList.add('hidden');
+                        confirmationModal.classList.remove('modal-exit-active');
+                    }, 200);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

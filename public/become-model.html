@@ -1,0 +1,1476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="Apply to become a model with Beige Model Agency using our AI assistant, Anne.">
+    <meta name="keywords" content="model application, Beige agency, AI assistant, talent application">
+    <title>Anne - AI Model Application Assistant | Beige</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <script src="https://cdn.tailwindcss.com?cache_bust=20250812"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css?cache_bust=20250812">
+    <style>
+        @font-face {
+            font-family: 'Didot';
+            src: url('/fonts/Didot.woff2') format('woff2'),
+                 url('/fonts/Didot.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'Didot';
+            src: url('/fonts/Didot-Bold.woff2') format('woff2'),
+                 url('/fonts/Didot-Bold.woff') format('woff');
+            font-weight: bold;
+            font-style: normal;
+        }
+        * {
+            box-sizing: border-box;
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+        body {
+            font-family: 'Didot', serif;
+            scroll-behavior: smooth;
+            overflow-x: hidden;
+            font-weight: 400;
+            display: flex;
+            flex-direction: column;
+            background-color: #f7f7f8;
+        }
+        main {
+            flex: 1 0 auto;
+            scroll-margin-top: clamp(4rem, 10vw, 6rem);
+        }
+        footer {
+            flex-shrink: 0;
+        }
+        .container {
+            max-width: 1280px;
+            margin-left: auto;
+            margin-right: auto;
+            padding-left: clamp(1rem, 3vw, 1.5rem);
+            padding-right: clamp(1rem, 3vw, 1.5rem);
+        }
+        .desktop-nav-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.9);
+            z-index: 60;
+            padding: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            min-height: 64px;
+        }
+        .desktop-nav-bar a[href="index.html"] {
+            font-size: clamp(1.5rem, 2.5vw, 3rem);
+            font-weight: 300;
+            color: black;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            max-width: 90vw;
+            z-index: 65;
+        }
+        .desktop-nav-bar a[href="home.html"] {
+            font-size: clamp(1rem, 1.5vw, 1.25rem);
+        }
+        .menu-toggle {
+            display: none;
+            position: relative;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            z-index: 65;
+        }
+        .menu-toggle span {
+            display: block;
+            position: absolute;
+            height: 3px;
+            width: 100%;
+            background: #000000;
+            border-radius: 3px;
+            opacity: 1;
+            left: 0;
+            transform: rotate(0deg);
+            transition: all 0.3s ease;
+        }
+        .menu-toggle span:nth-child(1) {
+            top: 4px;
+        }
+        .menu-toggle span:nth-child(2) {
+            top: 10px;
+        }
+        .menu-toggle span:nth-child(3) {
+            top: 16px;
+        }
+        .menu-toggle.active span:nth-child(1) {
+            top: 10px;
+            transform: rotate(45deg);
+        }
+        .menu-toggle.active span:nth-child(2) {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        .menu-toggle.active span:nth-child(3) {
+            top: 10px;
+            transform: rotate(-45deg);
+        }
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            z-index: 55;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .mobile-menu.active {
+            display: flex;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .mobile-menu a {
+            font-size: clamp(1rem, 4vw, 1.5rem);
+            color: black;
+            text-decoration: none;
+            text-transform: uppercase;
+            margin: 1.5rem 0;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.3s ease, transform 0.3s ease, color 0.3s ease;
+        }
+        .mobile-menu.active a {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .mobile-menu.active a:nth-child(1) { transition-delay: 0.2s; }
+        .mobile-menu.active a:nth-child(2) { transition-delay: 0.3s; }
+        .mobile-menu.active a:nth-child(3) { transition-delay: 0.4s; }
+        .mobile-menu.active a:nth-child(4) { transition-delay: 0.5s; }
+        .mobile-menu.active a:nth-child(5) { transition-delay: 0.6s; }
+        .mobile-menu a[href="home.html"] {
+            font-size: clamp(1.25rem, 5vw, 1.75rem);
+        }
+        .mobile-menu a:hover, .mobile-menu a:focus {
+            color: #4b5563;
+            transform: scale(1.05);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        @keyframes bubbleIn {
+            0% { opacity: 0; transform: translateY(10px) scale(0.95); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes avatarBounce {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .chat-bubble {
+            animation: bubbleIn 0.3s ease-out forwards;
+            max-width: 80%;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        .chat-bubble .avatar {
+            animation: avatarBounce 0.3s ease-in-out;
+        }
+        @keyframes typing {
+            0% { transform: translateY(0); opacity: 0.4; }
+            50% { transform: translateY(-2px); opacity: 1; }
+            100% { transform: translateY(0); opacity: 0.4; }
+        }
+        .typing-dot {
+            animation: typing 1s infinite ease-in-out;
+            width: 8px;
+            height: 8px;
+            background: #666;
+            border-radius: 50%;
+        }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        .example-box {
+            background: #f5f5f5;
+            border-left: 3px solid #000;
+            padding: 0.5rem 0.75rem;
+            margin-top: 0.5rem;
+            border-radius: 0 4px 4px 0;
+            font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+        }
+        .option-button {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            padding: 0.375rem 0.75rem;
+            margin: 0.25rem;
+            font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .option-button:hover, .option-button:focus {
+            background: #e0e0e0;
+            outline: 2px solid #000;
+            outline-offset: 2px;
+        }
+        .option-button.selected {
+            background: #000;
+            color: white;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.75);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 50;
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 1.5rem;
+            max-width: 95%;
+            width: 500px;
+            border: 1px solid #000;
+            border-radius: 0.5rem;
+            transform: scale(0.95);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        .modal-content.show {
+            transform: scale(1);
+            opacity: 1;
+        }
+        .modal-content h3 {
+            font-size: clamp(1.125rem, 4vw, 1.25rem);
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: #000;
+            text-shadow: none;
+        }
+        .modal-content p {
+            color: #333;
+            margin-bottom: 1.5rem;
+            font-size: clamp(0.875rem, 2.5vw, 1rem);
+        }
+        .modal-content button {
+            background-color: #000;
+            color: #fff;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        .modal-content button:hover, .modal-content button:focus {
+            background-color: #333;
+            outline: 2px solid #000;
+            outline-offset: 2px;
+        }
+        .modal-content input, .modal-content textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 0.25rem;
+            font-size: clamp(0.875rem, 2.5vw, 1rem);
+            margin-bottom: 1rem;
+        }
+        .image-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .image-preview img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border: 1px solid #ddd;
+            border-radius: 0.5rem;
+            transition: transform 0.2s ease;
+        }
+        .image-preview img:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .image-preview .remove-btn {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #000;
+            color: #fff;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+        .image-preview .remove-btn:hover, .image-preview .remove-btn:focus {
+            background: #333;
+        }
+        .input-area {
+            position: fixed;
+            bottom: env(safe-area-inset-bottom, 0);
+            left: 0;
+            width: 100%;
+            max-width: 100%;
+            background-color: #fff;
+            padding: 0.25rem;
+            box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .input-container {
+            flex-grow: 1;
+            background: #f7f7f8;
+            border: 1px solid #d1d5db;
+            border-radius: 1.5rem;
+            padding: 0.25rem 0.5rem;
+        }
+        .input-area textarea {
+            background: transparent;
+            border: none;
+            outline: none;
+            resize: none;
+            width: 100%;
+            font-size: clamp(0.875rem, 2.5vw, 1rem);
+            line-height: 1.25;
+            min-height: 0.75rem;
+            max-height: 2rem;
+            padding: 0.25rem 0.5rem;
+        }
+        .input-area .send-btn {
+            background: transparent;
+            color: #000;
+            border: none;
+            padding: 0.25rem;
+            width: 2.5rem;
+            height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s, transform 0.2s;
+            flex-shrink: 0;
+        }
+        .input-area .send-btn i {
+            font-size: 1.125rem;
+        }
+        .input-area .send-btn:hover:not(:disabled), .input-area .send-btn:focus:not(:disabled) {
+            color: #333;
+            transform: scale(1.1);
+        }
+        .input-area .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            background: #FFFFFF;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            max-width: 80%;
+            animation: bubbleIn 0.3s ease-out forwards;
+        }
+        .message-timestamp {
+            font-size: 0.75rem;
+            color: #667781;
+            margin-top: 0.25rem;
+            text-align: right;
+        }
+        .summary-container {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 0.5rem;
+            cursor: pointer;
+            user-select: none;
+        }
+        .summary-field {
+            padding: 0.25rem;
+            border-radius: 0.25rem;
+            transition: background-color 0.2s;
+        }
+        .summary-field:hover {
+            background-color: #e0e0e0;
+        }
+        .summary-photos {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        .summary-photos img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border: 1px solid #ddd;
+            border-radius: 0.25rem;
+        }
+        .message-sound {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .hero-title {
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            font-weight: bold;
+            text-align: center;
+            margin: 1rem 0;
+            color: #000;
+        }
+        .whatsapp-button {
+            background: #25D366;
+            color: white;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            padding: 0.375rem 0.75rem;
+            margin: 0.25rem;
+            font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+        }
+        .whatsapp-button:hover, .whatsapp-button:focus {
+            background: #20b955;
+            outline: 2px solid #000;
+            outline-offset: 2px;
+        }
+        @media (min-width: 640px) {
+            .container {
+                padding-left: clamp(1.5rem, 3vw, 2rem);
+                padding-right: clamp(1.5rem, 3vw, 2rem);
+            }
+            .menu-toggle {
+                display: none !important;
+            }
+            .mobile-menu {
+                display: none !important;
+            }
+            .chat-container-wrapper {
+                padding: 0 1rem clamp(2rem, 5vw, 4rem) 1rem;
+                max-width: 768px;
+                margin-left: auto;
+                margin-right: auto;
+                border-radius: 0.5rem;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            }
+            .chat-container {
+                padding: 0.75rem;
+                max-height: calc(100vh - 64px - 74px);
+            }
+            .input-area {
+                max-width: 768px;
+                left: 50%;
+                transform: translateX(-50%);
+                padding: 0.5rem 1rem;
+            }
+        }
+        @media (min-width: 1024px) {
+            .container {
+                max-width: 1280px;
+            }
+            .chat-container-wrapper {
+                max-width: 896px;
+            }
+            .input-area {
+                max-width: 896px;
+            }
+        }
+        @media (max-width: 639px) {
+            .desktop-nav-bar .desktop-nav {
+                display: none !important;
+            }
+            .desktop-nav-bar {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            .menu-toggle {
+                display: flex;
+                align-items: center;
+            }
+            .desktop-nav-bar a[href="index.html"] {
+                position: relative;
+                z-index: 65;
+            }
+            .chat-container-wrapper {
+                padding: 0 0.25rem clamp(1.5rem, 5vw, 3rem) 0.25rem;
+                margin: 0;
+                border-radius: 0;
+                box-shadow: none;
+            }
+            .chat-container {
+                padding: 0.25rem;
+            }
+            .modal-content {
+                width: 95%;
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+ <nav class="desktop-nav-bar fixed top-0 left-0 right-0 bg-white bg-opacity-90 shadow-sm z-50 flex items-center">
+        <div class="container flex justify-between items-center">
+            <a href="index.html" class="font-bold tracking-wider" aria-label="Beige Home">BEIGE</a>
+            <div class="desktop-nav flex space-x-8">
+                <a href="home.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase" aria-label="Home">HOME</a>
+                <a href="about.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase" aria-label="About Us">ABOUT US</a>
+                <a href="models.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase" aria-label="Models">MODELS</a>
+                <a href="booking.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase" aria-label="Book a Model">BOOK A MODEL</a>
+                <a href="become-model.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase" aria-label="Become a Model">BECOME A MODEL</a>
+                <a href="contact.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase" aria-label="Contact">CONTACT</a>
+                <a href="discount.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase" aria-label="10% Discount">EXCLUSIVE OFFERS</a>
+            </div>
+            <div class="menu-toggle" onclick="toggleMenu()" aria-label="Toggle Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+        <div class="mobile-menu" role="dialog" aria-label="Mobile Navigation Menu">
+            <a href="home.html" aria-label="Home">HOME</a>
+            <a href="about.html" aria-label="About Us">ABOUT US</a>
+            <a href="models.html" aria-label="Models">MODELS</a>
+            <a href="booking.html" aria-label="Book a Model">BOOK A MODEL</a>
+            <a href="become-model.html" aria-label="Become a Model">BECOME A MODEL</a>
+            <a href="contact.html" aria-label="Contact">CONTACT</a>
+           <a href="discount.html" aria-label="10% Discount" 
+   style="background-color: black; color: white; padding: 8px 16px; 
+          text-decoration: none; display: inline-block; 
+          border-radius: 4px; font-weight: bold;">
+   EXCLUSIVE OFFERS
+</a>
+
+        </div>
+    </nav>
+    <!-- Main content -->
+    <main class="flex-1 flex flex-col">
+        <!-- Chat container -->
+        <div class="chat-container-wrapper w-full sm:mx-auto sm:max-w-3xl flex-1 flex flex-col">
+            <div id="chat-container" class="chat-container flex-1 overflow-y-auto custom-scrollbar">
+                <!-- Welcome message -->
+                <div class="chat-bubble flex">
+                    <div class="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 flex items-center justify-center mr-2 avatar">
+                        <i class="fas fa-robot text-gray-600 text-sm" aria-label="Anne, AI Assistant"></i>
+                    </div>
+                    <div class="bg-white p-2 rounded-lg border border-gray-200">
+                        <p class="text-gray-800 text-sm font-semibold">Anne</p>
+                        <p class="text-gray-800 text-sm">Hello! I'm Anne, your Model Application Assistant.</p>
+                        <p class="text-gray-800 text-sm mt-1">I'll guide you through the application process step by step with precision and professionalism.</p>
+                        <div class="mt-2 flex flex-wrap gap-2">
+                            <button onclick="startApplication()" class="option-button px-2 py-1 bg-black hover:bg-gray-800 rounded-full text-xs text-white transition">
+                                <i class="fas fa-play mr-1"></i> Start Application
+                            </button>
+                            <button onclick="addMessageToChat('user', 'I have a question about the application')" class="option-button px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-xs text-gray-800 transition">
+                                <i class="fas fa-question mr-1"></i> Ask a Question
+                            </button>
+                        </div>
+                        <div class="message-timestamp" id="welcome-timestamp"></div>
+                    </div>
+                </div>
+                <!-- Typing indicator -->
+                <div id="typing-indicator" class="typing-indicator hidden">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 flex items-center justify-center mr-2 avatar">
+                            <i class="fas fa-robot text-gray-600 text-sm" aria-label="Anne, AI Assistant"></i>
+                        </div>
+                        <div class="flex flex-col">
+                            <p class="text-gray-800 text-sm font-semibold">Anne</p>
+                            <div class="flex space-x-1">
+                                <div class="typing-dot"></div>
+                                <div class="typing-dot"></div>
+                                <div class="typing-dot"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input area -->
+            <div class="input-area">
+                <div class="input-container">
+                    <textarea
+                        id="user-input"
+                        rows="1"
+                        placeholder="Message Anne..."
+                        class="w-full"
+                    ></textarea>
+                </div>
+                <button id="send-btn" class="send-btn" disabled>
+                    <i class="fas fa-paper-plane text-lg"></i>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Photo Upload Modal -->
+    <div id="photo-upload-modal" class="modal-overlay hidden" role="dialog" aria-labelledby="photo-modal-title" aria-describedby="photo-modal-desc">
+        <div class="modal-content">
+            <h3 id="photo-modal-title">Upload Your Photos</h3>
+            <p id="photo-modal-desc">You must upload one full-body shot and one portrait (without makeup or filters, no merged or profile shots). You may also upload up to four additional photos (max 6 total). Accepted formats: JPG, PNG. Max size: 5MB per image.</p>
+            <div class="image-preview" id="image-preview"></div>
+            <input type="file" id="photo-input" accept="image/jpeg,image/png" multiple class="mb-4">
+            <div class="flex space-x-2">
+                <button onclick="submitPhotos()" class="flex-1">Submit Photos</button>
+                <button onclick="closePhotoModal()" class="flex-1 bg-gray-500 hover:bg-gray-600">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Field Modal -->
+    <div id="edit-field-modal" class="modal-overlay hidden" role="dialog" aria-labelledby="edit-modal-title" aria-describedby="edit-modal-desc">
+        <div class="modal-content">
+            <h3 id="edit-modal-title">Edit Field</h3>
+            <p id="edit-modal-desc">Edit the selected field below.</p>
+            <textarea id="edit-field-input" rows="1" class="w-full"></textarea>
+            <div class="flex space-x-2">
+                <button onclick="saveFieldEdit()" class="flex-1">Save</button>
+                <button onclick="closeEditModal()" class="flex-1 bg-gray-500 hover:bg-gray-600">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Clear Chat Modal -->
+    <div id="clear-chat-modal" class="modal-overlay hidden" role="dialog" aria-labelledby="clear-chat-title" aria-describedby="clear-chat-desc">
+        <div class="modal-content">
+            <h3 id="clear-chat-title">Clear Chat History</h3>
+            <p id="clear-chat-desc">Do you want to clear the chat history and start a new application?</p>
+            <div class="flex space-x-2">
+                <button onclick="clearChatHistory()" class="flex-1">Yes</button>
+                <button onclick="keepChatHistory()" class="flex-1 bg-gray-500 hover:bg-gray-600">No</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sound elements -->
+    <audio id="message-sound" class="message-sound" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-positive-interface-beep-221.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="send-sound" class="message-sound" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-modern-click-box-check-1120.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        const config = { apiBaseUrl: '/api' };
+
+        function escapeHtml(str) {
+            if (typeof str !== 'string') return str || '';
+            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
+
+        function clampValue(min, value, max) {
+            return Math.min(Math.max(value, min), max);
+        }
+
+        function toggleMenu() {
+            const mobileMenu = document.querySelector('.mobile-menu');
+            const menuToggle = document.querySelector('.menu-toggle');
+            mobileMenu.classList.toggle('active');
+            menuToggle.classList.toggle('active');
+            mobileMenu.setAttribute('aria-hidden', !mobileMenu.classList.contains('active'));
+            console.log('Mobile menu toggled:', mobileMenu.classList.contains('active') ? 'open' : 'closed');
+        }
+
+        function adjustSectionPadding() {
+            const main = document.querySelector('main');
+            const navBar = document.querySelector('.desktop-nav-bar');
+            const inputArea = document.querySelector('.input-area');
+            const chatContainer = document.getElementById('chat-container');
+            if (main && navBar && inputArea && chatContainer) {
+                const navHeight = navBar.offsetHeight;
+                const inputHeight = inputArea.offsetHeight;
+                main.style.paddingTop = `${navHeight}px`;
+                chatContainer.style.paddingBottom = `${inputHeight + 16}px`;
+                chatContainer.style.maxHeight = `calc(100vh - ${navHeight}px - ${inputHeight + 16}px)`;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            adjustSectionPadding();
+            window.addEventListener('resize', adjustSectionPadding);
+
+            // Set welcome message timestamp
+            document.getElementById('welcome-timestamp').textContent = getCurrentTime();
+
+            let applicationData = JSON.parse(localStorage.getItem('applicationData')) || {
+                firstName: '',
+                lastName: '',
+                bust: '',
+                waist: '',
+                hips: '',
+                justCo: '',
+                height: '',
+                instagram: '',
+                tiktok: '',
+                location: '',
+                dob: '',
+                startDate: '',
+                email: '',
+                altContact: ''
+            };
+            let currentQuestion = parseInt(localStorage.getItem('currentQuestion')) || 0;
+            let isApplicationActive = JSON.parse(localStorage.getItem('isApplicationActive')) || false;
+            let selectedPhotos = JSON.parse(localStorage.getItem('selectedPhotos')) || [];
+            let messages = JSON.parse(localStorage.getItem('chatMessages')) || [];
+            let currentEditField = null;
+            let holdTimer = null;
+
+            const validators = {
+                firstName: (value) => !value ? 'First name is required' : null,
+                lastName: (value) => !value ? 'Last name is required' : null,
+                bust: (value) => !value ? 'Bust measurement is required' : null,
+                waist: (value) => !value ? 'Waist measurement is required' : null,
+                hips: (value) => !value ? 'Hip measurement is required' : null,
+                justCo: (value) => !value ? 'Agency representation status is required' : null,
+                height: (value) => !value ? 'Height is required' : null,
+                instagram: () => null,
+                tiktok: () => null,
+                location: (value) => !value ? 'Location is required' : null,
+                dob: (value) => !value ? 'Date of birth is required' : null,
+                startDate: (value) => !value ? 'Start date is required' : null,
+                email: (value) => !value ? 'Email is required' : null,
+                altContact: (value) => !value ? 'Alternative contact method is required' : null
+            };
+
+            const applicationQuestions = [
+                { question: "Let's begin with your first name. Please provide your first name.", field: 'firstName', example: "Example: Jane" },
+                { question: "Thank you! Now, please provide your last name.", field: 'lastName', example: "Example: Smith" },
+                { question: "Please provide your bust measurement.", field: 'bust', example: "Example: 86" },
+                { question: "Please provide your waist measurement.", field: 'waist', example: "Example: 61" },
+                { question: "Please provide your hip measurement.", field: 'hips', example: "Example: 89" },
+                { question: "Please provide your agency representation status (current or past agencies, or 'Independent' if unrepresented).", field: 'justCo', example: "Example: ------ Model Management or Independent" },
+                { question: "Please provide your height.", field: 'height', example: "Example: 5 feet 9 inches" },
+                { question: "You will need to submit two photos: one full-body shot and one portrait. Please click the button below to upload your photos or ask any questions about the photo requirements.", field: 'photos', example: "Example response: I understand" },
+                { question: "If you have an Instagram profile, please share your username or link.", field: 'instagram', example: "Example: yourusername or leave blank" },
+                { question: "If you have a TikTok account, please provide your username or link.", field: 'tiktok', example: "Example: yourusername or leave blank" },
+                { question: "Please specify your current location.", field: 'location', example: "Example: Los Angeles, USA" },
+                { question: "Please provide your date of birth.", field: 'dob', example: "Example: May 15, 1995" },
+                { question: "When would you like to begin modeling?", field: 'startDate', example: "Example: January 2026" },
+                { question: "Please provide an email address we can use to contact you.", field: 'email', example: "Example: yourname@example.com" },
+                { question: "Please provide an alternative contact method.", field: 'altContact', example: "Example: +1239077178197 or alternate@example.com" }
+            ];
+
+            const chatContainer = document.getElementById('chat-container');
+            const userInput = document.getElementById('user-input');
+            const sendBtn = document.getElementById('send-btn');
+            const typingIndicator = document.getElementById('typing-indicator');
+            const messageSound = document.getElementById('message-sound');
+            const sendSound = document.getElementById('send-sound');
+            const photoInput = document.getElementById('photo-input');
+            const imagePreview = document.getElementById('image-preview');
+            const photoModal = document.getElementById('photo-upload-modal');
+            const editFieldModal = document.getElementById('edit-field-modal');
+            const editFieldInput = document.getElementById('edit-field-input');
+            const clearChatModal = document.getElementById('clear-chat-modal');
+
+            // Add event listeners for mobile menu
+            document.querySelectorAll('.mobile-menu a').forEach(link => {
+                link.addEventListener('click', toggleMenu);
+            });
+
+            // Play sound function
+            function playSound(soundElement) {
+                soundElement.currentTime = 0;
+                soundElement.play().catch(e => console.log("Sound playback prevented:", e));
+            }
+
+            // Scroll to bottom
+            let scrollTimeout = null;
+            const scrollToBottom = () => {
+                if (scrollTimeout) clearTimeout(scrollTimeout);
+                requestAnimationFrame(() => {
+                    chatContainer.scrollTo({
+                        top: chatContainer.scrollHeight,
+                        behavior: 'smooth'
+                    });
+                    scrollTimeout = setTimeout(() => {
+                        const isScrolledToBottom = Math.abs(chatContainer.scrollHeight - chatContainer.scrollTop - chatContainer.clientHeight) <= 1;
+                        if (!isScrolledToBottom) {
+                            chatContainer.scrollTo({
+                                top: chatContainer.scrollHeight,
+                                behavior: 'smooth'
+                            });
+                        }
+                    }, 200);
+                });
+            };
+
+            // Mutation observer for chat container
+            const observer = new MutationObserver(() => {
+                scrollToBottom();
+            });
+            observer.observe(chatContainer, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+
+            // Resize observer for chat container
+            const resizeObserver = new ResizeObserver(() => {
+                scrollToBottom();
+            });
+            resizeObserver.observe(chatContainer);
+
+            // Auto-resize textarea
+            userInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = `${Math.min(this.scrollHeight, 64)}px`;
+                sendBtn.disabled = this.value.trim().length === 0;
+                scrollToBottom();
+            });
+
+            // Handle mobile keyboard
+            if (window.visualViewport) {
+                window.visualViewport.addEventListener('resize', () => {
+                    if (document.activeElement === userInput) {
+                        scrollToBottom();
+                    }
+                });
+            }
+
+            // Scroll on textarea focus
+            userInput.addEventListener('focus', () => {
+                setTimeout(scrollToBottom, 100);
+            });
+
+            // Send message on Enter
+            userInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    if (userInput.value.trim().length > 0) {
+                        sendMessage();
+                    }
+                }
+            });
+
+            // Send button click
+            sendBtn.addEventListener('click', sendMessage);
+
+            // Handle photo input change
+            photoInput.addEventListener('change', function(e) {
+                const files = Array.from(e.target.files);
+                if (selectedPhotos.length + files.length > 6) {
+                    alert('You can upload a maximum of 6 photos.');
+                    return;
+                }
+
+                files.forEach(file => {
+                    if (file.size > 5 * 1024 * 1024) {
+                        alert(`File ${file.name} exceeds 5MB limit.`);
+                        return;
+                    }
+                    if (!['image/jpeg', 'image/png'].includes(file.type)) {
+                        alert(`File ${file.name} must be JPG or PNG.`);
+                        return;
+                    }
+
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        selectedPhotos.push({ name: file.name, data: event.target.result });
+                        localStorage.setItem('selectedPhotos', JSON.stringify(selectedPhotos));
+                        updateImagePreview();
+                    };
+                    reader.readAsDataURL(file);
+                });
+
+                photoInput.value = '';
+                scrollToBottom();
+            });
+
+            function updateImagePreview() {
+                imagePreview.innerHTML = '';
+                selectedPhotos.forEach((photo, index) => {
+                    const previewDiv = document.createElement('div');
+                    previewDiv.className = 'relative';
+                    previewDiv.innerHTML = `
+                        <img src="${photo.data}" alt="Preview ${index + 1}">
+                        <span class="remove-btn" onclick="removePhoto(${index})">&times;</span>
+                    `;
+                    imagePreview.appendChild(previewDiv);
+                });
+                scrollToBottom();
+            }
+
+            window.removePhoto = function(index) {
+                selectedPhotos.splice(index, 1);
+                localStorage.setItem('selectedPhotos', JSON.stringify(selectedPhotos));
+                updateImagePreview();
+                scrollToBottom();
+            };
+
+            window.submitPhotos = function() {
+                if (selectedPhotos.length < 2) {
+                    alert('Please upload at least one full-body shot and one portrait.');
+                    return;
+                }
+                photoModal.classList.add('hidden');
+                photoModal.querySelector('.modal-content').classList.remove('show');
+                addMessageToChat('user', `Uploaded ${selectedPhotos.length} photo(s)`);
+                currentQuestion++;
+                localStorage.setItem('currentQuestion', currentQuestion);
+                setTimeout(() => {
+                    askQuestion(currentQuestion);
+                    scrollToBottom();
+                }, 100);
+            };
+
+            window.closePhotoModal = function() {
+                selectedPhotos = [];
+                localStorage.setItem('selectedPhotos', JSON.stringify(selectedPhotos));
+                photoModal.classList.add('hidden');
+                photoModal.querySelector('.modal-content').classList.remove('show');
+                addMessageToChat('ai', 'Photo upload cancelled. Please upload your photos to continue.');
+                setTimeout(() => {
+                    askQuestion(currentQuestion);
+                    scrollToBottom();
+                }, 100);
+            };
+
+            window.saveFieldEdit = function() {
+                if (currentEditField === 'photos') {
+                    editFieldModal.classList.add('hidden');
+                    editFieldModal.querySelector('.modal-content').classList.remove('show');
+                    photoModal.classList.remove('hidden');
+                    photoModal.querySelector('.modal-content').classList.add('show');
+                    return;
+                }
+                const newValue = editFieldInput.value.trim();
+                const validationError = validators[currentEditField]?.(newValue);
+                if (validationError) {
+                    alert(validationError);
+                    return;
+                }
+                applicationData[currentEditField] = newValue;
+                localStorage.setItem('applicationData', JSON.stringify(applicationData));
+                editFieldModal.classList.add('hidden');
+                editFieldModal.querySelector('.modal-content').classList.remove('show');
+                showApplicationReview();
+            };
+
+            window.closeEditModal = function() {
+                editFieldModal.classList.add('hidden');
+                editFieldModal.querySelector('.modal-content').classList.remove('show');
+                scrollToBottom();
+            };
+
+            window.clearChatHistory = function() {
+                localStorage.removeItem('chatMessages');
+                localStorage.removeItem('applicationData');
+                localStorage.removeItem('currentQuestion');
+                localStorage.removeItem('isApplicationActive');
+                localStorage.removeItem('selectedPhotos');
+                messages = [];
+                applicationData = {
+                    firstName: '', lastName: '', bust: '', waist: '', hips: '', justCo: '',
+                    height: '', instagram: '', tiktok: '', location: '', dob: '',
+                    startDate: '', email: '', altContact: ''
+                };
+                currentQuestion = 0;
+                isApplicationActive = false;
+                selectedPhotos = [];
+                while (chatContainer.children.length > 2) {
+                    chatContainer.removeChild(chatContainer.children[1]);
+                }
+                clearChatModal.classList.add('hidden');
+                clearChatModal.querySelector('.modal-content').classList.remove('show');
+                scrollToBottom();
+            };
+
+            window.keepChatHistory = function() {
+                clearChatModal.classList.add('hidden');
+                clearChatModal.querySelector('.modal-content').classList.remove('show');
+                restoreMessages();
+                scrollToBottom();
+            };
+
+            function getCurrentTime() {
+                const now = new Date();
+                const hours = now.getHours().toString().padStart(2, '0');
+                const minutes = now.getMinutes().toString().padStart(2, '0');
+                return `${hours}:${minutes}`;
+            }
+
+            function simulateTyping(message, callback) {
+                typingIndicator.classList.remove('hidden');
+                const delay = 500 + message.length * 20;
+                setTimeout(() => {
+                    typingIndicator.classList.add('hidden');
+                    callback();
+                }, delay);
+            }
+
+            function addMessageToChat(sender, message) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `chat-bubble flex ${sender === 'user' ? 'justify-end' : 'flex-row'}`;
+                const timestamp = getCurrentTime();
+                const isAskQuestion = message === 'I have a question about the application' && sender === 'user';
+                const isAIResponseToQuestion = sender === 'ai' && messages.length > 0 && messages[messages.length - 1].message === 'I have a question about the application' && messages[messages.length - 1].sender === 'user';
+
+                if (sender === 'user') {
+                    messageDiv.innerHTML = `
+                        <div class="bg-black text-white p-3 rounded-lg">
+                            <p class="text-sm">${message}</p>
+                            <div class="message-timestamp">${timestamp}</div>
+                        </div>
+                        <div class="w-8 h-8 rounded-full bg-gray-800 flex-shrink-0 flex items-center justify-center ml-2 avatar">
+                            <i class="fas fa-user text-white text-sm" aria-label="User"></i>
+                        </div>
+                    `;
+                    chatContainer.insertBefore(messageDiv, typingIndicator);
+                    playSound(sendSound);
+                    messages.push({ sender, message, timestamp });
+                    localStorage.setItem('chatMessages', JSON.stringify(messages));
+                    scrollToBottom();
+
+                    // Respond to "Ask a Question" button
+                    if (isAskQuestion) {
+                        simulateTyping('For inquiries, please click the WhatsApp button below to connect with our team.', () => {
+                            addMessageToChat('ai', 'For inquiries, please click the WhatsApp button below to connect with our team.');
+                        });
+                    }
+                } else {
+                    const currentQ = applicationQuestions[currentQuestion];
+                    const isAppQuestion = isApplicationActive && currentQ && currentQ.question === message;
+                    messageDiv.innerHTML = `
+                        <div class="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 flex items-center justify-center mr-2 avatar">
+                            <i class="fas fa-robot text-gray-600 text-sm" aria-label="Anne, AI Assistant"></i>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg border border-gray-200">
+                            <p class="text-gray-800 text-sm font-semibold">Anne</p>
+                            <p class="text-gray-800 text-sm">${message}</p>
+                            ${isAppQuestion && currentQ.example ?
+                                `<div class="example-box">${currentQ.example}</div>` : ''}
+                            ${isAppQuestion && currentQ.field === 'photos' ?
+                                `<div class="mt-2">
+                                    <button onclick="document.getElementById('photo-upload-modal').classList.remove('hidden'); document.getElementById('photo-upload-modal').querySelector('.modal-content').classList.add('show')" class="option-button">
+                                        Upload Photos
+                                    </button>
+                                </div>` : ''}
+                            ${isAIResponseToQuestion ? `
+                                <div class="mt-2">
+                                    <a href="https://wa.me/+2347033560653?text=Hi,%20I%20have%20a%20question%20about%20my%20Beige%20Model%20Agency%20application" target="_blank" class="whatsapp-button">
+                                        <i class="fab fa-whatsapp mr-1"></i> Chat on WhatsApp
+                                    </a>
+                                </div>` : ''}
+                            <div class="message-timestamp">${timestamp}</div>
+                        </div>
+                    `;
+                    chatContainer.insertBefore(messageDiv, typingIndicator);
+                    playSound(messageSound);
+                    messages.push({ sender, message, timestamp });
+                    localStorage.setItem('chatMessages', JSON.stringify(messages));
+                    scrollToBottom();
+                }
+            }
+
+            function sendMessage() {
+                const message = userInput.value.trim();
+                if (message.length === 0) return;
+
+                addMessageToChat('user', message);
+                userInput.value = '';
+                userInput.style.height = '0.75rem';
+                sendBtn.disabled = true;
+
+                simulateTyping('', () => {
+                    if (isApplicationActive) {
+                        if (applicationQuestions[currentQuestion].field === 'photos') {
+                            if (message.toLowerCase() === 'i understand') {
+                                photoModal.classList.remove('hidden');
+                                photoModal.querySelector('.modal-content').classList.add('show');
+                            } else {
+                                addMessageToChat('ai', "Please type 'I understand' to open the photo upload modal or ask a question about the photo requirements.");
+                                setTimeout(() => {
+                                    askQuestion(currentQuestion);
+                                    scrollToBottom();
+                                }, 100);
+                            }
+                        } else {
+                            processApplicationAnswer(message);
+                        }
+                    } else {
+                        const response = generateAIResponse(message);
+                        addMessageToChat('ai', response);
+                    }
+                });
+            }
+
+            function generateAIResponse(userMessage) {
+                const lowerMessage = userMessage.toLowerCase();
+
+                if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey')) {
+                    return "Hello! I'm Anne, your professional model application assistant. How may I assist you today?";
+                } else if (lowerMessage.includes('measurement') || lowerMessage.includes('bust') || lowerMessage.includes('waist') || lowerMessage.includes('hip')) {
+                    return "Please provide your measurements one at a time. I'll ask for each measurement individually during the application process.";
+                } else if (lowerMessage.includes('height') || lowerMessage.includes('tall')) {
+                    return "Height requirements vary by market. Please provide your height during the application process.";
+                } else if (lowerMessage.includes('photo') || lowerMessage.includes('picture') || lowerMessage.includes('image')) {
+                    return "For your application portfolio, you'll need: 1) A full-body shot in form-fitting clothing (swimsuit or athletic wear preferred), and 2) A clean portrait with minimal makeup. Both should be well-lit with a neutral background. Digital submissions should be high resolution. Photos must be one full body and one portrait, without makeup or filters, no merged or profile shots. You may upload up to 6 photos total via the upload modal.";
+                } else if (lowerMessage.includes('instagram') || lowerMessage.includes('tiktok') || lowerMessage.includes('social media')) {
+                    return "Social media presence is increasingly important. Please provide links to your Instagram and/or TikTok profiles if available. Ensure profiles are public and represent your professional image.";
+                } else if (lowerMessage.includes('just & co') || lowerMessage.includes('just and co') || lowerMessage.includes('agency')) {
+                    return "The 'Just & Co' field documents your agency representation history. List current or past agencies, or 'Independent' if unrepresented. Exclusive contracts should be disclosed.";
+                } else if (lowerMessage.includes('process') || lowerMessage.includes('next step') || lowerMessage.includes('what happens')) {
+                    return "Our review process: 1) Initial application screening (2-3 weeks), 2) Potential callback for interview, 3) Test shoots if applicable, 4) Final evaluation. We maintain high standards and appreciate your patience.";
+                } else if (lowerMessage.includes('requirement') || lowerMessage.includes('need') || lowerMessage.includes('qualification')) {
+                    return "Key evaluation criteria include: 1) Photogenic qualities, 2) Professional demeanor, 3) Distinctive features, 4) Proportional measurements, 5) Portfolio potential. Training and experience are assets but not mandatory.";
+                } else if (lowerMessage.includes('age') || lowerMessage.includes('old') || lowerMessage.includes('young')) {
+                    return "We consider applicants aged 16+ (with parental consent for minors). There's no upper age limit—we represent diverse demographics including mature models. Different markets have varying age preferences.";
+                } else if (lowerMessage.includes('location') || lowerMessage.includes('where') || lowerMessage.includes('city')) {
+                    return "Please specify your current location. While we're based in major fashion capitals, we work with talent worldwide. Some opportunities may require relocation or extensive travel.";
+                } else if (lowerMessage.includes('time') || lowerMessage.includes('long') || lowerMessage.includes('response')) {
+                    return "Our review timeline is typically a week for initial response. Due to volume, we may not respond to all applications. You're welcome to follow up after 3 weeks if you haven't heard from us.";
+                } else if (lowerMessage.includes('start') || lowerMessage.includes('begin modeling') || lowerMessage.includes('when can i start')) {
+                    return "Please specify when you would like to begin modeling. This helps us align opportunities with your availability.";
+                } else if (lowerMessage.includes('thank')) {
+                    return "You're most welcome. It's my pleasure to assist you with your professional modeling application.";
+                } else {
+                    return "For inquiries, please click the WhatsApp button below to connect with our team.";
+                }
+            }
+
+            function startApplication() {
+                isApplicationActive = true;
+                currentQuestion = 0;
+                localStorage.setItem('isApplicationActive', JSON.stringify(isApplicationActive));
+                localStorage.setItem('currentQuestion', currentQuestion);
+
+                while (chatContainer.children.length > 2) {
+                    chatContainer.removeChild(chatContainer.children[1]);
+                }
+                messages = [];
+                localStorage.setItem('chatMessages', JSON.stringify(messages));
+
+                addMessageToChat('ai', "Thank you for choosing to begin your professional modeling application. I'll guide you through each required field systematically. Please provide accurate information for optimal evaluation.");
+
+                setTimeout(() => {
+                    askQuestion(currentQuestion);
+                    scrollToBottom();
+                }, 100);
+            }
+
+            function askQuestion(index) {
+                if (index >= applicationQuestions.length) {
+                    showApplicationReview();
+                    return;
+                }
+
+                const question = applicationQuestions[index];
+                addMessageToChat('ai', question.question);
+                scrollToBottom();
+            }
+
+            function processApplicationAnswer(answer) {
+                const currentField = applicationQuestions[currentQuestion].field;
+                if (currentField !== 'photos') {
+                    const validationError = validators[currentField]?.(answer);
+                    if (validationError) {
+                        addMessageToChat('ai', `Error: ${validationError}. Please try again.`);
+                        setTimeout(() => {
+                            askQuestion(currentQuestion);
+                            scrollToBottom();
+                        }, 100);
+                        return;
+                    }
+                    applicationData[currentField] = answer;
+                    localStorage.setItem('applicationData', JSON.stringify(applicationData));
+                    currentQuestion++;
+                    localStorage.setItem('currentQuestion', currentQuestion);
+                    setTimeout(() => {
+                        askQuestion(currentQuestion);
+                        scrollToBottom();
+                    }, 100);
+                }
+            }
+
+            function showApplicationReview() {
+                const errors = [];
+                for (const [field, value] of Object.entries(applicationData)) {
+                    const error = validators[field]?.(value);
+                    if (error) errors.push(`${field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}: ${error}`);
+                }
+                if (selectedPhotos.length < 2 || selectedPhotos.length > 6) {
+                    errors.push('Photos: You must upload between 2 and 6 photos');
+                }
+
+                if (errors.length > 0) {
+                    addMessageToChat('ai', `Please correct the following errors:\n\n${errors.join('\n')}`);
+                    setTimeout(() => {
+                        askQuestion(currentQuestion);
+                        scrollToBottom();
+                    }, 100);
+                    return;
+                }
+
+                const summaryDiv = document.createElement('div');
+                summaryDiv.className = 'summary-container grid grid-cols-1 sm:grid-cols-2 gap-2 p-2 bg-gray-50 rounded-lg border border-gray-200';
+                for (const [key, value] of Object.entries(applicationData)) {
+                    if (value) {
+                        const displayKey = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+                        const fieldDiv = document.createElement('div');
+                        fieldDiv.className = 'summary-field';
+                        fieldDiv.dataset.field = key;
+                        fieldDiv.innerHTML = `<span class="font-bold">${displayKey}:</span> ${value}`;
+                        summaryDiv.appendChild(fieldDiv);
+                    }
+                }
+                const photosDiv = document.createElement('div');
+                photosDiv.className = 'summary-photos';
+                photosDiv.dataset.field = 'photos';
+                selectedPhotos.forEach((photo, index) => {
+                    const img = document.createElement('img');
+                    img.src = photo.data;
+                    img.alt = `Uploaded photo ${index + 1}`;
+                    photosDiv.appendChild(img);
+                });
+                summaryDiv.appendChild(photosDiv);
+
+                addMessageToChat('ai', `APPLICATION SUMMARY\n\nYour photos have been uploaded. Please ensure they include one full-body shot and one portrait (without makeup or filters, no merged or profile shots). Click and hold any field to edit, then submit when ready.`);
+                const botMessages = document.querySelectorAll('.chat-bubble:not(.justify-end)');
+                const lastBotMessage = botMessages[botMessages.length - 1].querySelector('.bg-white');
+                lastBotMessage.appendChild(summaryDiv);
+
+                const actionDiv = document.createElement('div');
+                actionDiv.className = 'flex space-x-2 mt-2';
+                actionDiv.innerHTML = `
+                    <button onclick="submitApplication()" class="option-button bg-black hover:bg-gray-800 text-white">
+                        <i class="fas fa-check mr-1"></i> Submit Application
+                    </button>
+                `;
+                lastBotMessage.appendChild(actionDiv);
+
+                summaryDiv.querySelectorAll('.summary-field, .summary-photos').forEach(field => {
+                    field.addEventListener('mousedown', (e) => {
+                        holdTimer = setTimeout(() => {
+                            currentEditField = field.dataset.field;
+                            if (currentEditField === 'photos') {
+                                photoModal.classList.remove('hidden');
+                                photoModal.querySelector('.modal-content').classList.add('show');
+                            } else {
+                                editFieldInput.value = applicationData[currentEditField] || '';
+                                editFieldModal.querySelector('#edit-modal-title').textContent = `Edit ${currentEditField.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}`;
+                                editFieldModal.classList.remove('hidden');
+                                editFieldModal.querySelector('.modal-content').classList.add('show');
+                            }
+                            scrollToBottom();
+                        }, 500);
+                    });
+                    field.addEventListener('mouseup', () => clearTimeout(holdTimer));
+                    field.addEventListener('mouseleave', () => clearTimeout(holdTimer));
+                    field.addEventListener('touchstart', (e) => {
+                        e.preventDefault();
+                        holdTimer = setTimeout(() => {
+                            currentEditField = field.dataset.field;
+                            if (currentEditField === 'photos') {
+                                photoModal.classList.remove('hidden');
+                                photoModal.querySelector('.modal-content').classList.add('show');
+                            } else {
+                                editFieldInput.value = applicationData[currentEditField] || '';
+                                editFieldModal.querySelector('#edit-modal-title').textContent = `Edit ${currentEditField.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}`;
+                                editFieldModal.classList.remove('hidden');
+                                editFieldModal.querySelector('.modal-content').classList.add('show');
+                            }
+                            scrollToBottom();
+                        }, 500);
+                    });
+                    field.addEventListener('touchend', () => clearTimeout(holdTimer));
+                    field.addEventListener('touchcancel', () => clearTimeout(holdTimer));
+                });
+
+                scrollToBottom();
+            }
+
+            async function submitApplication() {
+                const errors = [];
+                for (const [field, value] of Object.entries(applicationData)) {
+                    const error = validators[field]?.(value);
+                    if (error) errors.push(`${field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}: ${error}`);
+                }
+                if (selectedPhotos.length < 2 || selectedPhotos.length > 6) {
+                    errors.push('Photos: You must upload between 2 and 6 photos');
+                }
+
+                if (errors.length > 0) {
+                    addMessageToChat('ai', `Cannot submit due to the following errors:\n\n${errors.join('\n')}`);
+                    setTimeout(() => {
+                        showApplicationReview();
+                        scrollToBottom();
+                    }, 100);
+                    return;
+                }
+
+                addMessageToChat('user', 'Submit my application');
+                addMessageToChat('ai', 'submitting your application ...');
+                typingIndicator.classList.remove('hidden');
+
+                const formData = new FormData();
+                for (const [key, value] of Object.entries(applicationData)) {
+                    formData.append(key, value);
+                }
+                try {
+                    const photoBlobs = await Promise.all(
+                        selectedPhotos.map(async (photo, index) => {
+                            const res = await fetch(photo.data);
+                            const blob = await res.blob();
+                            return { blob, name: photo.name };
+                        })
+                    );
+                    photoBlobs.forEach(({ blob, name }, index) => {
+                        formData.append('photos', blob, name);
+                    });
+
+                    const response = await fetch(`${config.apiBaseUrl}/applications`, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await response.json();
+
+                    typingIndicator.classList.add('hidden');
+                    if (response.ok) {
+                        addMessageToChat('ai', `APPLICATION SUBMITTED\n\nThank you for your professional submission. We've received your information and photos, and will conduct a thorough review. Our team will contact you within a week if we wish to proceed.`);
+                        localStorage.removeItem('chatMessages');
+                        localStorage.removeItem('applicationData');
+                        localStorage.removeItem('currentQuestion');
+                        localStorage.removeItem('isApplicationActive');
+                        localStorage.removeItem('selectedPhotos');
+                        messages = [];
+                        applicationData = {
+                            firstName: '', lastName: '', bust: '', waist: '', hips: '', justCo: '',
+                            height: '', instagram: '', tiktok: '', location: '', dob: '',
+                            startDate: '', email: '', altContact: ''
+                        };
+                        currentQuestion = 0;
+                        isApplicationActive = false;
+                        selectedPhotos = [];
+                    } else {
+                        addMessageToChat('ai', `Error: ${data.message || 'Failed to submit application. Please correct your inputs and try again.'}`);
+                        setTimeout(() => {
+                            showApplicationReview();
+                            scrollToBottom();
+                        }, 100);
+                    }
+                } catch (error) {
+                    console.error('Error submitting application:', error);
+                    typingIndicator.classList.add('hidden');
+                    addMessageToChat('ai', 'Error: Server error. Please try again later.');
+                    scrollToBottom();
+                }
+            }
+
+            function restoreMessages() {
+                messages.forEach(({ sender, message, timestamp }) => {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = `chat-bubble flex ${sender === 'user' ? 'justify-end' : 'flex-row'}`;
+                    const isAppQuestion = isApplicationActive && applicationQuestions[currentQuestion] && applicationQuestions[currentQuestion].question === message;
+                    const isAIResponseToQuestion = sender === 'ai' && messages.length > 0 && messages[messages.length - 1].message === 'I have a question about the application' && messages[messages.length - 1].sender === 'user';
+
+                    if (sender === 'user') {
+                        messageDiv.innerHTML = `
+                            <div class="bg-black text-white p-3 rounded-lg">
+                                <p class="text-sm">${message}</p>
+                                <div class="message-timestamp">${timestamp}</div>
+                            </div>
+                            <div class="w-8 h-8 rounded-full bg-gray-800 flex-shrink-0 flex items-center justify-center ml-2 avatar">
+                                <i class="fas fa-user text-white text-sm" aria-label="User"></i>
+                            </div>
+                        `;
+                    } else {
+                        messageDiv.innerHTML = `
+                            <div class="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 flex items-center justify-center mr-2 avatar">
+                                <i class="fas fa-robot text-gray-600 text-sm" aria-label="Anne, AI Assistant"></i>
+                            </div>
+                            <div class="bg-white p-3 rounded-lg border border-gray-200">
+                                <p class="text-gray-800 text-sm font-semibold">Anne</p>
+                                <p class="text-gray-800 text-sm">${message}</p>
+                                ${isAppQuestion && applicationQuestions.find(q => q.question === message)?.example ?
+                                    `<div class="example-box">${applicationQuestions.find(q => q.question === message).example}</div>` : ''}
+                                ${isAppQuestion && applicationQuestions.find(q => q.question === message)?.field === 'photos' ?
+                                    `<div class="mt-2">
+                                        <button onclick="document.getElementById('photo-upload-modal').classList.remove('hidden'); document.getElementById('photo-upload-modal').querySelector('.modal-content').classList.add('show')" class="option-button">
+                                            Upload Photos
+                                        </button>
+                                    </div>` : ''}
+                                ${isAIResponseToQuestion ? `
+                                    <div class="mt-2">
+                                        <a href="https://wa.me/+2347033560653?text=Hi,%20I%20have%20a%20question%20about%20my%20Beige%20Model%20Agency%20application" target="_blank" class="whatsapp-button">
+                                            <i class="fab fa-whatsapp mr-1"></i> Chat on WhatsApp
+                                        </a>
+                                    </div>` : ''}
+                                <div class="message-timestamp">${timestamp}</div>
+                            </div>
+                        `;
+                    }
+
+                    chatContainer.insertBefore(messageDiv, typingIndicator);
+                });
+                if (messages.length > 0) {
+                    updateImagePreview();
+                    scrollToBottom();
+                }
+            }
+
+            if (localStorage.getItem('chatMessages') && JSON.parse(localStorage.getItem('chatMessages')).length > 0) {
+                clearChatModal.classList.remove('hidden');
+                clearChatModal.querySelector('.modal-content').classList.add('show');
+                scrollToBottom();
+            } else {
+                restoreMessages();
+                scrollToBottom();
+            }
+
+            window.startApplication = startApplication;
+            window.submitApplication = submitApplication;
+            window.addMessageToChat = addMessageToChat;
+            window.closePhotoModal = closePhotoModal;
+            window.submitPhotos = submitPhotos;
+            window.removePhoto = removePhoto;
+            window.saveFieldEdit = saveFieldEdit;
+            window.closeEditModal = closeEditModal;
+            window.clearChatHistory = clearChatHistory;
+            window.keepChatHistory = keepChatHistory;
+
+            // Initialize
+            adjustSectionPadding();
+        });
+
+        window.addEventListener('load', () => {
+            adjustSectionPadding();
+        });
+    </script>
+</body>
+</html>
