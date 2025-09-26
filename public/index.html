@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beige Agency Ad</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Playfair Display', serif;
+            overflow: hidden;
+            background-color: #000;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            position: relative;
+            width: 100%;
+            height: 100vh;
+        }
+        
+        .static {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            opacity: 0;
+            z-index: 10;
+        }
+        
+        .glitch {
+            position: relative;
+        }
+        
+        .glitch::before, .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .glitch::before {
+            left: 2px;
+            text-shadow: -2px 0 #fff;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim 5s infinite linear alternate-reverse;
+        }
+        
+        .glitch::after {
+            left: -2px;
+            text-shadow: -2px 0 #000, 2px 2px #fff;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim2 5s infinite linear alternate-reverse;
+        }
+        
+        @keyframes glitch-anim {
+            0% { clip: rect(31px, 9999px, 94px, 0); }
+            10% { clip: rect(112px, 9999px, 76px, 0); }
+            20% { clip: rect(85px, 9999px, 77px, 0); }
+            30% { clip: rect(27px, 9999px, 97px, 0); }
+            40% { clip: rect(64px, 9999px, 98px, 0); }
+            50% { clip: rect(61px, 9999px, 85px, 0); }
+            60% { clip: rect(99px, 9999px, 114px, 0); }
+            70% { clip: rect(34px, 9999px, 115px, 0); }
+            80% { clip: rect(98px, 9999px, 129px, 0); }
+            90% { clip: rect(43px, 9999px, 96px, 0); }
+            100% { clip: rect(82px, 9999px, 64px, 0); }
+        }
+        
+        @keyframes glitch-anim2 {
+            0% { clip: rect(65px, 9999px, 119px, 0); }
+            10% { clip: rect(79px, 9999px, 85px, 0); }
+            20% { clip: rect(74px, 9999px, 111px, 0); }
+            30% { clip: rect(116px, 9999px, 114px, 0); }
+            40% { clip: rect(115px, 9999px, 76px, 0); }
+            50% { clip: rect(52px, 9999px, 68px, 0); }
+            60% { clip: rect(78px, 9999px, 91px, 0); }
+            70% { clip: rect(103px, 9999px, 74px, 0); }
+            80% { clip: rect(40px, 9999px, 103px, 0); }
+            90% { clip: rect(107px, 9999px, 55px, 0); }
+            100% { clip: rect(100px, 9999px, 83px, 0); }
+        }
+        
+        .strobe {
+            animation: strobe 0.5s infinite alternate;
+        }
+        
+        @keyframes strobe {
+            0% { opacity: 1; }
+            50% { opacity: 0.2; }
+            100% { opacity: 1; }
+        }
+        
+        .mirror-tunnel {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                45deg,
+                #000,
+                #000 10px,
+                #fff 10px,
+                #fff 20px
+            );
+            transform: perspective(500px) rotateX(45deg);
+            opacity: 0;
+        }
+        
+        .model {
+            position: absolute;
+            width: 100px;
+            height: 300px;
+            background: linear-gradient(to bottom, transparent 0%, #fff 30%, #fff 70%, transparent 100%);
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+        }
+        
+        .fabric {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            background: repeating-linear-gradient(
+                45deg,
+                #fff,
+                #fff 5px,
+                #000 5px,
+                #000 10px
+            );
+            border-radius: 50%;
+            opacity: 0;
+            transform: scale(0);
+        }
+        
+        .heel {
+            position: absolute;
+            width: 100px;
+            height: 150px;
+            background: #fff;
+            clip-path: polygon(30% 0%, 70% 0%, 100% 100%, 0% 100%);
+            opacity: 0;
+            transform: rotate(0deg);
+        }
+        
+        .face {
+            position: absolute;
+            width: 150px;
+            height: 200px;
+            background: #fff;
+            border-radius: 50% 50% 40% 40%;
+            opacity: 0;
+        }
+        
+        .face::before, .face::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 30px;
+            background: #000;
+            border-radius: 50%;
+            top: 80px;
+        }
+        
+        .face::before {
+            left: 40px;
+        }
+        
+        .face::after {
+            right: 40px;
+        }
+        
+        .logo {
+            position: absolute;
+            font-size: 3rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 10px;
+            opacity: 0;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .neon-eye {
+            position: absolute;
+            width: 30px;
+            height: 10px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #fff, 0 0 20px #fff;
+            opacity: 0;
+            animation: blink 3s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 48%, 52%, 100% { height: 10px; }
+            50% { height: 2px; }
+        }
+        
+        .chrome-hand {
+            position: absolute;
+            width: 100px;
+            height: 150px;
+            background: linear-gradient(90deg, #000, #fff, #000);
+            clip-path: polygon(30% 0%, 70% 0%, 100% 100%, 0% 100%);
+            opacity: 0;
+        }
+        
+        .wing {
+            position: absolute;
+            width: 150px;
+            height: 200px;
+            background: linear-gradient(90deg, transparent, #fff, transparent);
+            clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
+            opacity: 0;
+        }
+        
+        .smoke {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, #fff 0%, transparent 70%);
+            border-radius: 50%;
+            opacity: 0;
+            filter: blur(10px);
+        }
+        
+        .final-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            opacity: 0;
+        }
+        
+        .loading-text {
+            position: absolute;
+            top: 60%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5rem;
+            letter-spacing: 10px;
+            opacity: 0;
+        }
+        
+        .jingle-overlay {
+            position: absolute;
+            top: 70%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 2rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            opacity: 0;
+        }
+        
+        .jingle-lyric {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            color: #CCCCCC;
+            text-align: center;
+            width: 80%;
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="static" id="static"></div>
+    <div class="mirror-tunnel" id="mirror-tunnel"></div>
+    <div class="model" id="model"></div>
+    <div class="fabric" id="fabric"></div>
+    <div class="heel" id="heel"></div>
+    <div class="face" id="face"></div>
+    <div class="logo" id="logo">BEIGE</div>
+    <div class="neon-eye" id="neon-eye1" style="top: 30%; left: 30%;"></div>
+    <div class="neon-eye" id="neon-eye2" style="top: 30%; right: 30%;"></div>
+    <div class="chrome-hand" id="chrome-hand" style="top: 70%; left: 40%;"></div>
+    <div class="wing" id="wing1" style="top: 20%; left: 10%; transform: rotate(-30deg);"></div>
+    <div class="wing" id="wing2" style="top: 20%; right: 10%; transform: rotate(30deg) scaleX(-1);"></div>
+    <div class="smoke" id="smoke"></div>
+    
+    <div class="final-text" id="final-text">Welcome to Beige</div>
+    <div class="glitch loading-text" id="loading-text" data-text="Loading...">Loading...</div>
+    <div class="jingle-overlay" id="jingle-overlay"></div>
+    <div class="jingle-lyric" id="jingle-lyric"></div>
+    
+    <audio id="audio" loop>
+        <source src="https://assets.codepen.io/3364143/low-pulse-ambient.mp3" type="audio/mpeg">
+        <!-- Note: Replace with a custom jingle (e.g., "Beige, where stars align, book your talent, feel so fine!") -->
+    </audio>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tl = gsap.timeline({ defaults: { ease: "power2.inOut" } });
+            const jingleLyric = document.getElementById('jingle-lyric');
+
+            // Initial static flash
+            tl.to("#static", { opacity: 1, duration: 0.5 })
+              .to("#static", { opacity: 0, duration: 0.5 })
+              
+            // Mirror tunnel with model
+            tl.to("#mirror-tunnel", { opacity: 0.7, duration: 0.5 })
+              .fromTo("#model", 
+                  { y: 100, opacity: 0 }, 
+                  { y: -100, opacity: 1, duration: 1 }, "-=0.5")
+              
+            // Quick flashes of fashion elements with jingle segments
+            const jingleSegments = [
+                { element: "#fabric", overlay: "Top Talent!", lyric: "Beige, where stars align!" },
+                { element: "#heel", overlay: "Runway Ready!", lyric: "Walk the Beige way!" },
+                { element: "#face", overlay: "Book Now!", lyric: "Book your star today!" },
+                { element: "#logo", overlay: "Beige Excellence!", lyric: "Excellence every day!" }
+            ];
+
+            jingleSegments.forEach((segment, index) => {
+                tl.to("#mirror-tunnel", { opacity: 0, duration: 0.1 })
+                  .to("#model", { opacity: 0, duration: 0.1 })
+                  .to(segment.element, { 
+                      opacity: 1, 
+                      duration: 0.5,
+                      ...(segment.element === "#fabric" && { scale: 1, x: "random(-200, 200)", y: "random(-100, 100)", rotate: "random(0, 360)" }),
+                      ...(segment.element === "#heel" && { rotate: 360, x: "random(-200, 200)", y: "random(-100, 100)" }),
+                      ...(segment.element === "#face" && { borderRadius: "20%", ease: "elastic.out(1, 0.3)" })
+                  })
+                  .to("#jingle-overlay", { 
+                      opacity: 1, 
+                      duration: 0.5,
+                      textContent: segment.overlay,
+                      onComplete: () => {
+                          gsap.to("#jingle-overlay", { opacity: 0, duration: 0.5 });
+                      }
+                  }, "<")
+                  .to(jingleLyric, { 
+                      opacity: 1, 
+                      duration: 0.5,
+                      textContent: segment.lyric,
+                      onComplete: () => {
+                          gsap.to(jingleLyric, { opacity: 0, duration: 0.5 });
+                      }
+                  }, "<")
+                  .to(segment.element, { opacity: 0, duration: 0.1 });
+            });
+
+            // Final text and loading text
+            tl.to("body", { backgroundColor: "#fff", duration: 0.5 })
+              .to("#final-text", { opacity: 1, duration: 1, color: "#000" })
+              .to("#loading-text", { opacity: 1, duration: 1, color: "#000" }, "-=0.5")
+
+            // Countdown for 6 seconds
+            let countdownValue = 6; // 6 seconds
+            const countdownDisplay = document.createElement('div');
+            countdownDisplay.style.position = 'absolute';
+            countdownDisplay.style.bottom = '16px';
+            countdownDisplay.style.left = '16px';
+            countdownDisplay.style.width = '32px';
+            countdownDisplay.style.height = '32px';
+            countdownDisplay.style.borderRadius = '50%';
+            countdownDisplay.style.backgroundColor = '#000';
+            countdownDisplay.style.display = 'flex';
+            countdownDisplay.style.alignItems = 'center';
+            countdownDisplay.style.justifyContent = 'center';
+            countdownDisplay.style.fontSize = '16px';
+            countdownDisplay.style.fontWeight = 'bold';
+            countdownDisplay.textContent = countdownValue;
+            document.body.appendChild(countdownDisplay);
+
+            const countdownInterval = setInterval(() => {
+                countdownValue--;
+                countdownDisplay.textContent = Math.max(0, countdownValue);
+                if (countdownValue <= 0) {
+                    clearInterval(countdownInterval);
+                    window.location.href = 'home.html'; // Redirect to home.html after 6 seconds
+                }
+            }, 1000);
+
+            // Audio (requires user interaction)
+            document.addEventListener('click', () => {
+                const audio = document.getElementById('audio');
+                if (audio) audio.play().catch(e => console.log("Audio playback prevented:", e));
+            });
+            
+            // Random flashes during the animation
+            setInterval(() => {
+                const elements = [
+                    "#fabric", "#heel", "#face", "#logo", 
+                    "#neon-eye1", "#neon-eye2", "#chrome-hand", 
+                    "#wing1", "#wing2", "#smoke"
+                ];
+                
+                const randomElement = elements[Math.floor(Math.random() * elements.length)];
+                gsap.to(randomElement, { 
+                    opacity: 1, 
+                    duration: 0.1,
+                    onComplete: () => {
+                        gsap.to(randomElement, { 
+                            opacity: 0, 
+                            duration: 0.1,
+                            delay: 0.1
+                        });
+                    }
+                });
+            }, 300);
+        });
+    </script>
+</body>
+</html>
