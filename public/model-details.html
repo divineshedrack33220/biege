@@ -190,30 +190,27 @@
         .error-message {
             color: #dc2626;
         }
+        
+        /* Model Image - Full Width Centered */
         .model-image {
             border: 1px solid #000000;
+            width: 100%;
             max-width: 100%;
-            margin: 0;
+            margin: 0 auto;
             display: flex;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: thin;
-            scrollbar-color: #000000 #f5f5f5;
-        }
-        .model-image::-webkit-scrollbar {
-            height: 8px;
-        }
-        .model-image::-webkit-scrollbar-track {
-            background: #f5f5f5;
-        }
-        .model-image::-webkit-scrollbar-thumb {
-            background: #000000;
-            border-radius: 4px;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            aspect-ratio: 3/4;
         }
         .model-image img {
-            max-width: 200px;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
             flex-shrink: 0;
         }
+        
+        /* Measurements Grid */
         #model-name {
             font-family: 'Playfair Display', serif;
             font-size: 36px;
@@ -237,6 +234,8 @@
             -webkit-overflow-scrolling: touch;
             scrollbar-width: thin;
             scrollbar-color: #000000 #f5f5f5;
+            width: 100%;
+            justify-content: flex-start;
         }
         .model-attributes .measurements-grid::-webkit-scrollbar {
             height: 8px;
@@ -265,6 +264,18 @@
             font-size: 12px;
             display: block;
         }
+        
+        /* Desktop measurements */
+        @media (min-width: 640px) {
+            .model-attributes .measurements-grid {
+                display: grid;
+                grid-template-columns: repeat(8, 1fr);
+                gap: 5px;
+                overflow-x: visible;
+                justify-content: center;
+            }
+        }
+        
         .model-social {
             justify-content: flex-start;
             min-height: 40px;
@@ -276,14 +287,15 @@
         .model-social a:hover {
             color: #4b5563;
         }
+        
+        /* Portfolio Grid - Full Width Centered */
         .portfolio-item {
             border: 1px solid #000000;
-            max-width: 200px;
-            flex-shrink: 0;
             aspect-ratio: 3/4;
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow: hidden;
         }
         .portfolio-item img {
             width: 100%;
@@ -298,6 +310,8 @@
             scrollbar-width: thin;
             scrollbar-color: #000000 #f5f5f5;
             padding-bottom: 10px;
+            width: 100%;
+            justify-content: flex-start;
         }
         #portfolio-grid::-webkit-scrollbar {
             height: 8px;
@@ -309,6 +323,7 @@
             background: #000000;
             border-radius: 4px;
         }
+        
         .section.bg-white .text-gray-600 {
             color: #000000;
             font-weight: 400;
@@ -388,19 +403,9 @@
                 max-width: 800px;
                 text-align: left;
             }
-            .model-attributes .measurements-grid {
-                display: grid;
-                grid-template-columns: repeat(8, 1fr);
-                gap: 5px;
-                overflow-x: visible;
-            }
             .model-image {
                 max-width: 300px;
-                display: flex;
-                overflow-x: auto;
-            }
-            .model-image img {
-                max-width: 300px;
+                margin: 0 auto;
             }
             #portfolio-grid {
                 display: grid !important;
@@ -408,11 +413,14 @@
                 gap: 1rem;
                 overflow-x: visible !important;
                 padding-bottom: 0;
+                width: 100%;
+                justify-content: center;
+                max-width: 100%;
             }
             .portfolio-item {
-                max-width: none;
                 width: 100%;
-                flex-shrink: initial;
+                max-width: none;
+                margin: 0;
             }
         }
         
@@ -434,20 +442,9 @@
                 padding-left: 10px;
                 padding-right: 10px;
             }
-            .model-attributes .measurements-grid {
-                display: flex;
-                gap: 10px;
-                overflow-x: auto;
-                padding-bottom: 10px;
-            }
             .model-image {
-                max-width: 150px;
-            }
-            .model-image img {
-                max-width: 150px;
-            }
-            .portfolio-item {
-                max-width: 150px;
+                max-width: 100%;
+                width: 100%;
             }
             #portfolio-grid {
                 display: grid !important;
@@ -455,6 +452,14 @@
                 gap: 1rem;
                 overflow-x: visible !important;
                 padding-bottom: 0;
+                width: 100%;
+                justify-content: center;
+                max-width: 100%;
+            }
+            .portfolio-item {
+                width: 100%;
+                max-width: 100%;
+                margin: 0 auto;
             }
             footer .container {
                 max-width: none;
@@ -522,7 +527,7 @@
                 <a href="booking.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase" aria-label="Book a Model">BOOK A MODEL</a>
                 <a href="become-model.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase" aria-label="Become a Model">BECOME A MODEL</a>
                 <a href="contact.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase" aria-label="Contact">CONTACT</a>
-                <a href="discount.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase" aria-label="Exclusive Offers">EXCLUSIVE OFFERS</a>
+                <a href="discount.html" class="hover:text-gray-600 transition-colors duration-colors duration-300 text-sm uppercase" aria-label="Exclusive Offers">EXCLUSIVE OFFERS</a>
             </div>
             <div class="menu-toggle" onclick="toggleMenu()" aria-label="Toggle Menu">
                 <span></span>
@@ -555,7 +560,7 @@
             </div>
             <!-- Loading State -->
             <div id="loading-state" class="animate-pulse flex flex-col gap-8 hidden">
-                <div class="bg-gray-200 aspect-[3/4] rounded" style="max-width: 150px;"></div>
+                <div class="bg-gray-200 aspect-[3/4] rounded w-full max-w-xs mx-auto"></div>
                 <div>
                     <div class="h-8 bg-gray-200 rounded w-3/4 mb-4"></div>
                     <div class="h-4 bg-gray-200 rounded w-full mb-2"></div>
@@ -596,23 +601,23 @@
                 <div class="mt-12 reveal">
                     <a id="book-now-btn" href="booking.html" class="btn-animate">Book Now</a>
                 </div>
-                <!-- Image -->
-                <div class="mt-12 reveal">
-                    <div id="model-image" class="model-image aspect-[3/4] flex items-center">
-                        <span class="text-gray-600"></span>
+                <!-- Main Model Image - Full Width Centered -->
+                <div class="mt-12 reveal w-full">
+                    <div id="model-image" class="model-image">
+                        <span class="text-gray-600 text-center px-4">No image available</span>
                     </div>
                 </div>
                 <!-- About the Model -->
                 <div class="mt-12 reveal">
                     <p id="model-description" class="text-gray-600"></p>
                 </div>
-                <!-- Portfolio -->
-                <div class="mt-12 reveal">
+                <!-- Portfolio - Full Width Centered -->
+                <div class="mt-12 reveal w-full">
                     <h3 class="hero-title">Portfolio</h3>
                     <div class="w-16 h-px bg-black mb-4"></div>
-                    <div id="portfolio-grid" class="flex gap-4">
-                        <div class="portfolio-item aspect-[3/4] flex items-center justify-center">
-                            <span class="text-gray-600"></span>
+                    <div id="portfolio-grid">
+                        <div class="portfolio-item w-full max-w-xs mx-auto flex items-center justify-center">
+                            <span class="text-gray-600 text-center px-2">No portfolio images available</span>
                         </div>
                     </div>
                 </div>
@@ -781,8 +786,6 @@
                 if (bookNowBtn) {
                     bookNowBtn.href = `booking.html?modelId=${encodeURIComponent(model._id)}&modelName=${encodeURIComponent(model.name)}&imageUrl=${encodeURIComponent(model.imageUrl)}`;
                     console.log('Updated Book Now button href:', bookNowBtn.href);
-                } else {
-                    console.error('Element #book-now-btn not found');
                 }
 
                 // Update Meta Tags for SEO
@@ -794,8 +797,6 @@
                 if (modelName) {
                     modelName.textContent = model.name || 'N/A';
                     console.log('Set model name:', model.name || 'N/A');
-                } else {
-                    console.error('Element #model-name not found');
                 }
 
                 // Update Measurement
@@ -813,21 +814,7 @@
                             <p><strong>SHOES</strong><span>${model.shoes || 'N/A'}</span></p>
                             <p><strong>MODEL SIZE</strong><span>${model.modelSize || 'N/A'}</span></p>
                         `;
-                        console.log('Updated measurements grid:', {
-                            height: model.height || 'N/A',
-                            bust: model.bust !== null && model.bust !== undefined ? model.bust : 'N/A',
-                            waist: model.waist !== null && model.waist !== undefined ? model.waist : 'N/A',
-                            hips: model.hips !== null && model.hips !== undefined ? model.hips : 'N/A',
-                            hair: model.hair || 'N/A',
-                            eyes: model.eyes || 'N/A',
-                            shoes: model.shoes || 'N/A',
-                            modelSize: model.modelSize || 'N/A'
-                        });
-                    } else {
-                        console.error('Element .measurements-grid not found');
                     }
-                } else {
-                    console.error('Element #model-attributes not found');
                 }
 
                 // Update Social Links
@@ -835,7 +822,6 @@
                 if (socialLinksDiv) {
                     const socialGrid = socialLinksDiv.querySelector('.model-social');
                     if (socialGrid) {
-                        console.log('Social links data:', model.socialLinks);
                         socialGrid.innerHTML = '';
                         if (model.socialLinks && (model.socialLinks.instagram || model.socialLinks.tiktok)) {
                             if (model.socialLinks.instagram) {
@@ -844,7 +830,6 @@
                                         <i class="fab fa-instagram mr-2"></i>Instagram
                                     </a>
                                 `;
-                                console.log('Added Instagram link:', model.socialLinks.instagram);
                             }
                             if (model.socialLinks.tiktok) {
                                 socialGrid.innerHTML += `
@@ -852,45 +837,33 @@
                                         <i class="fab fa-tiktok mr-2"></i>TikTok
                                     </a>
                                 `;
-                                console.log('Added TikTok link:', model.socialLinks.tiktok);
                             }
                         } else {
                             socialGrid.innerHTML = '<p class="text-gray-600">No social links available</p>';
-                            console.log('Set socialGrid to "No social links available"');
                         }
-                    } else {
-                        console.error('Element .model-social not found');
                     }
-                } else {
-                    console.error('Element #social-links not found');
                 }
 
-                // Update Image
+                // Update Main Model Image - Full Width Centered
                 const modelImage = document.getElementById('model-image');
                 if (modelImage) {
                     portfolioImages.length = 0;
                     if (model.imageUrl) {
                         portfolioImages.push(model.imageUrl);
-                        modelImage.innerHTML = `<img src="${model.imageUrl}" alt="${model.name || 'Model'}'s profile image" class="h-full object-cover" loading="lazy" onclick="openModal(0)">`;
-                        console.log('Set model image:', model.imageUrl);
+                        modelImage.innerHTML = `<img src="${model.imageUrl}" alt="${model.name || 'Model'}'s profile image" class="w-full h-full object-cover" loading="lazy" onclick="openModal(0)">`;
+                        console.log('Set main model image:', model.imageUrl);
                     } else {
-                        modelImage.innerHTML = '<p class="text-gray-600">No image available</p>';
-                        console.log('Set model image to "No image available"');
+                        modelImage.innerHTML = '<div class="w-full h-full flex items-center justify-center"><span class="text-gray-600 text-center px-4">No image available</span></div>';
                     }
-                } else {
-                    console.error('Element #model-image not found');
                 }
 
-                // Update About the Model
+                // Update Model Description
                 const modelDescription = document.getElementById('model-description');
                 if (modelDescription) {
                     modelDescription.textContent = model.description || 'No description available';
-                    console.log('Set model description:', model.description || 'No description available');
-                } else {
-                    console.error('Element #model-description not found');
                 }
 
-                // Update Portfolio Gallery
+                // Update Portfolio Gallery - Full Width Centered
                 const portfolioGrid = document.getElementById('portfolio-grid');
                 if (portfolioGrid) {
                     portfolioGrid.innerHTML = '';
@@ -899,7 +872,7 @@
                             if (image.url) {
                                 portfolioImages.push(image.url);
                                 const div = document.createElement('div');
-                                div.className = 'portfolio-item aspect-[3/4] flex items-center justify-center';
+                                div.className = 'portfolio-item';
                                 div.setAttribute('role', 'img');
                                 div.setAttribute('aria-label', `Portfolio Image ${index + 1} for ${model.name || 'Model'}`);
                                 div.innerHTML = `<img src="${image.url}" alt="Portfolio Image ${index + 1} for ${model.name || 'Model'}" class="w-full h-full object-cover" loading="lazy" onclick="openModal(${portfolioImages.length - 1})">`;
@@ -907,31 +880,26 @@
                                 console.log(`Added portfolio image ${index + 1}:`, image.url);
                             }
                         });
-                        if (portfolioGrid.children.length === 0) {
-                            portfolioGrid.innerHTML = '<div class="portfolio-item aspect-[3/4] flex items-center justify-center"><p class="text-gray-600 text-center">No portfolio images available</p></div>';
-                            console.log('Set portfolioGrid to "No portfolio images available"');
-                        }
-                    } else {
-                        portfolioGrid.innerHTML = '<div class="portfolio-item aspect-[3/4] flex items-center justify-center"><p class="text-gray-600 text-center">No portfolio images available</p></div>';
-                        console.log('Set portfolioGrid to "No portfolio images available"');
                     }
-                } else {
-                    console.error('Element #portfolio-grid not found');
+                    // Always show placeholder if no images
+                    if (portfolioGrid.children.length === 0) {
+                        const placeholder = document.createElement('div');
+                        placeholder.className = 'portfolio-item w-full max-w-xs mx-auto flex items-center justify-center';
+                        placeholder.innerHTML = '<span class="text-gray-600 text-center px-2">No portfolio images available</span>';
+                        portfolioGrid.appendChild(placeholder);
+                    }
                 }
 
                 loadingState.classList.add('hidden');
                 modelContent.classList.remove('opacity-50');
-                errorMessage.classList.add('hidden');
                 revealOnScroll();
             } catch (error) {
                 console.error('Error fetching model details:', error);
                 let message = 'Unable to load model details';
                 if (error.message.includes('Failed to fetch')) {
-                    message = 'Unable to connect to the server. Please check your network or server status.';
+                    message = 'Unable to connect to the server.';
                 } else if (error.message.includes('Model not found')) {
                     message = 'The requested model was not found.';
-                } else if (error.message.includes('Invalid model data')) {
-                    message = 'Invalid model data received from server.';
                 }
                 errorMessage.innerHTML = `
                     <p class="text-red-500 font-medium">${message}</p>
@@ -943,7 +911,7 @@
                 errorMessage.classList.remove('hidden');
                 loadingState.classList.add('hidden');
                 modelContent.classList.add('hidden');
-                document.getElementById('retry-fetch').addEventListener('click', (e) => {
+                document.getElementById('retry-fetch')?.addEventListener('click', (e) => {
                     e.preventDefault();
                     fetchModelDetails();
                 });
@@ -954,89 +922,30 @@
             currentImageIndex = clampValue(0, index, portfolioImages.length - 1);
             const modalImage = document.getElementById('modal-image');
             const modal = document.getElementById('image-modal');
-            const prevButton = document.getElementById('prev-image');
-            const nextButton = document.getElementById('next-image');
             if (portfolioImages.length > 0 && index >= 0 && index < portfolioImages.length) {
                 modalImage.src = portfolioImages[index];
-                modalImage.alt = index === 0 ? `Profile image for ${document.getElementById('model-name').textContent || 'Model'}` : `Portfolio Image ${index} for ${document.getElementById('model-name').textContent || 'Model'}`;
-                console.log('Opened modal with image:', portfolioImages[index], 'at index:', index);
-            } else {
-                modalImage.src = '';
-                modalImage.alt = 'No image available';
-                console.log('No valid image for modal at index:', index);
+                modal.style.display = 'flex';
             }
-            modal.style.display = 'flex';
-            prevButton.style.display = index > 0 ? 'block' : 'none';
-            nextButton.style.display = index < portfolioImages.length - 1 ? 'block' : 'none';
-            modal.focus();
-            document.addEventListener('touchstart', handleTouchStart, false);
-            document.addEventListener('touchmove', handleTouchMove, false);
-            document.addEventListener('keydown', handleKeydown);
+            document.getElementById('prev-image').style.display = currentImageIndex > 0 ? 'block' : 'none';
+            document.getElementById('next-image').style.display = currentImageIndex < portfolioImages.length - 1 ? 'block' : 'none';
         }
 
         function closeModal() {
-            const modal = document.getElementById('image-modal');
-            modal.style.display = 'none';
-            document.removeEventListener('touchstart', handleTouchStart, false);
-            document.removeEventListener('touchmove', handleTouchMove, false);
-            document.removeEventListener('keydown', handleKeydown);
-            console.log('Modal closed');
+            document.getElementById('image-modal').style.display = 'none';
         }
 
         function prevImage() {
             if (currentImageIndex > 0) {
                 currentImageIndex--;
-                const modalImage = document.getElementById('modal-image');
-                modalImage.src = portfolioImages[currentImageIndex];
-                modalImage.alt = currentImageIndex === 0 ? `Profile image for ${document.getElementById('model-name').textContent || 'Model'}` : `Portfolio Image ${currentImageIndex} for ${document.getElementById('model-name').textContent || 'Model'}`;
-                document.getElementById('prev-image').style.display = currentImageIndex > 0 ? 'block' : 'none';
-                document.getElementById('next-image').style.display = 'block';
-                console.log('Navigated to previous image:', portfolioImages[currentImageIndex], 'at index:', currentImageIndex);
+                openModal(currentImageIndex);
             }
         }
 
         function nextImage() {
             if (currentImageIndex < portfolioImages.length - 1) {
                 currentImageIndex++;
-                const modalImage = document.getElementById('modal-image');
-                modalImage.src = portfolioImages[currentImageIndex];
-                modalImage.alt = currentImageIndex === 0 ? `Profile image for ${document.getElementById('model-name').textContent || 'Model'}` : `Portfolio Image ${currentImageIndex} for ${document.getElementById('model-name').textContent || 'Model'}`;
-                document.getElementById('prev-image').style.display = 'block';
-                document.getElementById('next-image').style.display = currentImageIndex < portfolioImages.length - 1 ? 'block' : 'none';
-                console.log('Navigated to next image:', portfolioImages[currentImageIndex], 'at index:', currentImageIndex);
+                openModal(currentImageIndex);
             }
-        }
-
-        function handleKeydown(event) {
-            if (event.key === 'ArrowLeft') {
-                prevImage();
-            } else if (event.key === 'ArrowRight') {
-                nextImage();
-            } else if (event.key === 'Escape') {
-                closeModal();
-            }
-        }
-
-        let touchStartX = 0;
-        let touchEndX = 0;
-
-        function handleTouchStart(event) {
-            touchStartX = event.changedTouches[0].screenX;
-        }
-
-        function handleTouchMove(event) {
-            touchEndX = event.changedTouches[0].screenX;
-            handleSwipe();
-        }
-
-        function handleSwipe() {
-            const minSwipeDistance = 50;
-            if (touchEndX < touchStartX - minSwipeDistance && currentImageIndex < portfolioImages.length - 1) {
-                nextImage();
-            } else if (touchEndX > touchStartX + minSwipeDistance && currentImageIndex > 0) {
-                prevImage();
-            }
-            touchStartX = touchEndX;
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -1045,50 +954,13 @@
             fetchModelDetails();
             const modelTitle = document.querySelector('#model-name');
             if (modelTitle) modelTitle.classList.add('active');
-            try {
-                console.log('Body font-family:', getComputedStyle(document.body).fontFamily);
-                const logo = document.querySelector('.desktop-nav-bar a[href="index.html"]');
-                console.log('Nav logo font-size: 20px');
-                console.log('Nav logo computed font-size:', logo ? getComputedStyle(logo).fontSize : 'Not found');
-                console.log('Model title font-size:', modelTitle ? getComputedStyle(modelTitle).fontSize : 'Not found');
-                console.log('Model title position:', modelTitle ? modelTitle.getBoundingClientRect() : 'Not found');
-                console.log('Nav bar height:', document.querySelector('.desktop-nav-bar').offsetHeight);
-                console.log('Model-details section padding-top:', document.querySelector('#model-details') ? getComputedStyle(document.querySelector('#model-details')).paddingTop : 'Not found');
-                if (window.innerWidth < 640) {
-                    const desktopNav = document.querySelector('.desktop-nav-bar .desktop-nav');
-                    const menuToggle = document.querySelector('.menu-toggle');
-                    const mobileNavLinks = document.querySelectorAll('.mobile-menu a');
-                    console.log('Mobile view (< 640px): Desktop nav links display:', desktopNav ? (desktopNav.style.display || getComputedStyle(desktopNav).display) : 'Not found');
-                    console.log('Mobile view (< 640px): Menu toggle display:', menuToggle ? (menuToggle.style.display || getComputedStyle(menuToggle).display) : 'Not found');
-                    console.log('Mobile view (< 640px): Logo display:', logo ? (logo.style.display || getComputedStyle(logo).display) : 'Not found');
-                    console.log('Mobile view (< 640px): Mobile nav link count:', mobileNavLinks.length);
-                    mobileNavLinks.forEach((link, index) => {
-                        console.log(`Mobile nav link ${index + 1} text:`, link.textContent.trim());
-                    });
-                    if (logo) {
-                        const rect = logo.getBoundingClientRect();
-                        console.log('Mobile view (< 640px): Logo position:', { top: rect.top, left: rect.left, right: rect.right });
-                    }
-                    if (menuToggle) {
-                        const rect = menuToggle.getBoundingClientRect();
-                        console.log('Mobile view (< 640px): Menu toggle position:', { top: rect.top, left: rect.left, right: rect.right });
-                    }
-                } else {
-                    const desktopNavLinks = document.querySelectorAll('.desktop-nav a');
-                    console.log('Desktop view (≥640px): Desktop nav link count:', desktopNavLinks.length);
-                    desktopNavLinks.forEach((link, index) => {
-                        console.log(`Desktop nav link ${index + 1} text:`, link.textContent.trim());
-                    });
-                }
-            } catch (error) {
-                console.error('Error in DOMContentLoaded handler:', error);
-            }
         });
 
         window.addEventListener('resize', adjustSectionPadding);
         window.addEventListener('scroll', revealOnScroll);
 
-        document.getElementById('newsletter-submit').addEventListener('click', async () => {
+        // Newsletter functionality
+        document.getElementById('newsletter-submit')?.addEventListener('click', async () => {
             const emailInput = document.getElementById('newsletter-email');
             const feedback = document.getElementById('newsletter-feedback');
             const email = emailInput.value;
