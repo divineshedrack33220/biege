@@ -589,7 +589,7 @@
                 <!-- Welcome message -->
                 <div class="chat-bubble flex">
                     <div class="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 flex items-center justify-center mr-2 avatar">
-                        <i class="fas fa-robot text-gray-600 text-sm" aria-label="Anne, AI Assistant"></i>
+                        <i class="fas fa-robot text-gray-600 text-sm" aria-label=" Assistant, AI Assistant"></i>
                     </div>
                     <div class="bg-white p-2 rounded-lg border border-gray-200">
                         <p class="text-gray-800 text-sm font-semibold"> Assistant</p>
@@ -610,10 +610,10 @@
                 <div id="typing-indicator" class="typing-indicator hidden">
                     <div class="flex items-center space-x-2">
                         <div class="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 flex items-center justify-center mr-2 avatar">
-                            <i class="fas fa-robot text-gray-600 text-sm" aria-label="Anne, AI Assistant"></i>
+                            <i class="fas fa-robot text-gray-600 text-sm" aria-label=" Assistant, AI Assistant"></i>
                         </div>
                         <div class="flex flex-col">
-                            <p class="text-gray-800 text-sm font-semibold">Anne</p>
+                            <p class="text-gray-800 text-sm font-semibold"> Assistant</p>
                             <div class="flex space-x-1">
                                 <div class="typing-dot"></div>
                                 <div class="typing-dot"></div>
@@ -1067,10 +1067,10 @@
                     const isAppQuestion = isApplicationActive && currentQ && currentQ.question === message;
                     messageDiv.innerHTML = `
                         <div class="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 flex items-center justify-center mr-2 avatar">
-                            <i class="fas fa-robot text-gray-600 text-sm" aria-label="Anne, AI Assistant"></i>
+                            <i class="fas fa-robot text-gray-600 text-sm" aria-label=" Assistant, AI Assistant"></i>
                         </div>
                         <div class="bg-white p-3 rounded-lg border border-gray-200">
-                            <p class="text-gray-800 text-sm font-semibold">Anne</p>
+                            <p class="text-gray-800 text-sm font-semibold"> Assistant</p>
                             <p class="text-gray-800 text-sm">${message}</p>
                             ${isAppQuestion && currentQ.example ?
                                 `<div class="example-box">${currentQ.example}</div>` : ''}
@@ -1412,10 +1412,10 @@
                     } else {
                         messageDiv.innerHTML = `
                             <div class="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 flex items-center justify-center mr-2 avatar">
-                                <i class="fas fa-robot text-gray-600 text-sm" aria-label="Anne, AI Assistant"></i>
+                                <i class="fas fa-robot text-gray-600 text-sm" aria-label=" Assistant, AI Assistant"></i>
                             </div>
                             <div class="bg-white p-3 rounded-lg border border-gray-200">
-                                <p class="text-gray-800 text-sm font-semibold">Anne</p>
+                                <p class="text-gray-800 text-sm font-semibold"> Assistant</p>
                                 <p class="text-gray-800 text-sm">${message}</p>
                                 ${isAppQuestion && applicationQuestions.find(q => q.question === message)?.example ?
                                     `<div class="example-box">${applicationQuestions.find(q => q.question === message).example}</div>` : ''}
@@ -1474,5 +1474,6 @@
     </script>
 </body>
 </html>
+
 
 
