@@ -4,8 +4,8 @@ const aboutSchema = new mongoose.Schema({
   text: {
     type: String,
     required: true,
-    trim: true,
-    maxlength: [500, 'About text cannot exceed 500 characters']
+    trim: true
+    // REMOVED: maxlength: [500, 'About text cannot exceed 500 characters']
   },
   contact: {
     address: {
