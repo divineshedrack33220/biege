@@ -191,23 +191,28 @@
             color: #dc2626;
         }
         
-        /* Model Image - Full Width Centered */
+        /* Model Image */
         .model-image {
             border: 1px solid #000000;
             width: 100%;
-            max-width: 100%;
-            margin: 0 auto;
+            aspect-ratio: 3/4;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            aspect-ratio: 3/4;
         }
         .model-image img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             flex-shrink: 0;
+        }
+        
+        /* Profile Content Grid - Desktop Side by Side */
+        .profile-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
         }
         
         /* Measurements Grid */
@@ -288,7 +293,7 @@
             color: #4b5563;
         }
         
-        /* Portfolio Grid - Full Width Centered */
+        /* Portfolio Grid - 2 Column Full Width Desktop */
         .portfolio-item {
             border: 1px solid #000000;
             aspect-ratio: 3/4;
@@ -380,11 +385,8 @@
             text-align: left;
             max-width: none;
         }
-        #model-content .text-center {
-            text-align: left;
-        }
         
-        /* Desktop Media Query */
+        /* Desktop Media Query - Side by Side Layout */
         @media (min-width: 640px) {
             .container {
                 padding-left: 20px;
@@ -403,18 +405,29 @@
                 max-width: 800px;
                 text-align: left;
             }
-            .model-image {
-                max-width: 300px;
-                margin: 0 auto;
+            
+            /* Profile Grid - Side by Side */
+            .profile-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 3rem;
+                align-items: start;
             }
+            
+            .model-image {
+                width: 100%;
+                max-width: 100%;
+            }
+            
+            /* Portfolio - 2 Column Full Width */
             #portfolio-grid {
                 display: grid !important;
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                grid-template-columns: repeat(2, 1fr);
                 gap: 1rem;
                 overflow-x: visible !important;
                 padding-bottom: 0;
                 width: 100%;
-                justify-content: center;
+                justify-content: stretch;
                 max-width: 100%;
             }
             .portfolio-item {
@@ -441,6 +454,9 @@
             .container {
                 padding-left: 10px;
                 padding-right: 10px;
+            }
+            .profile-grid {
+                gap: 1.5rem;
             }
             .model-image {
                 max-width: 100%;
@@ -576,47 +592,57 @@
                     <h2 id="model-name" class="hero-title"></h2>
                     <h3 class="profile-subtitle">PROFILE</h3>
                 </div>
-                <!-- Measurement -->
-                <div id="model-attributes" class="model-attributes reveal">
-                    <h3>MEASUREMENT</h3>
-                    <div class="measurements-grid">
-                        <p><strong>HEIGHT</strong><span></span></p>
-                        <p><strong>BUST</strong><span></span></p>
-                        <p><strong>WAIST</strong><span></span></p>
-                        <p><strong>HIPS</strong><span></span></p>
-                        <p><strong>HAIR</strong><span></span></p>
-                        <p><strong>EYES</strong><span></span></p>
-                        <p><strong>SHOES</strong><span></span></p>
-                        <p><strong>MODEL SIZE</strong><span></span></p>
+                
+                <!-- Profile Grid - Main Image and Profile Info Side by Side -->
+                <div class="profile-grid reveal">
+                    <!-- Profile Info (Measurements, Social, Book Now) -->
+                    <div class="profile-info">
+                        <!-- Measurement -->
+                        <div id="model-attributes" class="model-attributes">
+                            <h3>MEASUREMENT</h3>
+                            <div class="measurements-grid">
+                                <p><strong>HEIGHT</strong><span></span></p>
+                                <p><strong>BUST</strong><span></span></p>
+                                <p><strong>WAIST</strong><span></span></p>
+                                <p><strong>HIPS</strong><span></span></p>
+                                <p><strong>HAIR</strong><span></span></p>
+                                <p><strong>EYES</strong><span></span></p>
+                                <p><strong>SHOES</strong><span></span></p>
+                                <p><strong>MODEL SIZE</strong><span></span></p>
+                            </div>
+                        </div>
+                        <!-- Social Links -->
+                        <div id="social-links" class="mt-12">
+                            <h3>SOCIAL</h3>
+                            <div class="model-social flex space-x-4">
+                                <p class="text-gray-600">No social links available</p>
+                            </div>
+                        </div>
+                        <!-- Book Now Button -->
+                        <div class="mt-12">
+                            <a id="book-now-btn" href="booking.html" class="btn-animate">Book Now</a>
+                        </div>
+                    </div>
+                    
+                    <!-- Main Model Image -->
+                    <div class="model-image-container">
+                        <div id="model-image" class="model-image">
+                            <span class="text-gray-600 text-center px-4">No image available</span>
+                        </div>
                     </div>
                 </div>
-                <!-- Social Links -->
-                <div id="social-links" class="mt-12 reveal">
-                    <h3>SOCIAL</h3>
-                    <div class="model-social flex space-x-4">
-                        <p class="text-gray-600">No social links available</p>
-                    </div>
-                </div>
-                <!-- Book Now Button -->
-                <div class="mt-12 reveal">
-                    <a id="book-now-btn" href="booking.html" class="btn-animate">Book Now</a>
-                </div>
-                <!-- Main Model Image - Full Width Centered -->
-                <div class="mt-12 reveal w-full">
-                    <div id="model-image" class="model-image">
-                        <span class="text-gray-600 text-center px-4">No image available</span>
-                    </div>
-                </div>
+                
                 <!-- About the Model -->
                 <div class="mt-12 reveal">
                     <p id="model-description" class="text-gray-600"></p>
                 </div>
-                <!-- Portfolio - Full Width Centered -->
+                
+                <!-- Portfolio - 2 Column Full Width Desktop -->
                 <div class="mt-12 reveal w-full">
                     <h3 class="hero-title">Portfolio</h3>
                     <div class="w-16 h-px bg-black mb-4"></div>
                     <div id="portfolio-grid">
-                        <div class="portfolio-item w-full max-w-xs mx-auto flex items-center justify-center">
+                        <div class="portfolio-item w-full flex items-center justify-center">
                             <span class="text-gray-600 text-center px-2">No portfolio images available</span>
                         </div>
                     </div>
@@ -759,15 +785,6 @@
                 return;
             }
 
-            if (!loadingState || !modelContent || !errorMessage) {
-                console.error('Required DOM elements not found:', {
-                    loadingState: !!loadingState,
-                    modelContent: !!modelContent,
-                    errorMessage: !!errorMessage
-                });
-                return;
-            }
-
             loadingState.classList.remove('hidden');
             modelContent.classList.add('opacity-50');
             errorMessage.classList.add('hidden');
@@ -844,7 +861,7 @@
                     }
                 }
 
-                // Update Main Model Image - Full Width Centered
+                // Update Main Model Image
                 const modelImage = document.getElementById('model-image');
                 if (modelImage) {
                     portfolioImages.length = 0;
@@ -863,7 +880,7 @@
                     modelDescription.textContent = model.description || 'No description available';
                 }
 
-                // Update Portfolio Gallery - Full Width Centered
+                // Update Portfolio Gallery - 2 Column Full Width Desktop
                 const portfolioGrid = document.getElementById('portfolio-grid');
                 if (portfolioGrid) {
                     portfolioGrid.innerHTML = '';
@@ -884,7 +901,7 @@
                     // Always show placeholder if no images
                     if (portfolioGrid.children.length === 0) {
                         const placeholder = document.createElement('div');
-                        placeholder.className = 'portfolio-item w-full max-w-xs mx-auto flex items-center justify-center';
+                        placeholder.className = 'portfolio-item w-full flex items-center justify-center';
                         placeholder.innerHTML = '<span class="text-gray-600 text-center px-2">No portfolio images available</span>';
                         portfolioGrid.appendChild(placeholder);
                     }
