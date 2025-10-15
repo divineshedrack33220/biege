@@ -182,7 +182,7 @@
                 <!-- Companies Section -->
                 <div id="companies-section">
                     <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-base font-semibold text-gray-900">Companies We’ve Worked With</h2>
+                        <h2 class="text-base font-semibold text-gray-900">Companies We've Worked With</h2>
                         <button id="add-company-btn" class="form-button text-sm bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md transition-colors" aria-label="Add New Company">Add Company</button>
                     </div>
                     <div id="companies-loading" class="text-center text-sm py-3 hidden">
@@ -732,12 +732,6 @@
                     textError.textContent = 'About text is required';
                     textError.classList.remove('hidden');
                     throw new Error('About text is required');
-                }
-                if (textValue.length > 500) {
-                    text.parentElement.classList.add('error');
-                    textError.textContent = 'About text must be under 500 characters';
-                    textError.classList.remove('hidden');
-                    throw new Error('About text must be under 500 characters');
                 }
                 if (!addressValue) {
                     address.parentElement.classList.add('error');
