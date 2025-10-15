@@ -49,8 +49,7 @@ router.put(
   [
     body('text')
       .notEmpty().withMessage('About text is required')
-      .trim()
-      .isLength({ max: 500 }).withMessage('About text cannot exceed 500 characters'),
+      .trim(),
     body('contact.address')
       .notEmpty().withMessage('Address is required')
       .trim()
