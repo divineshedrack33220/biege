@@ -1165,6 +1165,89 @@
             renderCurrentPage();
         }
 
+        function extractUsernameFromUrl(url, platform) {
+            if (!url) return null;
+            
+            try {
+                let cleanUrl = url.trim();
+                
+                // If it's just a username (without @), add it
+                if (!cleanUrl.includes('http') && !cleanUrl.includes('.') && !cleanUrl.includes('/')) {
+                    // It's likely just a username
+                    return {
+                        url: platform === 'instagram' ? `https://instagram.com/${cleanUrl}` : `https://tiktok.com/@${cleanUrl}`,
+                        username: cleanUrl.replace('@', '')
+                    };
+                }
+                
+                // Ensure URL has protocol
+                if (!cleanUrl.startsWith('http')) {
+                    cleanUrl = 'https://' + cleanUrl;
+                }
+                
+                const urlObj = new URL(cleanUrl);
+                const pathParts = urlObj.pathname.split('/').filter(part => part);
+                
+                let username = '';
+                
+                if (platform === 'instagram') {
+                    // Instagram: https://instagram.com/username
+                    // Instagram: https://www.instagram.com/username/
+                    username = pathParts[0] || '';
+                    
+                    // If it's a direct @username input
+                    if (!username && cleanUrl.includes('@')) {
+                        const match = cleanUrl.match(/@([\w\._]+)/);
+                        if (match) username = match[1];
+                    }
+                    
+                    if (username) {
+                        return {
+                            url: `https://instagram.com/${username}`,
+                            username: username
+                        };
+                    }
+                } else if (platform === 'tiktok') {
+                    // TikTok: https://tiktok.com/@username
+                    // TikTok: https://www.tiktok.com/@username
+                    if (pathParts.length > 0) {
+                        username = pathParts[0];
+                        // Remove @ symbol if present
+                        if (username.startsWith('@')) {
+                            username = username.substring(1);
+                        }
+                    }
+                    
+                    // If it's a direct @username input
+                    if (!username && cleanUrl.includes('@')) {
+                        const match = cleanUrl.match(/@([\w\._]+)/);
+                        if (match) username = match[1];
+                    }
+                    
+                    if (username) {
+                        return {
+                            url: `https://tiktok.com/@${username}`,
+                            username: username
+                        };
+                    }
+                }
+                
+                // If we couldn't extract username, return the original URL
+                return {
+                    url: cleanUrl,
+                    username: cleanUrl.replace('https://', '').replace('www.', '').split('/')[0]
+                };
+                
+            } catch (error) {
+                console.error('Error parsing social URL:', url, error);
+                // Return simple fallback
+                return {
+                    url: url,
+                    username: url.replace('https://', '').replace('www.', '').split('/')[0] || platform
+                };
+            }
+        }
+
         function renderCurrentPage() {
             const applicationGrid = document.getElementById('application-grid');
             const startIndex = (currentPage - 1) * itemsPerPage;
@@ -1188,9 +1271,9 @@
                     preloadImages(app.photos.slice(0, 3));
                 }
                 
-                // Format Instagram and TikTok links
-                const instagramLink = app.instagram ? formatSocialLink(app.instagram, 'instagram') : null;
-                const tiktokLink = app.tiktok ? formatSocialLink(app.tiktok, 'tiktok') : null;
+                // Extract Instagram and TikTok usernames
+                const instagramInfo = app.instagram ? extractUsernameFromUrl(app.instagram, 'instagram') : null;
+                const tiktokInfo = app.tiktok ? extractUsernameFromUrl(app.tiktok, 'tiktok') : null;
                 
                 // Format dates
                 const appliedDate = app.createdAt ? formatDate(app.createdAt) : 'N/A';
@@ -1199,6 +1282,15 @@
                 
                 // Determine if application is recent (within 24 hours)
                 const isRecent = app.createdAt ? (new Date() - new Date(app.createdAt)) < (24 * 60 * 60 * 1000) : false;
+                
+                // Truncate username for display if too long
+                const truncateUsername = (username) => {
+                    if (!username) return '';
+                    if (username.length > 15) {
+                        return username.substring(0, 15) + '...';
+                    }
+                    return username;
+                };
                 
                 div.innerHTML = `
                     <div class="p-4">
@@ -1247,8 +1339,31 @@
                             <p><strong>Agency:</strong> ${escapeHtml(app.justCo || 'N/A')}</p>
                             <p><strong>Height:</strong> ${app.height || 'N/A'}</p>
                             <p><strong>Photos:</strong> <span class="text-blue-500 hover:underline cursor-pointer view-photos-btn">View ${(app.photos || []).length} photo(s)</span></p>
-                            <p><strong>Instagram:</strong> ${instagramLink ? `<a href="${instagramLink.url}" target="_blank" class="text-blue-500 hover:underline" title="${instagramLink.username}">${instagramLink.username}</a>` : 'N/A'}</p>
-                            <p><strong>TikTok:</strong> ${tiktokLink ? `<a href="${tiktokLink.url}" target="_blank" class="text-blue-500 hover:underline" title="${tiktokLink.username}">${tiktokLink.username}</a>` : 'N/A'}</p>
+                            
+                            <!-- Instagram Link with Username -->
+                            <p class="flex items-center">
+                                <strong class="mr-2">Instagram:</strong>
+                                ${instagramInfo ? 
+                                    `<a href="${instagramInfo.url}" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:text-blue-700 hover:underline flex items-center">
+                                        <i class="fab fa-instagram mr-1 text-pink-500"></i>
+                                        <span class="username">${truncateUsername(instagramInfo.username)}</span>
+                                        <i class="fas fa-external-link-alt ml-1 text-xs text-gray-400"></i>
+                                    </a>` : 
+                                    '<span class="text-gray-500">N/A</span>'}
+                            </p>
+                            
+                            <!-- TikTok Link with Username -->
+                            <p class="flex items-center">
+                                <strong class="mr-2">TikTok:</strong>
+                                ${tiktokInfo ? 
+                                    `<a href="${tiktokInfo.url}" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:text-blue-700 hover:underline flex items-center">
+                                        <i class="fab fa-tiktok mr-1 text-gray-800"></i>
+                                        <span class="username">${truncateUsername(tiktokInfo.username)}</span>
+                                        <i class="fas fa-external-link-alt ml-1 text-xs text-gray-400"></i>
+                                    </a>` : 
+                                    '<span class="text-gray-500">N/A</span>'}
+                            </p>
+                            
                             <p><strong>Location:</strong> ${escapeHtml(app.location || 'N/A')}</p>
                             <p><strong>DOB:</strong> ${app.dob ? new Date(app.dob).toLocaleDateString() : 'N/A'}</p>
                             <p><strong>Start Date:</strong> ${escapeHtml(app.startDate || 'N/A')}</p>
@@ -1300,56 +1415,6 @@
             
             // Update pagination controls
             updatePaginationControls();
-        }
-
-        function formatSocialLink(url, platform) {
-            if (!url) return null;
-            
-            // Clean the URL
-            let cleanUrl = url.trim();
-            if (!cleanUrl.startsWith('http')) {
-                cleanUrl = 'https://' + cleanUrl;
-            }
-            
-            // Extract username
-            let username = '';
-            try {
-                const urlObj = new URL(cleanUrl);
-                const pathParts = urlObj.pathname.split('/').filter(part => part);
-                
-                if (platform === 'instagram') {
-                    // Instagram: https://instagram.com/username
-                    username = pathParts[0] || 'instagram';
-                    if (!cleanUrl.includes('instagram.com')) {
-                        cleanUrl = `https://instagram.com/${username}`;
-                    }
-                } else if (platform === 'tiktok') {
-                    // TikTok: https://tiktok.com/@username
-                    if (pathParts.length > 0) {
-                        username = pathParts[0].startsWith('@') ? pathParts[0].substring(1) : pathParts[0];
-                    } else {
-                        username = 'tiktok';
-                    }
-                    if (!cleanUrl.includes('tiktok.com')) {
-                        cleanUrl = `https://tiktok.com/@${username}`;
-                    }
-                }
-                
-                // Truncate long usernames
-                if (username.length > 15) {
-                    username = username.substring(0, 15) + '...';
-                }
-            } catch (error) {
-                console.error('Error parsing social URL:', url, error);
-                // Fallback to simple display
-                username = platform;
-                cleanUrl = `https://${platform}.com`;
-            }
-            
-            return {
-                url: cleanUrl,
-                username: `@${username}`
-            };
         }
 
         function setupEventListeners() {
