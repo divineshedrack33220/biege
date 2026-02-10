@@ -615,862 +615,387 @@
         <img id="preload-image" style="display: none;">
     </div>
 
-    <script>
-        // State management
-        let applicationsData = [];
-        let groupedApplicationsData = {};
-        let currentPage = 1;
-        let itemsPerPage = 20;
-        let totalPages = 1;
-        let touchStartHandler = null;
-        let touchEndHandler = null;
-        let searchTimeout = null;
-        let photoModalObserver = null;
-        let imageCache = new Map();
-        
-        function decodeToken(token) {
-            if (!token) {
-                console.error('No token provided for decoding');
-                return false;
-            }
-            try {
-                const payload = JSON.parse(atob(token.split('.')[1]));
-                const exp = payload.exp * 1000;
-                const now = Date.now();
-                return exp > now;
-            } catch (error) {
-                console.error('Error decoding token:', error);
-                return false;
-            }
+   <script>
+    // State management
+    let applicationsData = [];
+    let groupedApplicationsData = {};
+    let currentPage = 1;
+    let itemsPerPage = 20;
+    let totalPages = 1;
+    let touchStartHandler = null;
+    let touchEndHandler = null;
+    let searchTimeout = null;
+    let photoModalObserver = null;
+    let imageCache = new Map();
+    
+    // Image loading configuration
+    const IMAGE_CONFIG = {
+        MAX_RETRIES: 2,
+        RETRY_DELAY: 1000,
+        LOAD_TIMEOUT: 10000,
+        THUMBNAIL_SIZE: '200x200',
+        PLACEHOLDER_COLOR: '#f3f4f6',
+        PLACEHOLDER_TEXT: 'Loading...'
+    };
+    
+    // Store loading promises to prevent duplicate loads
+    const imageLoadPromises = new Map();
+    
+    function decodeToken(token) {
+        if (!token) {
+            console.error('No token provided for decoding');
+            return false;
         }
-
-        const token = localStorage.getItem('token');
-        const dashboard = document.getElementById('dashboard');
-        const applicationError = document.getElementById('application-error');
-        const applicationLoading = document.getElementById('application-loading');
-        const sidebar = document.querySelector('.sidebar');
-        const contentArea = document.querySelector('.content-area');
-        const userMenuButton = document.getElementById('user-menu-button');
-        const userMenu = document.getElementById('user-menu');
-        const mergeOption = document.getElementById('merge-option');
-        const prevPageBtn = document.getElementById('prev-page');
-        const nextPageBtn = document.getElementById('next-page');
-        const pageInfo = document.getElementById('page-info');
-        const paginationControls = document.getElementById('pagination-controls');
-
-        // Initial token check
-        if (!token || !decodeToken(token)) {
-            console.log('No valid token found, redirecting to login');
-            window.location.href = 'admin.html';
-        } else {
-            console.log('Token is valid');
-            dashboard.classList.remove('hidden');
-            loadApplications();
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            const exp = payload.exp * 1000;
+            const now = Date.now();
+            return exp > now;
+        } catch (error) {
+            console.error('Error decoding token:', error);
+            return false;
         }
+    }
 
-        // Sidebar toggle
-        document.getElementById('sidebar-toggle').addEventListener('click', () => {
-            sidebar.classList.toggle('sidebar-collapsed');
-            contentArea.classList.toggle('content-expanded');
-        });
+    const token = localStorage.getItem('token');
+    const dashboard = document.getElementById('dashboard');
+    const applicationError = document.getElementById('application-error');
+    const applicationLoading = document.getElementById('application-loading');
+    const sidebar = document.querySelector('.sidebar');
+    const contentArea = document.querySelector('.content-area');
+    const userMenuButton = document.getElementById('user-menu-button');
+    const userMenu = document.getElementById('user-menu');
+    const mergeOption = document.getElementById('merge-option');
+    const prevPageBtn = document.getElementById('prev-page');
+    const nextPageBtn = document.getElementById('next-page');
+    const pageInfo = document.getElementById('page-info');
+    const paginationControls = document.getElementById('pagination-controls');
 
-        // User menu toggle
-        userMenuButton.addEventListener('click', () => {
-            userMenu.classList.toggle('hidden');
-        });
+    // Initial token check
+    if (!token || !decodeToken(token)) {
+        console.log('No valid token found, redirecting to login');
+        window.location.href = 'admin.html';
+    } else {
+        console.log('Token is valid');
+        dashboard.classList.remove('hidden');
+        loadApplications();
+    }
 
-        // Logout handlers
-        document.getElementById('logout-btn').addEventListener('click', () => {
-            console.log('Logging out, clearing token');
-            localStorage.removeItem('token');
-            window.location.href = 'admin.html';
-            userMenu.classList.add('hidden');
-        });
+    // Sidebar toggle
+    document.getElementById('sidebar-toggle').addEventListener('click', () => {
+        sidebar.classList.toggle('sidebar-collapsed');
+        contentArea.classList.toggle('content-expanded');
+    });
 
-        document.getElementById('menu-logout').addEventListener('click', (e) => {
-            e.preventDefault();
-            console.log('Logging out via menu, clearing token');
-            localStorage.removeItem('token');
-            window.location.href = 'admin.html';
-            userMenu.classList.add('hidden');
-        });
+    // User menu toggle
+    userMenuButton.addEventListener('click', () => {
+        userMenu.classList.toggle('hidden');
+    });
 
-        // Close alerts
-        document.getElementById('close-success-alert').addEventListener('click', () => {
-            document.getElementById('success-alert').classList.add('hidden');
-        });
+    // Logout handlers
+    document.getElementById('logout-btn').addEventListener('click', () => {
+        console.log('Logging out, clearing token');
+        localStorage.removeItem('token');
+        window.location.href = 'admin.html';
+        userMenu.classList.add('hidden');
+    });
 
-        document.getElementById('close-error-alert').addEventListener('click', () => {
-            document.getElementById('error-alert').classList.add('hidden');
-        });
+    document.getElementById('menu-logout').addEventListener('click', (e) => {
+        e.preventDefault();
+        console.log('Logging out via menu, clearing token');
+        localStorage.removeItem('token');
+        window.location.href = 'admin.html';
+        userMenu.classList.add('hidden');
+    });
 
-        // Photo modal close
-        document.getElementById('close-photo-modal').addEventListener('click', () => {
+    // Close alerts
+    document.getElementById('close-success-alert').addEventListener('click', () => {
+        document.getElementById('success-alert').classList.add('hidden');
+    });
+
+    document.getElementById('close-error-alert').addEventListener('click', () => {
+        document.getElementById('error-alert').classList.add('hidden');
+    });
+
+    // Photo modal close
+    document.getElementById('close-photo-modal').addEventListener('click', () => {
+        closePhotoModal();
+    });
+
+    // Close photo modal on outside click
+    document.getElementById('photo-modal').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('photo-modal')) {
             closePhotoModal();
-        });
-
-        // Close photo modal on outside click
-        document.getElementById('photo-modal').addEventListener('click', (e) => {
-            if (e.target === document.getElementById('photo-modal')) {
-                closePhotoModal();
-            }
-        });
-
-        // Close photo modal on Escape key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && !document.getElementById('photo-modal').classList.contains('hidden')) {
-                closePhotoModal();
-            }
-        });
-
-        // Pagination controls
-        prevPageBtn.addEventListener('click', () => {
-            if (currentPage > 1) {
-                currentPage--;
-                renderCurrentPage();
-            }
-        });
-
-        nextPageBtn.addEventListener('click', () => {
-            if (currentPage < totalPages) {
-                currentPage++;
-                renderCurrentPage();
-            }
-        });
-
-        // Search with debouncing
-        document.getElementById('search-applications').addEventListener('input', (e) => {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                filterApplications(e.target.value);
-            }, 300);
-        });
-
-        // Merge option change
-        mergeOption.addEventListener('change', () => {
-            currentPage = 1;
-            processApplications();
-        });
-
-        // Function to format date
-        function formatDate(dateString) {
-            if (!dateString) return 'N/A';
-            
-            try {
-                const date = new Date(dateString);
-                if (isNaN(date.getTime())) return 'N/A';
-                
-                const now = new Date();
-                const diffTime = Math.abs(now - date);
-                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-                
-                // Format for recent dates (today, yesterday)
-                if (diffDays === 0) {
-                    return 'Today';
-                } else if (diffDays === 1) {
-                    return 'Yesterday';
-                } else if (diffDays < 7) {
-                    return `${diffDays} days ago`;
-                }
-                
-                // Format as date
-                return date.toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric'
-                });
-            } catch (error) {
-                console.error('Error formatting date:', error);
-                return 'N/A';
-            }
         }
+    });
 
-        // Function to get time ago
-        function getTimeAgo(dateString) {
-            if (!dateString) return '';
-            
-            try {
-                const date = new Date(dateString);
-                if (isNaN(date.getTime())) return '';
-                
-                const now = new Date();
-                const diffTime = Math.abs(now - date);
-                const diffMinutes = Math.floor(diffTime / (1000 * 60));
-                const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
-                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-                
-                if (diffMinutes < 60) {
-                    return diffMinutes === 1 ? '1 min ago' : `${diffMinutes} mins ago`;
-                } else if (diffHours < 24) {
-                    return diffHours === 1 ? '1 hour ago' : `${diffHours} hours ago`;
-                } else if (diffDays < 7) {
-                    return diffDays === 1 ? '1 day ago' : `${diffDays} days ago`;
-                }
-                
-                return '';
-            } catch (error) {
-                return '';
-            }
+    // Close photo modal on Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !document.getElementById('photo-modal').classList.contains('hidden')) {
+            closePhotoModal();
         }
+    });
 
-        // Function to preload images
-        function preloadImages(imageUrls) {
-            imageUrls.forEach(url => {
-                if (!imageCache.has(url)) {
-                    const img = new Image();
-                    img.src = url;
-                    imageCache.set(url, img);
-                }
-            });
-        }
-
-        function closePhotoModal() {
-            const photoModal = document.getElementById('photo-modal');
-            
-            // Remove touch event listeners to prevent memory leaks
-            if (touchStartHandler && touchEndHandler) {
-                const carouselSlide = document.getElementById('carousel-slide');
-                if (carouselSlide) {
-                    carouselSlide.removeEventListener('touchstart', touchStartHandler);
-                    carouselSlide.removeEventListener('touchend', touchEndHandler);
-                }
-                touchStartHandler = null;
-                touchEndHandler = null;
-            }
-            
-            // Clean up lazy loading observer
-            if (photoModalObserver) {
-                photoModalObserver.disconnect();
-                photoModalObserver = null;
-            }
-            
-            photoModal.classList.add('modal-exit-active');
-            setTimeout(() => {
-                photoModal.classList.add('hidden');
-                photoModal.classList.remove('modal-exit-active');
-                // Clear carousel content to free memory
-                document.getElementById('carousel-slide').innerHTML = '';
-            }, 200);
-        }
-
-        let currentPhotoIndex = 0;
-        let photos = [];
-
-        function showPhotoModal(photoArray, startIndex = 0) {
-            if (!Array.isArray(photoArray) || photoArray.length === 0) {
-                console.error('Invalid photo array:', photoArray);
-                return;
-            }
-            
-            photos = photoArray;
-            currentPhotoIndex = Math.min(Math.max(startIndex, 0), photos.length - 1);
-            const photoModal = document.getElementById('photo-modal');
-            const carouselSlide = document.getElementById('carousel-slide');
-            const carouselPrev = document.getElementById('carousel-prev');
-            const carouselNext = document.getElementById('carousel-next');
-            const carouselCounter = document.getElementById('carousel-counter');
-
-            carouselSlide.innerHTML = '';
-            
-            // Preload all images for instant viewing
-            photos.forEach((url, index) => {
-                if (imageCache.has(url)) {
-                    // Use cached image
-                    const img = document.createElement('img');
-                    img.src = url;
-                    img.alt = `Application Photo ${index + 1}`;
-                    img.className = 'carousel-image';
-                    carouselSlide.appendChild(img);
-                } else {
-                    // Create and load image
-                    const img = new Image();
-                    img.src = url;
-                    img.alt = `Application Photo ${index + 1}`;
-                    img.className = 'carousel-image';
-                    
-                    // Add loading indicator
-                    img.onload = () => {
-                        imageCache.set(url, img);
-                    };
-                    
-                    img.onerror = () => {
-                        console.error(`Failed to load image: ${url}`);
-                    };
-                    
-                    carouselSlide.appendChild(img);
-                }
-            });
-
-            updateCarousel();
-            carouselSlide.style.transform = `translateX(-${currentPhotoIndex * 100}%)`;
-            carouselPrev.classList.toggle('hidden', photos.length <= 1);
-            carouselNext.classList.toggle('hidden', photos.length <= 1);
-            carouselCounter.textContent = `${currentPhotoIndex + 1} / ${photos.length}`;
-
-            // Remove old event listeners if they exist
-            if (touchStartHandler && touchEndHandler) {
-                carouselSlide.removeEventListener('touchstart', touchStartHandler);
-                carouselSlide.removeEventListener('touchend', touchEndHandler);
-            }
-
-            // Add new touch event listeners
-            touchStartHandler = (e) => {
-                e.preventDefault();
-                touchStartX = e.changedTouches[0].screenX;
-            };
-
-            touchEndHandler = (e) => {
-                e.preventDefault();
-                const touchEndX = e.changedTouches[0].screenX;
-                if (touchEndX < touchStartX - 50) {
-                    showNextPhoto();
-                } else if (touchEndX > touchStartX + 50) {
-                    showPrevPhoto();
-                }
-            };
-
-            carouselSlide.addEventListener('touchstart', touchStartHandler, { passive: false });
-            carouselSlide.addEventListener('touchend', touchEndHandler, { passive: false });
-
-            photoModal.classList.remove('hidden');
-            photoModal.classList.add('modal-enter-active');
-            setTimeout(() => photoModal.classList.remove('modal-enter-active'), 200);
-        }
-
-        function showPrevPhoto() {
-            if (currentPhotoIndex > 0) {
-                currentPhotoIndex--;
-                updateCarousel();
-            }
-        }
-
-        function showNextPhoto() {
-            if (currentPhotoIndex < photos.length - 1) {
-                currentPhotoIndex++;
-                updateCarousel();
-            }
-        }
-
-        function updateCarousel() {
-            const carouselSlide = document.getElementById('carousel-slide');
-            const carouselPrev = document.getElementById('carousel-prev');
-            const carouselNext = document.getElementById('carousel-next');
-            const carouselCounter = document.getElementById('carousel-counter');
-
-            if (carouselSlide) {
-                carouselSlide.style.transform = `translateX(-${currentPhotoIndex * 100}%)`;
-            }
-            if (carouselPrev) {
-                carouselPrev.classList.toggle('hidden', currentPhotoIndex === 0);
-            }
-            if (carouselNext) {
-                carouselNext.classList.toggle('hidden', currentPhotoIndex === photos.length - 1);
-            }
-            if (carouselCounter) {
-                carouselCounter.textContent = `${currentPhotoIndex + 1} / ${photos.length}`;
-            }
-        }
-
-        document.getElementById('carousel-prev').addEventListener('click', showPrevPhoto);
-        document.getElementById('carousel-next').addEventListener('click', showNextPhoto);
-
-        // Function to group applications by email and merge them
-        function groupApplicationsByEmail(applications) {
-            const grouped = {};
-            let duplicates = 0;
-            
-            applications.forEach(application => {
-                const email = application.email.toLowerCase();
-                
-                if (!grouped[email]) {
-                    // First application from this email
-                    grouped[email] = { 
-                        ...application, 
-                        mergedIds: [application._id]
-                    };
-                } else {
-                    // Merge with existing application
-                    const existing = grouped[email];
-                    
-                    // Merge photos (avoid duplicates)
-                    const allPhotos = [...existing.photos, ...application.photos];
-                    const uniquePhotos = [...new Set(allPhotos)];
-                    
-                    // Update the existing entry
-                    existing.mergedCount = (existing.mergedCount || 1) + 1;
-                    existing.mergedIds.push(application._id);
-                    existing.photos = uniquePhotos;
-                    
-                    // Keep the most recent status if there's a conflict
-                    if (application.createdAt && existing.createdAt) {
-                        if (new Date(application.createdAt) > new Date(existing.createdAt)) {
-                            existing.status = application.status;
-                            existing.createdAt = application.createdAt;
-                        }
-                    }
-                    
-                    // Update with any missing data from newer application
-                    Object.keys(application).forEach(key => {
-                        if (!existing[key] && application[key]) {
-                            existing[key] = application[key];
-                        }
-                    });
-                    
-                    duplicates++;
-                }
-            });
-            
-            return { grouped, duplicates };
-        }
-
-        // Function to group applications by name and merge them
-        function groupApplicationsByName(applications) {
-            const grouped = {};
-            let duplicates = 0;
-            
-            applications.forEach(application => {
-                const nameKey = `${application.firstName?.toLowerCase() || ''} ${application.lastName?.toLowerCase() || ''}`.trim();
-                
-                if (!grouped[nameKey]) {
-                    // First application from this name
-                    grouped[nameKey] = { 
-                        ...application, 
-                        mergedIds: [application._id]
-                    };
-                } else {
-                    // Merge with existing application
-                    const existing = grouped[nameKey];
-                    
-                    // Merge photos (avoid duplicates)
-                    const allPhotos = [...existing.photos, ...application.photos];
-                    const uniquePhotos = [...new Set(allPhotos)];
-                    
-                    // Update the existing entry
-                    existing.mergedCount = (existing.mergedCount || 1) + 1;
-                    existing.mergedIds.push(application._id);
-                    existing.photos = uniquePhotos;
-                    
-                    // Keep the most recent status if there's a conflict
-                    if (application.createdAt && existing.createdAt) {
-                        if (new Date(application.createdAt) > new Date(existing.createdAt)) {
-                            existing.status = application.status;
-                            existing.createdAt = application.createdAt;
-                        }
-                    }
-                    
-                    // Update with any missing data from newer application
-                    Object.keys(application).forEach(key => {
-                        if (!existing[key] && application[key]) {
-                            existing[key] = application[key];
-                        }
-                    });
-                    
-                    duplicates++;
-                }
-            });
-            
-            return { grouped, duplicates };
-        }
-
-        async function loadApplications() {
-            applicationLoading.classList.remove('hidden');
-            applicationError.classList.add('hidden');
-            try {
-                const token = localStorage.getItem('token');
-                if (!token) {
-                    throw new Error('No token found in localStorage');
-                }
-                
-                const response = await fetch('/api/applications', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                
-                if (!response.ok) {
-                    const data = await response.json().catch(() => ({}));
-                    if (response.status === 401) {
-                        localStorage.removeItem('token');
-                        window.location.href = 'admin.html';
-                        return;
-                    }
-                    throw new Error(data.message || `HTTP error: ${response.status}`);
-                }
-                
-                applicationsData = await response.json();
-                processApplications();
-                
-            } catch (error) {
-                applicationError.textContent = error.message || 'Error loading applications';
-                applicationError.classList.remove('hidden');
-                document.getElementById('error-message').textContent = error.message;
-                document.getElementById('error-alert').classList.remove('hidden');
-                setTimeout(() => document.getElementById('error-alert').classList.add('hidden'), 3000);
-            } finally {
-                applicationLoading.classList.add('hidden');
-            }
-        }
-
-        function processApplications() {
-            // Update stats
-            document.getElementById('total-apps').textContent = applicationsData.length;
-            
-            // Calculate recent applications (last 7 days)
-            const sevenDaysAgo = new Date();
-            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-            const recentApps = applicationsData.filter(app => {
-                if (!app.createdAt) return false;
-                const appDate = new Date(app.createdAt);
-                return appDate >= sevenDaysAgo;
-            }).length;
-            document.getElementById('recent-apps').textContent = recentApps;
-            
-            const mergeType = mergeOption.value;
-            let result;
-            
-            if (mergeType === 'email') {
-                result = groupApplicationsByEmail(applicationsData);
-            } else if (mergeType === 'name') {
-                result = groupApplicationsByName(applicationsData);
-            } else {
-                // Don't merge
-                groupedApplicationsData = {};
-                applicationsData.forEach(app => {
-                    groupedApplicationsData[app._id] = { 
-                        ...app, 
-                        mergedIds: [app._id]
-                    };
-                });
-                result = { grouped: groupedApplicationsData, duplicates: 0 };
-            }
-            
-            groupedApplicationsData = result.grouped;
-            
-            // Preload all images from applications
-            const allPhotos = [];
-            Object.values(groupedApplicationsData).forEach(app => {
-                if (app.photos && Array.isArray(app.photos)) {
-                    allPhotos.push(...app.photos);
-                }
-            });
-            preloadImages([...new Set(allPhotos)]);
-            
-            // Update stats
-            document.getElementById('merged-groups').textContent = Object.keys(groupedApplicationsData).length;
-            document.getElementById('duplicates-count').textContent = result.duplicates;
-            
-            // Calculate pagination
-            const totalItems = Object.keys(groupedApplicationsData).length;
-            totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
-            currentPage = Math.min(currentPage, totalPages);
-            
+    // Pagination controls
+    prevPageBtn.addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
             renderCurrentPage();
         }
+    });
 
-        function extractUsernameFromUrl(url, platform) {
-            if (!url) return null;
+    nextPageBtn.addEventListener('click', () => {
+        if (currentPage < totalPages) {
+            currentPage++;
+            renderCurrentPage();
+        }
+    });
+
+    // Search with debouncing
+    document.getElementById('search-applications').addEventListener('input', (e) => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            filterApplications(e.target.value);
+        }, 300);
+    });
+
+    // Merge option change
+    mergeOption.addEventListener('change', () => {
+        currentPage = 1;
+        processApplications();
+    });
+
+    // Function to format date - UPDATED FORMAT
+    function formatDate(dateString) {
+        if (!dateString) return 'N/A';
+        
+        try {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return 'N/A';
             
-            try {
-                let cleanUrl = url.trim();
-                
-                // If it's just a username (without @), add it
-                if (!cleanUrl.includes('http') && !cleanUrl.includes('.') && !cleanUrl.includes('/')) {
-                    // It's likely just a username
-                    return {
-                        url: platform === 'instagram' ? `https://instagram.com/${cleanUrl}` : `https://tiktok.com/@${cleanUrl}`,
-                        username: cleanUrl.replace('@', '')
-                    };
-                }
-                
-                // Ensure URL has protocol
-                if (!cleanUrl.startsWith('http')) {
-                    cleanUrl = 'https://' + cleanUrl;
-                }
-                
-                const urlObj = new URL(cleanUrl);
-                const pathParts = urlObj.pathname.split('/').filter(part => part);
-                
-                let username = '';
-                
-                if (platform === 'instagram') {
-                    // Instagram: https://instagram.com/username
-                    // Instagram: https://www.instagram.com/username/
-                    username = pathParts[0] || '';
-                    
-                    // If it's a direct @username input
-                    if (!username && cleanUrl.includes('@')) {
-                        const match = cleanUrl.match(/@([\w\._]+)/);
-                        if (match) username = match[1];
-                    }
-                    
-                    if (username) {
-                        return {
-                            url: `https://instagram.com/${username}`,
-                            username: username
-                        };
-                    }
-                } else if (platform === 'tiktok') {
-                    // TikTok: https://tiktok.com/@username
-                    // TikTok: https://www.tiktok.com/@username
-                    if (pathParts.length > 0) {
-                        username = pathParts[0];
-                        // Remove @ symbol if present
-                        if (username.startsWith('@')) {
-                            username = username.substring(1);
-                        }
-                    }
-                    
-                    // If it's a direct @username input
-                    if (!username && cleanUrl.includes('@')) {
-                        const match = cleanUrl.match(/@([\w\._]+)/);
-                        if (match) username = match[1];
-                    }
-                    
-                    if (username) {
-                        return {
-                            url: `https://tiktok.com/@${username}`,
-                            username: username
-                        };
-                    }
-                }
-                
-                // If we couldn't extract username, return the original URL
-                return {
-                    url: cleanUrl,
-                    username: cleanUrl.replace('https://', '').replace('www.', '').split('/')[0]
-                };
-                
-            } catch (error) {
-                console.error('Error parsing social URL:', url, error);
-                // Return simple fallback
-                return {
-                    url: url,
-                    username: url.replace('https://', '').replace('www.', '').split('/')[0] || platform
-                };
+            const now = new Date();
+            const diffTime = Math.abs(now - date);
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            
+            // Format for recent dates (today, yesterday)
+            if (diffDays === 0) {
+                // Show time for today
+                const hours = date.getHours();
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                const formattedHours = hours % 12 || 12;
+                return `Today at ${formattedHours}:${minutes} ${ampm}`;
+            } else if (diffDays === 1) {
+                // Show time for yesterday
+                const hours = date.getHours();
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                const formattedHours = hours % 12 || 12;
+                return `Yesterday at ${formattedHours}:${minutes} ${ampm}`;
+            } else if (diffDays < 7) {
+                // Show day name and time for this week
+                const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                const dayName = dayNames[date.getDay()];
+                const hours = date.getHours();
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                const formattedHours = hours % 12 || 12;
+                return `${dayName} at ${formattedHours}:${minutes} ${ampm}`;
             }
+            
+            // Format as full date with time for older dates
+            const day = date.getDate();
+            const month = date.toLocaleDateString('en-US', { month: 'long' });
+            const year = date.getFullYear();
+            const hours = date.getHours();
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            const formattedHours = hours % 12 || 12;
+            
+            // Return format: "March 15, 2024 at 2:30 PM"
+            return `${month} ${day}, ${year} at ${formattedHours}:${minutes} ${ampm}`;
+        } catch (error) {
+            console.error('Error formatting date:', error);
+            return 'N/A';
         }
+    }
 
-        function renderCurrentPage() {
-            const applicationGrid = document.getElementById('application-grid');
-            const startIndex = (currentPage - 1) * itemsPerPage;
-            const endIndex = startIndex + itemsPerPage;
-            const appsToDisplay = Object.values(groupedApplicationsData).slice(startIndex, endIndex);
+    // Function to get time ago - UPDATED FORMAT
+    function getTimeAgo(dateString) {
+        if (!dateString) return '';
+        
+        try {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return '';
             
-            // Use DocumentFragment for efficient DOM updates
-            const fragment = document.createDocumentFragment();
+            const now = new Date();
+            const diffTime = Math.abs(now - date);
+            const diffMinutes = Math.floor(diffTime / (1000 * 60));
+            const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            const diffWeeks = Math.floor(diffDays / 7);
+            const diffMonths = Math.floor(diffDays / 30);
+            const diffYears = Math.floor(diffDays / 365);
             
-            appsToDisplay.forEach((app, index) => {
-                const div = document.createElement('div');
-                div.className = 'card bg-white rounded-lg overflow-hidden';
-                div.style.animationDelay = `${index * 0.05}s`;
-                
-                // Display merged application count
-                const applicationCount = app.mergedIds ? app.mergedIds.length : 1;
-                const isMerged = applicationCount > 1;
-                
-                // Preload images for this application
-                if (app.photos && app.photos.length > 0) {
-                    preloadImages(app.photos.slice(0, 3));
+            if (diffMinutes < 60) {
+                return diffMinutes === 1 ? '1 minute ago' : `${diffMinutes} minutes ago`;
+            } else if (diffHours < 24) {
+                return diffHours === 1 ? '1 hour ago' : `${diffHours} hours ago`;
+            } else if (diffDays < 7) {
+                return diffDays === 1 ? '1 day ago' : `${diffDays} days ago`;
+            } else if (diffWeeks < 4) {
+                return diffWeeks === 1 ? '1 week ago' : `${diffWeeks} weeks ago`;
+            } else if (diffMonths < 12) {
+                return diffMonths === 1 ? '1 month ago' : `${diffMonths} months ago`;
+            } else {
+                return diffYears === 1 ? '1 year ago' : `${diffYears} years ago`;
+            }
+        } catch (error) {
+            return '';
+        }
+    }
+
+    // Function to get simple date for display (without time)
+    function getSimpleDate(dateString) {
+        if (!dateString) return 'N/A';
+        
+        try {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return 'N/A';
+            
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            
+            return `${day}/${month}/${year}`;
+        } catch (error) {
+            return 'N/A';
+        }
+    }
+
+    // Function to load image with retry logic and timeout
+    function loadImageWithRetry(url, retries = IMAGE_CONFIG.MAX_RETRIES, timeout = IMAGE_CONFIG.LOAD_TIMEOUT) {
+        // Return cached promise if exists
+        if (imageLoadPromises.has(url)) {
+            return imageLoadPromises.get(url);
+        }
+        
+        const loadPromise = new Promise((resolve, reject) => {
+            const img = new Image();
+            let retryCount = 0;
+            
+            // Set timeout
+            const timeoutId = setTimeout(() => {
+                if (retryCount < retries) {
+                    retryLoad();
+                } else {
+                    reject(new Error('Image load timeout'));
+                    imageLoadPromises.delete(url);
                 }
+            }, timeout);
+            
+            const retryLoad = () => {
+                retryCount++;
+                clearTimeout(timeoutId);
                 
-                // Extract Instagram and TikTok usernames
-                const instagramInfo = app.instagram ? extractUsernameFromUrl(app.instagram, 'instagram') : null;
-                const tiktokInfo = app.tiktok ? extractUsernameFromUrl(app.tiktok, 'tiktok') : null;
+                // Add cache busting query parameter for retry
+                const cacheBustUrl = retryCount > 0 ? 
+                    `${url}${url.includes('?') ? '&' : '?'}_cb=${Date.now()}` : 
+                    url;
                 
-                // Format dates
-                const appliedDate = app.createdAt ? formatDate(app.createdAt) : 'N/A';
-                const timeAgo = app.createdAt ? getTimeAgo(app.createdAt) : '';
-                const updatedDate = app.updatedAt && app.createdAt !== app.updatedAt ? formatDate(app.updatedAt) : null;
+                img.src = cacheBustUrl;
                 
-                // Determine if application is recent (within 24 hours)
-                const isRecent = app.createdAt ? (new Date() - new Date(app.createdAt)) < (24 * 60 * 60 * 1000) : false;
-                
-                // Truncate username for display if too long
-                const truncateUsername = (username) => {
-                    if (!username) return '';
-                    if (username.length > 15) {
-                        return username.substring(0, 15) + '...';
+                // Set new timeout
+                setTimeout(() => {
+                    if (!img.complete && retryCount < retries) {
+                        retryLoad();
                     }
-                    return username;
-                };
+                }, timeout);
+            };
+            
+            img.onload = () => {
+                clearTimeout(timeoutId);
+                imageCache.set(url, img);
+                resolve(img);
+                imageLoadPromises.delete(url);
+            };
+            
+            img.onerror = () => {
+                if (retryCount < retries) {
+                    console.log(`Retrying image load (${retryCount + 1}/${retries}): ${url}`);
+                    setTimeout(retryLoad, IMAGE_CONFIG.RETRY_DELAY);
+                } else {
+                    clearTimeout(timeoutId);
+                    reject(new Error(`Failed to load image after ${retries} retries`));
+                    imageLoadPromises.delete(url);
+                }
+            };
+            
+            // Start initial load
+            retryLoad();
+        });
+        
+        imageLoadPromises.set(url, loadPromise);
+        return loadPromise;
+    }
+    
+    // Function to create image placeholder
+    function createImagePlaceholder(index, total) {
+        const placeholder = document.createElement('div');
+        placeholder.className = 'image-placeholder bg-gray-100 rounded relative overflow-hidden';
+        placeholder.style.minHeight = '80px';
+        placeholder.innerHTML = `
+            <div class="absolute inset-0 flex flex-col items-center justify-center">
+                <div class="spinner-small w-6 h-6 border-2 border-primary-300 border-t-primary-600 rounded-full animate-spin mb-2"></div>
+                <span class="text-xs text-gray-500">Loading ${index + 1}/${total}</span>
+            </div>
+        `;
+        return placeholder;
+    }
+    
+    // Function to create image error fallback
+    function createImageErrorFallback() {
+        const fallback = document.createElement('div');
+        fallback.className = 'image-fallback bg-gray-100 rounded flex items-center justify-center';
+        fallback.style.minHeight = '80px';
+        fallback.innerHTML = `
+            <div class="text-center">
+                <i class="fas fa-image text-gray-300 text-xl mb-1"></i>
+                <p class="text-xs text-gray-400">Image failed to load</p>
+            </div>
+        `;
+        return fallback;
+    }
+    
+    // Function to lazy load image into container
+    function lazyLoadImage(container, imageUrl, index, totalImages) {
+        // Create and insert placeholder
+        const placeholder = createImagePlaceholder(index, totalImages);
+        container.innerHTML = '';
+        container.appendChild(placeholder);
+        
+        // Load image with retry
+        loadImageWithRetry(imageUrl)
+            .then(img => {
+                // Create image element
+                const imageElement = document.createElement('img');
+                imageElement.src = img.src;
+                imageElement.alt = `Thumbnail ${index + 1}`;
+                imageElement.className = 'photo-thumbnail w-full h-20 object-cover rounded transition-opacity duration-300';
+                imageElement.style.opacity = '0';
+                imageElement.loading = 'lazy';
                 
-                div.innerHTML = `
-                    <div class="p-4">
-                        <div class="flex justify-between items-center mb-2">
-                            <div class="flex items-center max-w-[70%]">
-                                <h4 class="text-sm font-semibold text-gray-900 name-break">
-                                    ${escapeHtml(app.firstName || '')} ${escapeHtml(app.lastName || '')}
-                                </h4>
-                                ${isMerged ? 
-                                    `<span class="ml-2 badge badge-merged">${applicationCount} merged</span>` : 
-                                    ''}
-                            </div>
-                            <span class="badge badge-${app.status || 'pending'}">${app.status || 'pending'}</span>
-                        </div>
-                        
-                        <!-- DATE DISPLAY SECTION - ADDED HERE -->
-                        <div class="mb-3 p-2 bg-gray-50 rounded border border-gray-200">
-                            <div class="flex items-center justify-between text-xs">
-                                <div class="flex items-center text-gray-700">
-                                    <i class="fas fa-calendar-day mr-2 text-primary-500"></i>
-                                    <div>
-                                        <div class="font-medium">Applied: ${appliedDate}</div>
-                                        ${timeAgo ? `<div class="text-gray-500 text-xs mt-0.5">(${timeAgo})</div>` : ''}
-                                    </div>
-                                </div>
-                                ${isRecent ? 
-                                    `<span class="badge badge-date">
-                                        <i class="fas fa-clock mr-1"></i> Recent
-                                    </span>` : 
-                                    ''}
-                            </div>
-                            ${updatedDate ? `
-                                <div class="mt-1 text-xs text-gray-600">
-                                    <i class="fas fa-sync-alt mr-1 text-gray-400"></i>
-                                    Updated: ${updatedDate}
-                                </div>
-                            ` : ''}
-                        </div>
-                        
-                        <div class="space-y-1.5 text-xs text-gray-600">
-                            <p><strong>Email:</strong> ${escapeHtml(app.email || '')}</p>
-                            <p><strong>Alt Contact:</strong> ${escapeHtml(app.altContact || 'N/A')}</p>
-                            <p><strong>Bust:</strong> ${app.bust || 'N/A'} cm</p>
-                            <p><strong>Waist:</strong> ${app.waist || 'N/A'} cm</p>
-                            <p><strong>Hips:</strong> ${app.hips || 'N/A'} cm</p>
-                            <p><strong>Agency:</strong> ${escapeHtml(app.justCo || 'N/A')}</p>
-                            <p><strong>Height:</strong> ${app.height || 'N/A'}</p>
-                            <p><strong>Photos:</strong> <span class="text-blue-500 hover:underline cursor-pointer view-photos-btn">View ${(app.photos || []).length} photo(s)</span></p>
-                            
-                            <!-- Instagram Link with Username -->
-                            <p class="flex items-center">
-                                <strong class="mr-2">Instagram:</strong>
-                                ${instagramInfo ? 
-                                    `<a href="${instagramInfo.url}" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:text-blue-700 hover:underline flex items-center">
-                                        <i class="fab fa-instagram mr-1 text-pink-500"></i>
-                                        <span class="username">${truncateUsername(instagramInfo.username)}</span>
-                                        <i class="fas fa-external-link-alt ml-1 text-xs text-gray-400"></i>
-                                    </a>` : 
-                                    '<span class="text-gray-500">N/A</span>'}
-                            </p>
-                            
-                            <!-- TikTok Link with Username -->
-                            <p class="flex items-center">
-                                <strong class="mr-2">TikTok:</strong>
-                                ${tiktokInfo ? 
-                                    `<a href="${tiktokInfo.url}" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:text-blue-700 hover:underline flex items-center">
-                                        <i class="fab fa-tiktok mr-1 text-gray-800"></i>
-                                        <span class="username">${truncateUsername(tiktokInfo.username)}</span>
-                                        <i class="fas fa-external-link-alt ml-1 text-xs text-gray-400"></i>
-                                    </a>` : 
-                                    '<span class="text-gray-500">N/A</span>'}
-                            </p>
-                            
-                            <p><strong>Location:</strong> ${escapeHtml(app.location || 'N/A')}</p>
-                            <p><strong>DOB:</strong> ${app.dob ? new Date(app.dob).toLocaleDateString() : 'N/A'}</p>
-                            <p><strong>Start Date:</strong> ${escapeHtml(app.startDate || 'N/A')}</p>
-                            ${isMerged ? 
-                                `<p class="text-xs text-gray-500 italic mt-2">${applicationCount} application(s) merged into one entry</p>` : 
-                                ''}
-                        </div>
-                        <div class="mt-3">
-                            <label for="status-${app._id || index}" class="block text-xs font-medium text-gray-700 mb-1">Status</label>
-                            <select id="status-${app._id || index}" class="form-select text-xs" aria-label="Application Status">
-                                <option value="pending" ${app.status === 'pending' ? 'selected' : ''}>Pending</option>
-                                <option value="reviewed" ${app.status === 'reviewed' ? 'selected' : ''}>Reviewed</option>
-                                <option value="accepted" ${app.status === 'accepted' ? 'selected' : ''}>Accepted</option>
-                                <option value="rejected" ${app.status === 'rejected' ? 'selected' : ''}>Rejected</option>
-                            </select>
-                        </div>
-                        <div class="mt-3 flex space-x-2">
-                            <button class="update-btn form-button text-xs tooltip" data-tooltip="${isMerged ? 'Update all merged applications' : 'Update status'}" aria-label="Update Application Status">
-                                <i class="fas fa-save mr-1"></i> ${isMerged ? 'Update All' : 'Update'}
-                            </button>
-                            <button class="delete-btn form-button bg-red-500 hover:bg-red-600 text-xs tooltip" data-tooltip="${isMerged ? 'Delete all merged applications' : 'Delete application'}" aria-label="Delete Application">
-                                <i class="fas fa-trash mr-1"></i> ${isMerged ? 'Delete All' : 'Delete'}
-                            </button>
-                        </div>
-                        <div class="mt-3 grid grid-cols-3 gap-2">
-                            ${(app.photos || []).slice(0, 3).map((photo, i) => `
-                                <div class="lazy-photo relative cursor-pointer" data-photo-index="${i}">
-                                    <img src="${photo}" alt="Thumbnail ${i + 1}" class="photo-thumbnail w-full h-20 object-cover" loading="lazy">
-                                </div>
-                            `).join('')}
-                            ${(app.photos || []).length > 3 ? 
-                                `<div class="col-span-3 text-center text-xs text-gray-500">+${(app.photos || []).length - 3} more photos</div>` : 
-                                ''}
-                            ${(app.photos || []).length === 0 ? 
-                                '<p class="text-xs text-gray-500 col-span-3 text-center">No photos</p>' : 
-                                ''}
-                        </div>
-                    </div>
-                `;
-                fragment.appendChild(div);
-            });
-            
-            // Clear and update grid
-            applicationGrid.innerHTML = '';
-            applicationGrid.appendChild(fragment);
-            
-            // Set up event listeners
-            setupEventListeners();
-            
-            // Update pagination controls
-            updatePaginationControls();
-        }
-
-        function setupEventListeners() {
-            // View photos buttons
-            document.querySelectorAll('.view-photos-btn').forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const card = this.closest('.card');
-                    const photos = [];
-                    // Collect photos from thumbnails
-                    card.querySelectorAll('.photo-thumbnail').forEach(img => {
-                        if (img.src) {
-                            photos.push(img.src);
-                        }
-                    });
-                    if (photos.length > 0) {
-                        showPhotoModal(photos);
-                    }
-                });
-            });
-            
-            // Update buttons
-            document.querySelectorAll('.update-btn').forEach(btn => {
-                btn.addEventListener('click', async function() {
-                    const card = this.closest('.card');
-                    const appId = card.querySelector('h4').textContent.split(' ').slice(0, 2).join(' ') + '_' + Date.now();
-                    const mergedIds = [appId]; // Simplified for demo
-                    const isMerged = card.querySelector('.badge-merged') !== null;
-                    
-                    // Show loading state on button
-                    const originalHTML = this.innerHTML;
-                    this.innerHTML = '<span class="spinner"></span> Updating...';
-                    this.disabled = true;
-                    
-                    await updateApplicationStatus(appId, isMerged, mergedIds);
-                    
-                    // Restore button state
-                    this.innerHTML = originalHTML;
-                    this.disabled = false;
-                });
-            });
-            
-            // Delete buttons
-            document.querySelectorAll('.delete-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const card = this.closest('.card');
-                    const appId = card.querySelector('h4').textContent.split(' ').slice(0, 2).join(' ') + '_' + Date.now();
-                    const mergedIds = [appId]; // Simplified for demo
-                    const isMerged = card.querySelector('.badge-merged') !== null;
-                    deleteApplication(appId, isMerged, mergedIds);
-                });
-            });
-            
-            // Photo thumbnails
-            document.querySelectorAll('.photo-thumbnail').forEach(img => {
-                img.addEventListener('click', function(e) {
+                // Replace placeholder with image
+                container.innerHTML = '';
+                container.appendChild(imageElement);
+                
+                // Fade in image
+                setTimeout(() => {
+                    imageElement.style.opacity = '1';
+                }, 50);
+                
+                // Add click event
+                imageElement.addEventListener('click', function(e) {
                     e.stopPropagation();
                     const card = this.closest('.card');
                     const photos = [];
@@ -1487,36 +1012,852 @@
                         showPhotoModal(photos, clickedIndex);
                     }
                 });
+            })
+            .catch(error => {
+                console.error('Failed to load image:', imageUrl, error);
+                // Replace with error fallback
+                container.innerHTML = '';
+                container.appendChild(createImageErrorFallback());
             });
-        }
+    }
 
-        function updatePaginationControls() {
-            pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
-            prevPageBtn.disabled = currentPage === 1;
-            nextPageBtn.disabled = currentPage === totalPages;
-            paginationControls.classList.toggle('hidden', totalPages <= 1);
-        }
-
-        function filterApplications(searchTerm) {
-            const term = searchTerm.toLowerCase();
-            const cards = document.querySelectorAll('#application-grid .card');
+    // Function to preload images intelligently
+    function preloadImages(imageUrls, priority = 'low') {
+        if (!Array.isArray(imageUrls) || imageUrls.length === 0) return;
+        
+        // Limit concurrent loads based on priority
+        const maxConcurrent = priority === 'high' ? 4 : 2;
+        const queue = [...imageUrls];
+        
+        const loadNext = () => {
+            if (queue.length === 0) return;
             
-            cards.forEach(card => {
-                const name = card.querySelector('h4').textContent.toLowerCase();
-                const email = card.querySelector('p strong').nextSibling.textContent.toLowerCase();
-                card.style.display = name.includes(term) || email.includes(term) ? '' : 'none';
+            const url = queue.shift();
+            if (!imageCache.has(url) && !imageLoadPromises.has(url)) {
+                loadImageWithRetry(url, 1) // Only 1 retry for preload
+                    .catch(() => {}) // Silent fail for preload
+                    .finally(loadNext);
+            } else {
+                loadNext();
+            }
+        };
+        
+        // Start loading
+        for (let i = 0; i < Math.min(maxConcurrent, imageUrls.length); i++) {
+            loadNext();
+        }
+    }
+
+    function closePhotoModal() {
+        const photoModal = document.getElementById('photo-modal');
+        
+        // Remove touch event listeners to prevent memory leaks
+        if (touchStartHandler && touchEndHandler) {
+            const carouselSlide = document.getElementById('carousel-slide');
+            if (carouselSlide) {
+                carouselSlide.removeEventListener('touchstart', touchStartHandler);
+                carouselSlide.removeEventListener('touchend', touchEndHandler);
+            }
+            touchStartHandler = null;
+            touchEndHandler = null;
+        }
+        
+        // Clean up lazy loading observer
+        if (photoModalObserver) {
+            photoModalObserver.disconnect();
+            photoModalObserver = null;
+        }
+        
+        // Cancel any pending image loads for modal
+        document.querySelectorAll('#carousel-slide img').forEach(img => {
+            if (img.src && imageLoadPromises.has(img.src)) {
+                // We can't cancel the promise, but we can remove from promises map
+                imageLoadPromises.delete(img.src);
+            }
+        });
+        
+        photoModal.classList.add('modal-exit-active');
+        setTimeout(() => {
+            photoModal.classList.add('hidden');
+            photoModal.classList.remove('modal-exit-active');
+            // Clear carousel content to free memory
+            document.getElementById('carousel-slide').innerHTML = '';
+        }, 200);
+    }
+
+    let currentPhotoIndex = 0;
+    let photos = [];
+
+    function showPhotoModal(photoArray, startIndex = 0) {
+        if (!Array.isArray(photoArray) || photoArray.length === 0) {
+            console.error('Invalid photo array:', photoArray);
+            return;
+        }
+        
+        photos = photoArray;
+        currentPhotoIndex = Math.min(Math.max(startIndex, 0), photos.length - 1);
+        const photoModal = document.getElementById('photo-modal');
+        const carouselSlide = document.getElementById('carousel-slide');
+        const carouselPrev = document.getElementById('carousel-prev');
+        const carouselNext = document.getElementById('carousel-next');
+        const carouselCounter = document.getElementById('carousel-counter');
+
+        carouselSlide.innerHTML = '';
+        
+        // Create loading placeholders for all images
+        photos.forEach((url, index) => {
+            const slideContainer = document.createElement('div');
+            slideContainer.className = 'carousel-slide-item relative w-full flex-shrink-0';
+            
+            // Create loading overlay
+            const loadingOverlay = document.createElement('div');
+            loadingOverlay.className = 'absolute inset-0 flex items-center justify-center bg-gray-100';
+            loadingOverlay.innerHTML = `
+                <div class="text-center">
+                    <div class="spinner w-8 h-8 border-4 border-primary-300 border-t-primary-600 rounded-full animate-spin mx-auto mb-2"></div>
+                    <p class="text-sm text-gray-600">Loading image ${index + 1}/${photos.length}</p>
+                </div>
+            `;
+            
+            // Create image element
+            const img = document.createElement('img');
+            img.className = 'carousel-image w-full h-full object-contain';
+            img.alt = `Application Photo ${index + 1}`;
+            img.style.opacity = '0';
+            img.loading = 'eager'; // Eager loading for modal images
+            
+            slideContainer.appendChild(img);
+            slideContainer.appendChild(loadingOverlay);
+            carouselSlide.appendChild(slideContainer);
+            
+            // Load image with retry for modal
+            loadImageWithRetry(url, IMAGE_CONFIG.MAX_RETRIES, 15000)
+                .then(loadedImg => {
+                    img.src = loadedImg.src;
+                    img.style.opacity = '1';
+                    loadingOverlay.style.display = 'none';
+                })
+                .catch(error => {
+                    console.error('Failed to load modal image:', url, error);
+                    loadingOverlay.innerHTML = `
+                        <div class="text-center p-4">
+                            <i class="fas fa-exclamation-triangle text-yellow-500 text-2xl mb-2"></i>
+                            <p class="text-sm text-gray-700">Image failed to load</p>
+                            <button class="mt-2 px-3 py-1 bg-primary-500 text-white text-xs rounded hover:bg-primary-600 transition-colors retry-load">
+                                Retry
+                            </button>
+                        </div>
+                    `;
+                    
+                    // Add retry button handler
+                    loadingOverlay.querySelector('.retry-load')?.addEventListener('click', () => {
+                        loadingOverlay.innerHTML = `
+                            <div class="text-center">
+                                <div class="spinner w-8 h-8 border-4 border-primary-300 border-t-primary-600 rounded-full animate-spin mx-auto mb-2"></div>
+                                <p class="text-sm text-gray-600">Retrying...</p>
+                            </div>
+                        `;
+                        
+                        loadImageWithRetry(url)
+                            .then(loadedImg => {
+                                img.src = loadedImg.src;
+                                img.style.opacity = '1';
+                                loadingOverlay.style.display = 'none';
+                            })
+                            .catch(() => {
+                                loadingOverlay.innerHTML = `
+                                    <div class="text-center p-4">
+                                        <i class="fas fa-times-circle text-red-500 text-2xl mb-2"></i>
+                                        <p class="text-sm text-gray-700">Still cannot load image</p>
+                                    </div>
+                                `;
+                            });
+                    });
+                });
+        });
+
+        updateCarousel();
+        carouselSlide.style.transform = `translateX(-${currentPhotoIndex * 100}%)`;
+        carouselPrev.classList.toggle('hidden', photos.length <= 1);
+        carouselNext.classList.toggle('hidden', photos.length <= 1);
+        carouselCounter.textContent = `${currentPhotoIndex + 1} / ${photos.length}`;
+
+        // Remove old event listeners if they exist
+        if (touchStartHandler && touchEndHandler) {
+            carouselSlide.removeEventListener('touchstart', touchStartHandler);
+            carouselSlide.removeEventListener('touchend', touchEndHandler);
+        }
+
+        // Add new touch event listeners
+        touchStartHandler = (e) => {
+            e.preventDefault();
+            touchStartX = e.changedTouches[0].screenX;
+        };
+
+        touchEndHandler = (e) => {
+            e.preventDefault();
+            const touchEndX = e.changedTouches[0].screenX;
+            if (touchEndX < touchStartX - 50) {
+                showNextPhoto();
+            } else if (touchEndX > touchStartX + 50) {
+                showPrevPhoto();
+            }
+        };
+
+        carouselSlide.addEventListener('touchstart', touchStartHandler, { passive: false });
+        carouselSlide.addEventListener('touchend', touchEndHandler, { passive: false });
+
+        photoModal.classList.remove('hidden');
+        photoModal.classList.add('modal-enter-active');
+        setTimeout(() => photoModal.classList.remove('modal-enter-active'), 200);
+    }
+
+    function showPrevPhoto() {
+        if (currentPhotoIndex > 0) {
+            currentPhotoIndex--;
+            updateCarousel();
+        }
+    }
+
+    function showNextPhoto() {
+        if (currentPhotoIndex < photos.length - 1) {
+            currentPhotoIndex++;
+            updateCarousel();
+        }
+    }
+
+    function updateCarousel() {
+        const carouselSlide = document.getElementById('carousel-slide');
+        const carouselPrev = document.getElementById('carousel-prev');
+        const carouselNext = document.getElementById('carousel-next');
+        const carouselCounter = document.getElementById('carousel-counter');
+
+        if (carouselSlide) {
+            carouselSlide.style.transform = `translateX(-${currentPhotoIndex * 100}%)`;
+        }
+        if (carouselPrev) {
+            carouselPrev.classList.toggle('hidden', currentPhotoIndex === 0);
+        }
+        if (carouselNext) {
+            carouselNext.classList.toggle('hidden', currentPhotoIndex === photos.length - 1);
+        }
+        if (carouselCounter) {
+            carouselCounter.textContent = `${currentPhotoIndex + 1} / ${photos.length}`;
+        }
+    }
+
+    document.getElementById('carousel-prev').addEventListener('click', showPrevPhoto);
+    document.getElementById('carousel-next').addEventListener('click', showNextPhoto);
+
+    // Function to group applications by email and merge them
+    function groupApplicationsByEmail(applications) {
+        const grouped = {};
+        let duplicates = 0;
+        
+        applications.forEach(application => {
+            const email = application.email.toLowerCase();
+            
+            if (!grouped[email]) {
+                // First application from this email
+                grouped[email] = { 
+                    ...application, 
+                    mergedIds: [application._id]
+                };
+            } else {
+                // Merge with existing application
+                const existing = grouped[email];
+                
+                // Merge photos (avoid duplicates)
+                const allPhotos = [...existing.photos, ...application.photos];
+                const uniquePhotos = [...new Set(allPhotos)];
+                
+                // Update the existing entry
+                existing.mergedCount = (existing.mergedCount || 1) + 1;
+                existing.mergedIds.push(application._id);
+                existing.photos = uniquePhotos;
+                
+                // Keep the most recent status if there's a conflict
+                if (application.createdAt && existing.createdAt) {
+                    if (new Date(application.createdAt) > new Date(existing.createdAt)) {
+                        existing.status = application.status;
+                        existing.createdAt = application.createdAt;
+                    }
+                }
+                
+                // Update with any missing data from newer application
+                Object.keys(application).forEach(key => {
+                    if (!existing[key] && application[key]) {
+                        existing[key] = application[key];
+                    }
+                });
+                
+                duplicates++;
+            }
+        });
+        
+        return { grouped, duplicates };
+    }
+
+    // Function to group applications by name and merge them
+    function groupApplicationsByName(applications) {
+        const grouped = {};
+        let duplicates = 0;
+        
+        applications.forEach(application => {
+            const nameKey = `${application.firstName?.toLowerCase() || ''} ${application.lastName?.toLowerCase() || ''}`.trim();
+            
+            if (!grouped[nameKey]) {
+                // First application from this name
+                grouped[nameKey] = { 
+                    ...application, 
+                    mergedIds: [application._id]
+                };
+            } else {
+                // Merge with existing application
+                const existing = grouped[nameKey];
+                
+                // Merge photos (avoid duplicates)
+                const allPhotos = [...existing.photos, ...application.photos];
+                const uniquePhotos = [...new Set(allPhotos)];
+                
+                // Update the existing entry
+                existing.mergedCount = (existing.mergedCount || 1) + 1;
+                existing.mergedIds.push(application._id);
+                existing.photos = uniquePhotos;
+                
+                // Keep the most recent status if there's a conflict
+                if (application.createdAt && existing.createdAt) {
+                    if (new Date(application.createdAt) > new Date(existing.createdAt)) {
+                        existing.status = application.status;
+                        existing.createdAt = application.createdAt;
+                    }
+                }
+                
+                // Update with any missing data from newer application
+                Object.keys(application).forEach(key => {
+                    if (!existing[key] && application[key]) {
+                        existing[key] = application[key];
+                    }
+                });
+                
+                duplicates++;
+            }
+        });
+        
+        return { grouped, duplicates };
+    }
+
+    async function loadApplications() {
+        applicationLoading.classList.remove('hidden');
+        applicationError.classList.add('hidden');
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('No token found in localStorage');
+            }
+            
+            const response = await fetch('/api/applications', {
+                headers: { 'Authorization': `Bearer ${token}` }
             });
+            
+            if (!response.ok) {
+                const data = await response.json().catch(() => ({}));
+                if (response.status === 401) {
+                    localStorage.removeItem('token');
+                    window.location.href = 'admin.html';
+                    return;
+                }
+                throw new Error(data.message || `HTTP error: ${response.status}`);
+            }
+            
+            applicationsData = await response.json();
+            processApplications();
+            
+        } catch (error) {
+            applicationError.textContent = error.message || 'Error loading applications';
+            applicationError.classList.remove('hidden');
+            document.getElementById('error-message').textContent = error.message;
+            document.getElementById('error-alert').classList.remove('hidden');
+            setTimeout(() => document.getElementById('error-alert').classList.add('hidden'), 3000);
+        } finally {
+            applicationLoading.classList.add('hidden');
         }
+    }
 
-        function escapeHtml(text) {
+    function processApplications() {
+        // Update stats
+        document.getElementById('total-apps').textContent = applicationsData.length;
+        
+        // Calculate recent applications (last 7 days)
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        const recentApps = applicationsData.filter(app => {
+            if (!app.createdAt) return false;
+            const appDate = new Date(app.createdAt);
+            return appDate >= sevenDaysAgo;
+        }).length;
+        document.getElementById('recent-apps').textContent = recentApps;
+        
+        const mergeType = mergeOption.value;
+        let result;
+        
+        if (mergeType === 'email') {
+            result = groupApplicationsByEmail(applicationsData);
+        } else if (mergeType === 'name') {
+            result = groupApplicationsByName(applicationsData);
+        } else {
+            // Don't merge
+            groupedApplicationsData = {};
+            applicationsData.forEach(app => {
+                groupedApplicationsData[app._id] = { 
+                    ...app, 
+                    mergedIds: [app._id]
+                };
+            });
+            result = { grouped: groupedApplicationsData, duplicates: 0 };
+        }
+        
+        groupedApplicationsData = result.grouped;
+        
+        // Preload thumbnail images intelligently (low priority)
+        const allPhotos = [];
+        Object.values(groupedApplicationsData).forEach(app => {
+            if (app.photos && Array.isArray(app.photos)) {
+                allPhotos.push(...app.photos.slice(0, 3)); // Only preload first 3 thumbnails
+            }
+        });
+        preloadImages([...new Set(allPhotos)], 'low');
+        
+        // Update stats
+        document.getElementById('merged-groups').textContent = Object.keys(groupedApplicationsData).length;
+        document.getElementById('duplicates-count').textContent = result.duplicates;
+        
+        // Calculate pagination
+        const totalItems = Object.keys(groupedApplicationsData).length;
+        totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
+        currentPage = Math.min(currentPage, totalPages);
+        
+        renderCurrentPage();
+    }
+
+    function extractUsernameFromUrl(url, platform) {
+        if (!url) return null;
+        
+        try {
+            let cleanUrl = url.trim();
+            
+            // If it's just a username (without @), add it
+            if (!cleanUrl.includes('http') && !cleanUrl.includes('.') && !cleanUrl.includes('/')) {
+                // It's likely just a username
+                return {
+                    url: platform === 'instagram' ? `https://instagram.com/${cleanUrl}` : `https://tiktok.com/@${cleanUrl}`,
+                    username: cleanUrl.replace('@', '')
+                };
+            }
+            
+            // Ensure URL has protocol
+            if (!cleanUrl.startsWith('http')) {
+                cleanUrl = 'https://' + cleanUrl;
+            }
+            
+            const urlObj = new URL(cleanUrl);
+            const pathParts = urlObj.pathname.split('/').filter(part => part);
+            
+            let username = '';
+            
+            if (platform === 'instagram') {
+                // Instagram: https://instagram.com/username
+                // Instagram: https://www.instagram.com/username/
+                username = pathParts[0] || '';
+                
+                // If it's a direct @username input
+                if (!username && cleanUrl.includes('@')) {
+                    const match = cleanUrl.match(/@([\w\._]+)/);
+                    if (match) username = match[1];
+                }
+                
+                if (username) {
+                    return {
+                        url: `https://instagram.com/${username}`,
+                        username: username
+                    };
+                }
+            } else if (platform === 'tiktok') {
+                // TikTok: https://tiktok.com/@username
+                // TikTok: https://www.tiktok.com/@username
+                if (pathParts.length > 0) {
+                    username = pathParts[0];
+                    // Remove @ symbol if present
+                    if (username.startsWith('@')) {
+                        username = username.substring(1);
+                    }
+                }
+                
+                // If it's a direct @username input
+                if (!username && cleanUrl.includes('@')) {
+                    const match = cleanUrl.match(/@([\w\._]+)/);
+                    if (match) username = match[1];
+                }
+                
+                if (username) {
+                    return {
+                        url: `https://tiktok.com/@${username}`,
+                        username: username
+                    };
+                }
+            }
+            
+            // If we couldn't extract username, return the original URL
+            return {
+                url: cleanUrl,
+                username: cleanUrl.replace('https://', '').replace('www.', '').split('/')[0]
+            };
+            
+        } catch (error) {
+            console.error('Error parsing social URL:', url, error);
+            // Return simple fallback
+            return {
+                url: url,
+                username: url.replace('https://', '').replace('www.', '').split('/')[0] || platform
+            };
+        }
+    }
+
+    function renderCurrentPage() {
+        const applicationGrid = document.getElementById('application-grid');
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const appsToDisplay = Object.values(groupedApplicationsData).slice(startIndex, endIndex);
+        
+        // Clear grid first to free memory
+        applicationGrid.innerHTML = '';
+        
+        // Use DocumentFragment for efficient DOM updates
+        const fragment = document.createDocumentFragment();
+        
+        appsToDisplay.forEach((app, index) => {
             const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
+            div.className = 'card bg-white rounded-lg overflow-hidden';
+            div.style.animationDelay = `${index * 0.05}s`;
+            
+            // Display merged application count
+            const applicationCount = app.mergedIds ? app.mergedIds.length : 1;
+            const isMerged = applicationCount > 1;
+            
+            // Extract Instagram and TikTok usernames
+            const instagramInfo = app.instagram ? extractUsernameFromUrl(app.instagram, 'instagram') : null;
+            const tiktokInfo = app.tiktok ? extractUsernameFromUrl(app.tiktok, 'tiktok') : null;
+            
+            // Format dates
+            const appliedDate = formatDate(app.createdAt);
+            const timeAgo = getTimeAgo(app.createdAt);
+            const simpleDate = getSimpleDate(app.createdAt);
+            const updatedDate = app.updatedAt && app.createdAt !== app.updatedAt ? formatDate(app.updatedAt) : null;
+            
+            // Determine if application is recent (within 24 hours)
+            const isRecent = app.createdAt ? (new Date() - new Date(app.createdAt)) < (24 * 60 * 60 * 1000) : false;
+            
+            // Truncate username for display if too long
+            const truncateUsername = (username) => {
+                if (!username) return '';
+                if (username.length > 15) {
+                    return username.substring(0, 15) + '...';
+                }
+                return username;
+            };
+            
+            div.innerHTML = `
+                <div class="p-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <div class="flex items-center max-w-[70%]">
+                            <h4 class="text-sm font-semibold text-gray-900 name-break">
+                                ${escapeHtml(app.firstName || '')} ${escapeHtml(app.lastName || '')}
+                            </h4>
+                            ${isMerged ? 
+                                `<span class="ml-2 badge badge-merged">${applicationCount} merged</span>` : 
+                                ''}
+                        </div>
+                        <span class="badge badge-${app.status || 'pending'}">${app.status || 'pending'}</span>
+                    </div>
+                    
+                    <!-- UPDATED DATE DISPLAY SECTION -->
+                    <div class="mb-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <div class="flex items-start justify-between">
+                            <div class="flex items-start">
+                                <i class="fas fa-calendar-check mt-0.5 mr-2 text-primary-500"></i>
+                                <div>
+                                    <div class="text-sm font-semibold text-gray-900">Applied Date</div>
+                                    <div class="text-xs text-gray-700 mt-1">${appliedDate}</div>
+                                    ${timeAgo ? `<div class="text-xs text-gray-500 mt-0.5">(${timeAgo})</div>` : ''}
+                                    <div class="text-xs text-gray-500 mt-1">Date: ${simpleDate}</div>
+                                </div>
+                            </div>
+                            ${isRecent ? 
+                                `<span class="badge badge-date flex items-center">
+                                    <i class="fas fa-bolt mr-1 text-xs"></i> New
+                                </span>` : 
+                                ''}
+                        </div>
+                        ${updatedDate ? `
+                            <div class="mt-3 pt-3 border-t border-gray-200">
+                                <div class="flex items-start">
+                                    <i class="fas fa-sync-alt mt-0.5 mr-2 text-gray-400 text-xs"></i>
+                                    <div>
+                                        <div class="text-xs font-medium text-gray-700">Last Updated</div>
+                                        <div class="text-xs text-gray-600 mt-0.5">${updatedDate}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                    
+                    <div class="space-y-1.5 text-xs text-gray-600">
+                        <p><strong>Email:</strong> ${escapeHtml(app.email || '')}</p>
+                        <p><strong>Alt Contact:</strong> ${escapeHtml(app.altContact || 'N/A')}</p>
+                        <p><strong>Bust:</strong> ${app.bust || 'N/A'} cm</p>
+                        <p><strong>Waist:</strong> ${app.waist || 'N/A'} cm</p>
+                        <p><strong>Hips:</strong> ${app.hips || 'N/A'} cm</p>
+                        <p><strong>Agency:</strong> ${escapeHtml(app.justCo || 'N/A')}</p>
+                        <p><strong>Height:</strong> ${app.height || 'N/A'}</p>
+                        <p><strong>Photos:</strong> <span class="text-blue-500 hover:underline cursor-pointer view-photos-btn">View ${(app.photos || []).length} photo(s)</span></p>
+                        
+                        <!-- Instagram Link with Username -->
+                        <p class="flex items-center">
+                            <strong class="mr-2">Instagram:</strong>
+                            ${instagramInfo ? 
+                                `<a href="${instagramInfo.url}" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:text-blue-700 hover:underline flex items-center">
+                                    <i class="fab fa-instagram mr-1 text-pink-500"></i>
+                                    <span class="username">${truncateUsername(instagramInfo.username)}</span>
+                                    <i class="fas fa-external-link-alt ml-1 text-xs text-gray-400"></i>
+                                </a>` : 
+                                '<span class="text-gray-500">N/A</span>'}
+                        </p>
+                        
+                        <!-- TikTok Link with Username -->
+                        <p class="flex items-center">
+                            <strong class="mr-2">TikTok:</strong>
+                            ${tiktokInfo ? 
+                                `<a href="${tiktokInfo.url}" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:text-blue-700 hover:underline flex items-center">
+                                    <i class="fab fa-tiktok mr-1 text-gray-800"></i>
+                                    <span class="username">${truncateUsername(tiktokInfo.username)}</span>
+                                    <i class="fas fa-external-link-alt ml-1 text-xs text-gray-400"></i>
+                                </a>` : 
+                                '<span class="text-gray-500">N/A</span>'}
+                        </p>
+                        
+                        <p><strong>Location:</strong> ${escapeHtml(app.location || 'N/A')}</p>
+                        <p><strong>DOB:</strong> ${app.dob ? new Date(app.dob).toLocaleDateString('en-US', { 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric' 
+                        }) : 'N/A'}</p>
+                        <p><strong>Start Date:</strong> ${escapeHtml(app.startDate || 'N/A')}</p>
+                        ${isMerged ? 
+                            `<p class="text-xs text-gray-500 italic mt-2">${applicationCount} application(s) merged into one entry</p>` : 
+                            ''}
+                    </div>
+                    <div class="mt-3">
+                        <label for="status-${app._id || index}" class="block text-xs font-medium text-gray-700 mb-1">Status</label>
+                        <select id="status-${app._id || index}" class="form-select text-xs" aria-label="Application Status">
+                            <option value="pending" ${app.status === 'pending' ? 'selected' : ''}>Pending</option>
+                            <option value="reviewed" ${app.status === 'reviewed' ? 'selected' : ''}>Reviewed</option>
+                            <option value="accepted" ${app.status === 'accepted' ? 'selected' : ''}>Accepted</option>
+                            <option value="rejected" ${app.status === 'rejected' ? 'selected' : ''}>Rejected</option>
+                        </select>
+                    </div>
+                    <div class="mt-3 flex space-x-2">
+                        <button class="update-btn form-button text-xs tooltip" data-tooltip="${isMerged ? 'Update all merged applications' : 'Update status'}" aria-label="Update Application Status">
+                            <i class="fas fa-save mr-1"></i> ${isMerged ? 'Update All' : 'Update'}
+                        </button>
+                        <button class="delete-btn form-button bg-red-500 hover:bg-red-600 text-xs tooltip" data-tooltip="${isMerged ? 'Delete all merged applications' : 'Delete application'}" aria-label="Delete Application">
+                            <i class="fas fa-trash mr-1"></i> ${isMerged ? 'Delete All' : 'Delete'}
+                        </button>
+                    </div>
+                    <div class="mt-3 grid grid-cols-3 gap-2 photo-grid" id="photo-grid-${app._id || index}">
+                        <!-- Images will be lazy loaded here -->
+                    </div>
+                </div>
+            `;
+            fragment.appendChild(div);
+        });
+        
+        // Append fragment to grid
+        applicationGrid.appendChild(fragment);
+        
+        // Set up event listeners
+        setupEventListeners();
+        
+        // Lazy load images for each application
+        setTimeout(() => {
+            appsToDisplay.forEach((app, index) => {
+                const photoGrid = document.getElementById(`photo-grid-${app._id || index}`);
+                if (photoGrid && app.photos && app.photos.length > 0) {
+                    // Show only first 3 images initially
+                    const photosToShow = app.photos.slice(0, 3);
+                    photosToShow.forEach((photo, photoIndex) => {
+                        const container = document.createElement('div');
+                        container.className = 'photo-container relative rounded overflow-hidden';
+                        container.style.minHeight = '80px';
+                        photoGrid.appendChild(container);
+                        
+                        // Lazy load the image
+                        lazyLoadImage(container, photo, photoIndex, photosToShow.length);
+                    });
+                    
+                    // Show "more photos" message if applicable
+                    if (app.photos.length > 3) {
+                        const moreDiv = document.createElement('div');
+                        moreDiv.className = 'col-span-3 text-center text-xs text-gray-500 mt-1';
+                        moreDiv.textContent = `+${app.photos.length - 3} more photos`;
+                        photoGrid.appendChild(moreDiv);
+                    }
+                    
+                    // Show "no photos" message if empty
+                    if (app.photos.length === 0) {
+                        const noPhotosDiv = document.createElement('p');
+                        noPhotosDiv.className = 'text-xs text-gray-500 col-span-3 text-center';
+                        noPhotosDiv.textContent = 'No photos';
+                        photoGrid.appendChild(noPhotosDiv);
+                    }
+                }
+            });
+        }, 100);
+        
+        // Update pagination controls
+        updatePaginationControls();
+    }
 
-        async function updateApplicationStatus(id, isMerged = false, mergedIds = [id]) {
-            const status = document.getElementById(`status-${id}`)?.value || 'pending';
+    function setupEventListeners() {
+        // View photos buttons
+        document.querySelectorAll('.view-photos-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const card = this.closest('.card');
+                const photos = [];
+                // Collect photos from thumbnails
+                card.querySelectorAll('.photo-thumbnail').forEach(img => {
+                    if (img.src) {
+                        photos.push(img.src);
+                    }
+                });
+                if (photos.length > 0) {
+                    showPhotoModal(photos);
+                }
+            });
+        });
+        
+        // Update buttons
+        document.querySelectorAll('.update-btn').forEach(btn => {
+            btn.addEventListener('click', async function() {
+                const card = this.closest('.card');
+                const appId = card.querySelector('h4').textContent.split(' ').slice(0, 2).join(' ') + '_' + Date.now();
+                const mergedIds = [appId]; // Simplified for demo
+                const isMerged = card.querySelector('.badge-merged') !== null;
+                
+                // Show loading state on button
+                const originalHTML = this.innerHTML;
+                this.innerHTML = '<span class="spinner"></span> Updating...';
+                this.disabled = true;
+                
+                await updateApplicationStatus(appId, isMerged, mergedIds);
+                
+                // Restore button state
+                this.innerHTML = originalHTML;
+                this.disabled = false;
+            });
+        });
+        
+        // Delete buttons
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const card = this.closest('.card');
+                const appId = card.querySelector('h4').textContent.split(' ').slice(0, 2).join(' ') + '_' + Date.now();
+                const mergedIds = [appId]; // Simplified for demo
+                const isMerged = card.querySelector('.badge-merged') !== null;
+                deleteApplication(appId, isMerged, mergedIds);
+            });
+        });
+    }
+
+    function updatePaginationControls() {
+        pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+        prevPageBtn.disabled = currentPage === 1;
+        nextPageBtn.disabled = currentPage === totalPages;
+        paginationControls.classList.toggle('hidden', totalPages <= 1);
+    }
+
+    function filterApplications(searchTerm) {
+        const term = searchTerm.toLowerCase();
+        const cards = document.querySelectorAll('#application-grid .card');
+        
+        cards.forEach(card => {
+            const name = card.querySelector('h4').textContent.toLowerCase();
+            const email = card.querySelector('p strong').nextSibling.textContent.toLowerCase();
+            card.style.display = name.includes(term) || email.includes(term) ? '' : 'none';
+        });
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    async function updateApplicationStatus(id, isMerged = false, mergedIds = [id]) {
+        const status = document.getElementById(`status-${id}`)?.value || 'pending';
+        applicationError.classList.add('hidden');
+        
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('No token found in localStorage');
+            }
+            
+            // Simulate API call
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            document.getElementById('success-message').textContent = isMerged ? 
+                `All ${mergedIds.length} applications updated successfully!` : 
+                'Application status updated successfully!';
+            document.getElementById('success-alert').classList.remove('hidden');
+            setTimeout(() => document.getElementById('success-alert').classList.add('hidden'), 3000);
+        } catch (error) {
+            applicationError.textContent = error.message;
+            applicationError.classList.remove('hidden');
+            document.getElementById('error-message').textContent = error.message;
+            document.getElementById('error-alert').classList.remove('hidden');
+            setTimeout(() => document.getElementById('error-alert').classList.add('hidden'), 3000);
+        }
+    }
+
+    async function deleteApplication(id, isMerged = false, mergedIds = [id]) {
+        const confirmationModal = document.getElementById('confirmation-modal');
+        const confirmButton = document.getElementById('confirm-action');
+        const cancelButton = document.getElementById('cancel-action');
+        const confirmText = confirmButton.querySelector('.confirm-text');
+        const confirmSpinner = confirmButton.querySelector('.spinner');
+        
+        document.getElementById('confirmation-title').textContent = isMerged ? 'Delete All Applications' : 'Delete Application';
+        document.getElementById('confirmation-message').textContent = isMerged ? 
+            `Are you sure you want to delete all ${mergedIds.length} merged applications? This action cannot be undone.` :
+            'Are you sure you want to delete this application? This action cannot be undone.';
+        
+        confirmationModal.classList.remove('hidden');
+        confirmationModal.classList.add('modal-enter-active');
+        setTimeout(() => confirmationModal.classList.remove('modal-enter-active'), 200);
+
+        // Reset button state
+        confirmText.classList.remove('hidden');
+        confirmSpinner.classList.add('hidden');
+        confirmButton.disabled = false;
+
+        confirmButton.onclick = async () => {
             applicationError.classList.add('hidden');
+            
+            // Show loading state
+            confirmText.classList.add('hidden');
+            confirmSpinner.classList.remove('hidden');
+            confirmButton.disabled = true;
             
             try {
                 const token = localStorage.getItem('token');
@@ -1524,128 +1865,76 @@
                     throw new Error('No token found in localStorage');
                 }
                 
-                // Simulate API call
-                await new Promise(resolve => setTimeout(resolve, 500));
+                // Fast delete - simulate with minimal delay
+                await new Promise(resolve => setTimeout(resolve, 300));
                 
-                document.getElementById('success-message').textContent = isMerged ? 
-                    `All ${mergedIds.length} applications updated successfully!` : 
-                    'Application status updated successfully!';
-                document.getElementById('success-alert').classList.remove('hidden');
-                setTimeout(() => document.getElementById('success-alert').classList.add('hidden'), 3000);
+                // Remove from UI immediately for better UX
+                const cards = document.querySelectorAll('.card');
+                cards.forEach(card => {
+                    const name = card.querySelector('h4').textContent;
+                    if (name.includes(id.split('_')[0])) {
+                        card.style.opacity = '0.5';
+                        card.style.pointerEvents = 'none';
+                    }
+                });
+                
+                // Simulate API call completion
+                setTimeout(() => {
+                    loadApplications();
+                    document.getElementById('success-message').textContent = isMerged ? 
+                        `All ${mergedIds.length} applications deleted successfully!` : 
+                        'Application deleted successfully!';
+                    document.getElementById('success-alert').classList.remove('hidden');
+                    setTimeout(() => document.getElementById('success-alert').classList.add('hidden'), 3000);
+                }, 500);
+                
             } catch (error) {
                 applicationError.textContent = error.message;
                 applicationError.classList.remove('hidden');
                 document.getElementById('error-message').textContent = error.message;
                 document.getElementById('error-alert').classList.remove('hidden');
                 setTimeout(() => document.getElementById('error-alert').classList.add('hidden'), 3000);
+            } finally {
+                confirmationModal.classList.add('modal-exit-active');
+                setTimeout(() => {
+                    confirmationModal.classList.add('hidden');
+                    confirmationModal.classList.remove('modal-exit-active');
+                    // Reset button
+                    confirmText.classList.remove('hidden');
+                    confirmSpinner.classList.add('hidden');
+                    confirmButton.disabled = false;
+                }, 200);
             }
-        }
+        };
 
-        async function deleteApplication(id, isMerged = false, mergedIds = [id]) {
-            const confirmationModal = document.getElementById('confirmation-modal');
-            const confirmButton = document.getElementById('confirm-action');
-            const cancelButton = document.getElementById('cancel-action');
-            const confirmText = confirmButton.querySelector('.confirm-text');
-            const confirmSpinner = confirmButton.querySelector('.spinner');
-            
-            document.getElementById('confirmation-title').textContent = isMerged ? 'Delete All Applications' : 'Delete Application';
-            document.getElementById('confirmation-message').textContent = isMerged ? 
-                `Are you sure you want to delete all ${mergedIds.length} merged applications? This action cannot be undone.` :
-                'Are you sure you want to delete this application? This action cannot be undone.';
-            
-            confirmationModal.classList.remove('hidden');
-            confirmationModal.classList.add('modal-enter-active');
-            setTimeout(() => confirmationModal.classList.remove('modal-enter-active'), 200);
+        cancelButton.onclick = () => {
+            confirmationModal.classList.add('modal-exit-active');
+            setTimeout(() => {
+                confirmationModal.classList.add('hidden');
+                confirmationModal.classList.remove('modal-exit-active');
+            }, 200);
+        };
 
-            // Reset button state
-            confirmText.classList.remove('hidden');
-            confirmSpinner.classList.add('hidden');
-            confirmButton.disabled = false;
-
-            confirmButton.onclick = async () => {
-                applicationError.classList.add('hidden');
-                
-                // Show loading state
-                confirmText.classList.add('hidden');
-                confirmSpinner.classList.remove('hidden');
-                confirmButton.disabled = true;
-                
-                try {
-                    const token = localStorage.getItem('token');
-                    if (!token) {
-                        throw new Error('No token found in localStorage');
-                    }
-                    
-                    // Fast delete - simulate with minimal delay
-                    await new Promise(resolve => setTimeout(resolve, 300));
-                    
-                    // Remove from UI immediately for better UX
-                    const cards = document.querySelectorAll('.card');
-                    cards.forEach(card => {
-                        const name = card.querySelector('h4').textContent;
-                        if (name.includes(id.split('_')[0])) {
-                            card.style.opacity = '0.5';
-                            card.style.pointerEvents = 'none';
-                        }
-                    });
-                    
-                    // Simulate API call completion
-                    setTimeout(() => {
-                        loadApplications();
-                        document.getElementById('success-message').textContent = isMerged ? 
-                            `All ${mergedIds.length} applications deleted successfully!` : 
-                            'Application deleted successfully!';
-                        document.getElementById('success-alert').classList.remove('hidden');
-                        setTimeout(() => document.getElementById('success-alert').classList.add('hidden'), 3000);
-                    }, 500);
-                    
-                } catch (error) {
-                    applicationError.textContent = error.message;
-                    applicationError.classList.remove('hidden');
-                    document.getElementById('error-message').textContent = error.message;
-                    document.getElementById('error-alert').classList.remove('hidden');
-                    setTimeout(() => document.getElementById('error-alert').classList.add('hidden'), 3000);
-                } finally {
-                    confirmationModal.classList.add('modal-exit-active');
-                    setTimeout(() => {
-                        confirmationModal.classList.add('hidden');
-                        confirmationModal.classList.remove('modal-exit-active');
-                        // Reset button
-                        confirmText.classList.remove('hidden');
-                        confirmSpinner.classList.add('hidden');
-                        confirmButton.disabled = false;
-                    }, 200);
-                }
-            };
-
-            cancelButton.onclick = () => {
+        confirmationModal.addEventListener('click', (e) => {
+            if (e.target === confirmationModal) {
                 confirmationModal.classList.add('modal-exit-active');
                 setTimeout(() => {
                     confirmationModal.classList.add('hidden');
                     confirmationModal.classList.remove('modal-exit-active');
                 }, 200);
-            };
+            }
+        });
 
-            confirmationModal.addEventListener('click', (e) => {
-                if (e.target === confirmationModal) {
-                    confirmationModal.classList.add('modal-exit-active');
-                    setTimeout(() => {
-                        confirmationModal.classList.add('hidden');
-                        confirmationModal.classList.remove('modal-exit-active');
-                    }, 200);
-                }
-            });
-
-            confirmationModal.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') {
-                    confirmationModal.classList.add('modal-exit-active');
-                    setTimeout(() => {
-                        confirmationModal.classList.add('hidden');
-                        confirmationModal.classList.remove('modal-exit-active');
-                    }, 200);
-                }
-            });
-        }
-    </script>
+        confirmationModal.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                confirmationModal.classList.add('modal-exit-active');
+                setTimeout(() => {
+                    confirmationModal.classList.add('hidden');
+                    confirmationModal.classList.remove('modal-exit-active');
+                }, 200);
+            }
+        });
+    }
+</script>
 </body>
 </html>
