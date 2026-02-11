@@ -689,356 +689,856 @@
         <source src="https://assets.mixkit.co/sfx/preview/mixkit-modern-click-box-check-1120.mp3" type="audio/mpeg">
     </audio>
 
-    <script>
-        const config = { apiBaseUrl: '/api' };
+   <script>
+    const config = { 
+        apiBaseUrl: window.location.hostname === 'localhost' 
+            ? 'http://localhost:3000/api' 
+            : '/api' 
+    };
 
-        function escapeHtml(str) {
-            if (typeof str !== 'string') return str || '';
-            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    function escapeHtml(str) {
+        if (typeof str !== 'string') return str || '';
+        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function toggleMenu() {
+        const mobileMenu = document.querySelector('.mobile-menu');
+        const menuToggle = document.querySelector('.menu-toggle');
+        mobileMenu.classList.toggle('active');
+        menuToggle.classList.toggle('active');
+        mobileMenu.setAttribute('aria-hidden', !mobileMenu.classList.contains('active'));
+    }
+
+    function adjustSectionPadding() {
+        const main = document.querySelector('main');
+        const navBar = document.querySelector('.desktop-nav-bar');
+        const inputArea = document.querySelector('.input-area');
+        const chatContainer = document.getElementById('chat-container');
+        if (main && navBar && inputArea && chatContainer) {
+            const navHeight = navBar.offsetHeight;
+            const inputHeight = inputArea.offsetHeight;
+            main.style.paddingTop = `${navHeight}px`;
+            chatContainer.style.paddingBottom = `${inputHeight + 16}px`;
+            chatContainer.style.maxHeight = `calc(100vh - ${navHeight}px - ${inputHeight + 16}px)`;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        adjustSectionPadding();
+        window.addEventListener('resize', adjustSectionPadding);
+
+        // Set welcome message timestamp
+        document.getElementById('welcome-timestamp').textContent = getCurrentTime();
+
+        let applicationData = JSON.parse(localStorage.getItem('applicationData')) || {
+            firstName: '',
+            lastName: '',
+            bust: '',
+            waist: '',
+            hips: '',
+            justCo: '',
+            height: '',
+            instagram: '',
+            tiktok: '',
+            location: '',
+            dob: '',
+            startDate: '',
+            email: '',
+            altContact: ''
+        };
+        let currentQuestion = parseInt(localStorage.getItem('currentQuestion')) || 0;
+        let isApplicationActive = JSON.parse(localStorage.getItem('isApplicationActive')) || false;
+        let selectedPhotos = JSON.parse(localStorage.getItem('selectedPhotos')) || [];
+        let messages = JSON.parse(localStorage.getItem('chatMessages')) || [];
+        let currentEditField = null;
+        let holdTimer = null;
+        let isSubmitting = false;
+
+        const validators = {
+            firstName: (value) => !value ? 'First name is required' : null,
+            lastName: (value) => !value ? 'Last name is required' : null,
+            bust: (value) => !value ? 'Bust measurement is required' : null,
+            waist: (value) => !value ? 'Waist measurement is required' : null,
+            hips: (value) => !value ? 'Hip measurement is required' : null,
+            justCo: (value) => !value ? 'Agency representation status is required' : null,
+            height: (value) => !value ? 'Height is required' : null,
+            instagram: () => null,
+            tiktok: () => null,
+            location: (value) => !value ? 'Location is required' : null,
+            dob: (value) => !value ? 'Date of birth is required' : null,
+            startDate: (value) => !value ? 'Start date is required' : null,
+            email: (value) => {
+                if (!value) return 'Email is required';
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Please enter a valid email address';
+                return null;
+            },
+            altContact: (value) => !value ? 'Alternative contact method is required' : null
+        };
+
+        const applicationQuestions = [
+            { question: "Let's begin with your first name. Please provide your first name.", field: 'firstName', example: "Example: Jane" },
+            { question: "Thank you! Now, please provide your last name.", field: 'lastName', example: "Example: Smith" },
+            { question: "Please provide your bust measurement.", field: 'bust', example: "Example: 86" },
+            { question: "Please provide your waist measurement.", field: 'waist', example: "Example: 61" },
+            { question: "Please provide your hip measurement.", field: 'hips', example: "Example: 89" },
+            { question: "Please provide your agency representation status (current or past agencies, or 'Independent' if unrepresented).", field: 'justCo', example: "Example: ------ Model Management or Independent" },
+            { question: "Please provide your height.", field: 'height', example: "Example: 5 feet 9 inches" },
+            { question: "You will need to submit two photos: one full-body shot and one portrait. Please click the button below to upload your photos or ask any questions about the photo requirements.", field: 'photos', example: "Example response: I understand" },
+            { question: "If you have an Instagram profile, please share your username or link.", field: 'instagram', example: "Example: yourusername or leave blank" },
+            { question: "If you have a TikTok account, please provide your username or link.", field: 'tiktok', example: "Example: yourusername or leave blank" },
+            { question: "Please specify your current location.", field: 'location', example: "Example: Los Angeles, USA" },
+            { question: "Please provide your date of birth.", field: 'dob', example: "Example: May 15, 1995" },
+            { question: "When would you like to begin modeling?", field: 'startDate', example: "Example: January 2026" },
+            { question: "Please provide an email address we can use to contact you.", field: 'email', example: "Example: yourname@example.com" },
+            { question: "Please provide an alternative contact method.", field: 'altContact', example: "Example: +1239077178197 or alternate@example.com" }
+        ];
+
+        const chatContainer = document.getElementById('chat-container');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const typingIndicator = document.getElementById('typing-indicator');
+        const messageSound = document.getElementById('message-sound');
+        const sendSound = document.getElementById('send-sound');
+        const photoInput = document.getElementById('photo-input');
+        const imagePreview = document.getElementById('image-preview');
+        const photoModal = document.getElementById('photo-upload-modal');
+        const editFieldModal = document.getElementById('edit-field-modal');
+        const editFieldInput = document.getElementById('edit-field-input');
+        const clearChatModal = document.getElementById('clear-chat-modal');
+
+        // Add event listeners for mobile menu
+        document.querySelectorAll('.mobile-menu a').forEach(link => {
+            link.addEventListener('click', toggleMenu);
+        });
+
+        // Play sound function
+        function playSound(soundElement) {
+            soundElement.currentTime = 0;
+            soundElement.play().catch(e => console.log("Sound playback prevented:", e));
         }
 
-        function clampValue(min, value, max) {
-            return Math.min(Math.max(value, min), max);
-        }
-
-        function toggleMenu() {
-            const mobileMenu = document.querySelector('.mobile-menu');
-            const menuToggle = document.querySelector('.menu-toggle');
-            mobileMenu.classList.toggle('active');
-            menuToggle.classList.toggle('active');
-            mobileMenu.setAttribute('aria-hidden', !mobileMenu.classList.contains('active'));
-            console.log('Mobile menu toggled:', mobileMenu.classList.contains('active') ? 'open' : 'closed');
-        }
-
-        function adjustSectionPadding() {
-            const main = document.querySelector('main');
-            const navBar = document.querySelector('.desktop-nav-bar');
-            const inputArea = document.querySelector('.input-area');
-            const chatContainer = document.getElementById('chat-container');
-            if (main && navBar && inputArea && chatContainer) {
-                const navHeight = navBar.offsetHeight;
-                const inputHeight = inputArea.offsetHeight;
-                main.style.paddingTop = `${navHeight}px`;
-                chatContainer.style.paddingBottom = `${inputHeight + 16}px`;
-                chatContainer.style.maxHeight = `calc(100vh - ${navHeight}px - ${inputHeight + 16}px)`;
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            adjustSectionPadding();
-            window.addEventListener('resize', adjustSectionPadding);
-
-            // Set welcome message timestamp
-            document.getElementById('welcome-timestamp').textContent = getCurrentTime();
-
-            let applicationData = JSON.parse(localStorage.getItem('applicationData')) || {
-                firstName: '',
-                lastName: '',
-                bust: '',
-                waist: '',
-                hips: '',
-                justCo: '',
-                height: '',
-                instagram: '',
-                tiktok: '',
-                location: '',
-                dob: '',
-                startDate: '',
-                email: '',
-                altContact: ''
-            };
-            let currentQuestion = parseInt(localStorage.getItem('currentQuestion')) || 0;
-            let isApplicationActive = JSON.parse(localStorage.getItem('isApplicationActive')) || false;
-            let selectedPhotos = JSON.parse(localStorage.getItem('selectedPhotos')) || [];
-            let messages = JSON.parse(localStorage.getItem('chatMessages')) || [];
-            let currentEditField = null;
-            let holdTimer = null;
-
-            const validators = {
-                firstName: (value) => !value ? 'First name is required' : null,
-                lastName: (value) => !value ? 'Last name is required' : null,
-                bust: (value) => !value ? 'Bust measurement is required' : null,
-                waist: (value) => !value ? 'Waist measurement is required' : null,
-                hips: (value) => !value ? 'Hip measurement is required' : null,
-                justCo: (value) => !value ? 'Agency representation status is required' : null,
-                height: (value) => !value ? 'Height is required' : null,
-                instagram: () => null,
-                tiktok: () => null,
-                location: (value) => !value ? 'Location is required' : null,
-                dob: (value) => !value ? 'Date of birth is required' : null,
-                startDate: (value) => !value ? 'Start date is required' : null,
-                email: (value) => !value ? 'Email is required' : null,
-                altContact: (value) => !value ? 'Alternative contact method is required' : null
-            };
-
-            const applicationQuestions = [
-                { question: "Let's begin with your first name. Please provide your first name.", field: 'firstName', example: "Example: Jane" },
-                { question: "Thank you! Now, please provide your last name.", field: 'lastName', example: "Example: Smith" },
-                { question: "Please provide your bust measurement.", field: 'bust', example: "Example: 86" },
-                { question: "Please provide your waist measurement.", field: 'waist', example: "Example: 61" },
-                { question: "Please provide your hip measurement.", field: 'hips', example: "Example: 89" },
-                { question: "Please provide your agency representation status (current or past agencies, or 'Independent' if unrepresented).", field: 'justCo', example: "Example: ------ Model Management or Independent" },
-                { question: "Please provide your height.", field: 'height', example: "Example: 5 feet 9 inches" },
-                { question: "You will need to submit two photos: one full-body shot and one portrait. Please click the button below to upload your photos or ask any questions about the photo requirements.", field: 'photos', example: "Example response: I understand" },
-                { question: "If you have an Instagram profile, please share your username or link.", field: 'instagram', example: "Example: yourusername or leave blank" },
-                { question: "If you have a TikTok account, please provide your username or link.", field: 'tiktok', example: "Example: yourusername or leave blank" },
-                { question: "Please specify your current location.", field: 'location', example: "Example: Los Angeles, USA" },
-                { question: "Please provide your date of birth.", field: 'dob', example: "Example: May 15, 1995" },
-                { question: "When would you like to begin modeling?", field: 'startDate', example: "Example: January 2026" },
-                { question: "Please provide an email address we can use to contact you.", field: 'email', example: "Example: yourname@example.com" },
-                { question: "Please provide an alternative contact method.", field: 'altContact', example: "Example: +1239077178197 or alternate@example.com" }
-            ];
-
-            const chatContainer = document.getElementById('chat-container');
-            const userInput = document.getElementById('user-input');
-            const sendBtn = document.getElementById('send-btn');
-            const typingIndicator = document.getElementById('typing-indicator');
-            const messageSound = document.getElementById('message-sound');
-            const sendSound = document.getElementById('send-sound');
-            const photoInput = document.getElementById('photo-input');
-            const imagePreview = document.getElementById('image-preview');
-            const photoModal = document.getElementById('photo-upload-modal');
-            const editFieldModal = document.getElementById('edit-field-modal');
-            const editFieldInput = document.getElementById('edit-field-input');
-            const clearChatModal = document.getElementById('clear-chat-modal');
-
-            // Add event listeners for mobile menu
-            document.querySelectorAll('.mobile-menu a').forEach(link => {
-                link.addEventListener('click', toggleMenu);
-            });
-
-            // Play sound function
-            function playSound(soundElement) {
-                soundElement.currentTime = 0;
-                soundElement.play().catch(e => console.log("Sound playback prevented:", e));
-            }
-
-            // Scroll to bottom
-            let scrollTimeout = null;
-            const scrollToBottom = () => {
-                if (scrollTimeout) clearTimeout(scrollTimeout);
-                requestAnimationFrame(() => {
-                    chatContainer.scrollTo({
-                        top: chatContainer.scrollHeight,
-                        behavior: 'smooth'
-                    });
-                    scrollTimeout = setTimeout(() => {
-                        const isScrolledToBottom = Math.abs(chatContainer.scrollHeight - chatContainer.scrollTop - chatContainer.clientHeight) <= 1;
-                        if (!isScrolledToBottom) {
-                            chatContainer.scrollTo({
-                                top: chatContainer.scrollHeight,
-                                behavior: 'smooth'
-                            });
-                        }
-                    }, 200);
+        // Scroll to bottom
+        let scrollTimeout = null;
+        const scrollToBottom = () => {
+            if (scrollTimeout) clearTimeout(scrollTimeout);
+            requestAnimationFrame(() => {
+                chatContainer.scrollTo({
+                    top: chatContainer.scrollHeight,
+                    behavior: 'smooth'
                 });
-            };
-
-            // Mutation observer for chat container
-            const observer = new MutationObserver(() => {
-                scrollToBottom();
-            });
-            observer.observe(chatContainer, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
-
-            // Resize observer for chat container
-            const resizeObserver = new ResizeObserver(() => {
-                scrollToBottom();
-            });
-            resizeObserver.observe(chatContainer);
-
-            // Auto-resize textarea
-            userInput.addEventListener('input', function() {
-                this.style.height = 'auto';
-                this.style.height = `${Math.min(this.scrollHeight, 64)}px`;
-                sendBtn.disabled = this.value.trim().length === 0;
-                scrollToBottom();
-            });
-
-            // Handle mobile keyboard
-            if (window.visualViewport) {
-                window.visualViewport.addEventListener('resize', () => {
-                    if (document.activeElement === userInput) {
-                        scrollToBottom();
+                scrollTimeout = setTimeout(() => {
+                    const isScrolledToBottom = Math.abs(chatContainer.scrollHeight - chatContainer.scrollTop - chatContainer.clientHeight) <= 1;
+                    if (!isScrolledToBottom) {
+                        chatContainer.scrollTo({
+                            top: chatContainer.scrollHeight,
+                            behavior: 'smooth'
+                        });
                     }
-                });
-            }
-
-            // Scroll on textarea focus
-            userInput.addEventListener('focus', () => {
-                setTimeout(scrollToBottom, 100);
+                }, 200);
             });
+        };
 
-            // Send message on Enter
-            userInput.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    if (userInput.value.trim().length > 0) {
-                        sendMessage();
-                    }
+        // Mutation observer for chat container
+        const observer = new MutationObserver(() => {
+            scrollToBottom();
+        });
+        observer.observe(chatContainer, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+
+        // Resize observer for chat container
+        const resizeObserver = new ResizeObserver(() => {
+            scrollToBottom();
+        });
+        resizeObserver.observe(chatContainer);
+
+        // Auto-resize textarea
+        userInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = `${Math.min(this.scrollHeight, 64)}px`;
+            sendBtn.disabled = this.value.trim().length === 0;
+            scrollToBottom();
+        });
+
+        // Handle mobile keyboard
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', () => {
+                if (document.activeElement === userInput) {
+                    scrollToBottom();
                 }
             });
+        }
 
-            // Send button click
-            sendBtn.addEventListener('click', sendMessage);
+        // Scroll on textarea focus
+        userInput.addEventListener('focus', () => {
+            setTimeout(scrollToBottom, 100);
+        });
 
-            // Handle photo input change
-            photoInput.addEventListener('change', function(e) {
-                const files = Array.from(e.target.files);
-                if (selectedPhotos.length + files.length > 6) {
-                    alert('You can upload a maximum of 6 photos.');
+        // Send message on Enter
+        userInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (userInput.value.trim().length > 0) {
+                    sendMessage();
+                }
+            }
+        });
+
+        // Send button click
+        sendBtn.addEventListener('click', sendMessage);
+
+        // Handle photo input change
+        photoInput.addEventListener('change', function(e) {
+            const files = Array.from(e.target.files);
+            if (selectedPhotos.length + files.length > 6) {
+                alert('You can upload a maximum of 6 photos.');
+                return;
+            }
+
+            files.forEach(file => {
+                if (file.size > 5 * 1024 * 1024) {
+                    alert(`File ${file.name} exceeds 5MB limit.`);
+                    return;
+                }
+                if (!['image/jpeg', 'image/png'].includes(file.type)) {
+                    alert(`File ${file.name} must be JPG or PNG.`);
                     return;
                 }
 
-                files.forEach(file => {
-                    if (file.size > 5 * 1024 * 1024) {
-                        alert(`File ${file.name} exceeds 5MB limit.`);
-                        return;
-                    }
-                    if (!['image/jpeg', 'image/png'].includes(file.type)) {
-                        alert(`File ${file.name} must be JPG or PNG.`);
-                        return;
-                    }
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    selectedPhotos.push({ name: file.name, data: event.target.result });
+                    localStorage.setItem('selectedPhotos', JSON.stringify(selectedPhotos));
+                    updateImagePreview();
+                };
+                reader.readAsDataURL(file);
+            });
 
-                    const reader = new FileReader();
-                    reader.onload = function(event) {
-                        selectedPhotos.push({ name: file.name, data: event.target.result });
-                        localStorage.setItem('selectedPhotos', JSON.stringify(selectedPhotos));
-                        updateImagePreview();
+            photoInput.value = '';
+            scrollToBottom();
+        });
+
+        function updateImagePreview() {
+            imagePreview.innerHTML = '';
+            selectedPhotos.forEach((photo, index) => {
+                const previewDiv = document.createElement('div');
+                previewDiv.className = 'relative';
+                previewDiv.innerHTML = `
+                    <img src="${photo.data}" alt="Preview ${index + 1}">
+                    <span class="remove-btn" onclick="removePhoto(${index})">&times;</span>
+                `;
+                imagePreview.appendChild(previewDiv);
+            });
+            scrollToBottom();
+        }
+
+        window.removePhoto = function(index) {
+            selectedPhotos.splice(index, 1);
+            localStorage.setItem('selectedPhotos', JSON.stringify(selectedPhotos));
+            updateImagePreview();
+            scrollToBottom();
+        };
+
+        window.submitPhotos = function() {
+            if (selectedPhotos.length < 2) {
+                alert('Please upload at least one full-body shot and one portrait.');
+                return;
+            }
+            photoModal.classList.add('hidden');
+            photoModal.querySelector('.modal-content').classList.remove('show');
+            addMessageToChat('user', `Uploaded ${selectedPhotos.length} photo(s)`);
+            currentQuestion++;
+            localStorage.setItem('currentQuestion', currentQuestion);
+            setTimeout(() => {
+                askQuestion(currentQuestion);
+                scrollToBottom();
+            }, 100);
+        };
+
+        window.closePhotoModal = function() {
+            selectedPhotos = [];
+            localStorage.setItem('selectedPhotos', JSON.stringify(selectedPhotos));
+            photoModal.classList.add('hidden');
+            photoModal.querySelector('.modal-content').classList.remove('show');
+            addMessageToChat('ai', 'Photo upload cancelled. Please upload your photos to continue.');
+            setTimeout(() => {
+                askQuestion(currentQuestion);
+                scrollToBottom();
+            }, 100);
+        };
+
+        window.saveFieldEdit = function() {
+            if (currentEditField === 'photos') {
+                editFieldModal.classList.add('hidden');
+                editFieldModal.querySelector('.modal-content').classList.remove('show');
+                photoModal.classList.remove('hidden');
+                photoModal.querySelector('.modal-content').classList.add('show');
+                return;
+            }
+            const newValue = editFieldInput.value.trim();
+            const validationError = validators[currentEditField]?.(newValue);
+            if (validationError) {
+                alert(validationError);
+                return;
+            }
+            applicationData[currentEditField] = newValue;
+            localStorage.setItem('applicationData', JSON.stringify(applicationData));
+            editFieldModal.classList.add('hidden');
+            editFieldModal.querySelector('.modal-content').classList.remove('show');
+            showApplicationReview();
+        };
+
+        window.closeEditModal = function() {
+            editFieldModal.classList.add('hidden');
+            editFieldModal.querySelector('.modal-content').classList.remove('show');
+            scrollToBottom();
+        };
+
+        window.clearChatHistory = function() {
+            localStorage.removeItem('chatMessages');
+            localStorage.removeItem('applicationData');
+            localStorage.removeItem('currentQuestion');
+            localStorage.removeItem('isApplicationActive');
+            localStorage.removeItem('selectedPhotos');
+            messages = [];
+            applicationData = {
+                firstName: '', lastName: '', bust: '', waist: '', hips: '', justCo: '',
+                height: '', instagram: '', tiktok: '', location: '', dob: '',
+                startDate: '', email: '', altContact: ''
+            };
+            currentQuestion = 0;
+            isApplicationActive = false;
+            selectedPhotos = [];
+            while (chatContainer.children.length > 2) {
+                chatContainer.removeChild(chatContainer.children[1]);
+            }
+            clearChatModal.classList.add('hidden');
+            clearChatModal.querySelector('.modal-content').classList.remove('show');
+            scrollToBottom();
+        };
+
+        window.keepChatHistory = function() {
+            clearChatModal.classList.add('hidden');
+            clearChatModal.querySelector('.modal-content').classList.remove('show');
+            restoreMessages();
+            scrollToBottom();
+        };
+
+        function getCurrentTime() {
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            return `${hours}:${minutes}`;
+        }
+
+        function simulateTyping(message, callback) {
+            typingIndicator.classList.remove('hidden');
+            const delay = 500 + message.length * 20;
+            setTimeout(() => {
+                typingIndicator.classList.add('hidden');
+                callback();
+            }, delay);
+        }
+
+        function clearApplicationData() {
+            localStorage.removeItem('applicationData');
+            localStorage.removeItem('currentQuestion');
+            localStorage.removeItem('isApplicationActive');
+            localStorage.removeItem('selectedPhotos');
+            localStorage.removeItem('chatMessages');
+            
+            // Set a 24-hour cooldown for new applications from same browser
+            localStorage.setItem('applicationCooldown', (Date.now() + (24 * 60 * 60 * 1000)).toString());
+        }
+
+        function checkCooldown() {
+            const cooldown = localStorage.getItem('applicationCooldown');
+            const lastSubmission = localStorage.getItem('lastApplicationSubmission');
+            
+            // Check 24-hour cooldown
+            if (cooldown && Date.now() < parseInt(cooldown)) {
+                const hoursLeft = Math.ceil((parseInt(cooldown) - Date.now()) / (1000 * 60 * 60));
+                return {
+                    onCooldown: true,
+                    message: `⏳ You recently submitted an application. Please wait ${hoursLeft} hour(s) before applying again.`
+                };
+            }
+            
+            // Check 5-second submission cooldown
+            if (lastSubmission) {
+                const timeSinceLast = Date.now() - parseInt(lastSubmission);
+                if (timeSinceLast < 5000) { // 5 seconds
+                    const secondsLeft = Math.ceil((5000 - timeSinceLast) / 1000);
+                    return {
+                        onCooldown: true,
+                        message: `⏳ Please wait ${secondsLeft} second(s) before submitting again.`
                     };
-                    reader.readAsDataURL(file);
-                });
+                }
+            }
+            
+            return { onCooldown: false };
+        }
 
-                photoInput.value = '';
+        function addMessageToChat(sender, message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-bubble flex ${sender === 'user' ? 'justify-end' : 'flex-row'}`;
+            const timestamp = getCurrentTime();
+            const isAskQuestion = message === 'I have a question about the application' && sender === 'user';
+            const isAIResponseToQuestion = sender === 'ai' && messages.length > 0 && messages[messages.length - 1].message === 'I have a question about the application' && messages[messages.length - 1].sender === 'user';
+
+            if (sender === 'user') {
+                messageDiv.innerHTML = `
+                    <div class="bg-black text-white p-3 rounded-lg">
+                        <p class="text-sm">${message}</p>
+                        <div class="message-timestamp">${timestamp}</div>
+                    </div>
+                    <div class="w-8 h-8 rounded-full bg-gray-800 flex-shrink-0 flex items-center justify-center ml-2 avatar">
+                        <i class="fas fa-user text-white text-sm" aria-label="User"></i>
+                    </div>
+                `;
+                chatContainer.insertBefore(messageDiv, typingIndicator);
+                playSound(sendSound);
+                messages.push({ sender, message, timestamp });
+                localStorage.setItem('chatMessages', JSON.stringify(messages));
                 scrollToBottom();
-            });
 
-            function updateImagePreview() {
-                imagePreview.innerHTML = '';
-                selectedPhotos.forEach((photo, index) => {
-                    const previewDiv = document.createElement('div');
-                    previewDiv.className = 'relative';
-                    previewDiv.innerHTML = `
-                        <img src="${photo.data}" alt="Preview ${index + 1}">
-                        <span class="remove-btn" onclick="removePhoto(${index})">&times;</span>
-                    `;
-                    imagePreview.appendChild(previewDiv);
-                });
+                // Respond to "Ask a Question" button
+                if (isAskQuestion) {
+                    simulateTyping('For inquiries, please click the WhatsApp button below to connect with our team.', () => {
+                        addMessageToChat('ai', 'For inquiries, please click the WhatsApp button below to connect with our team.');
+                    });
+                }
+            } else {
+                const currentQ = applicationQuestions[currentQuestion];
+                const isAppQuestion = isApplicationActive && currentQ && currentQ.question === message;
+                messageDiv.innerHTML = `
+                    <div class="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 flex items-center justify-center mr-2 avatar">
+                        <i class="fas fa-robot text-gray-600 text-sm" aria-label=" Assistant, AI Assistant"></i>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg border border-gray-200">
+                        <p class="text-gray-800 text-sm font-semibold"> Assistant</p>
+                        <p class="text-gray-800 text-sm">${message}</p>
+                        ${isAppQuestion && currentQ.example ?
+                            `<div class="example-box">${currentQ.example}</div>` : ''}
+                        ${isAppQuestion && currentQ.field === 'photos' ?
+                            `<div class="mt-2">
+                                <button onclick="document.getElementById('photo-upload-modal').classList.remove('hidden'); document.getElementById('photo-upload-modal').querySelector('.modal-content').classList.add('show')" class="option-button">
+                                    Upload Photos
+                                </button>
+                            </div>` : ''}
+                        ${isAIResponseToQuestion ? `
+                            <div class="mt-2">
+                                <a href="https://wa.me/+2347080717976?text=Hi,%20I%20have%20a%20question%20about%20my%20Beige%20Model%20Agency%20application" target="_blank" class="whatsapp-button">
+                                    <i class="fab fa-whatsapp mr-1"></i> Chat on WhatsApp
+                                </a>
+                            </div>` : ''}
+                        <div class="message-timestamp">${timestamp}</div>
+                    </div>
+                `;
+                chatContainer.insertBefore(messageDiv, typingIndicator);
+                playSound(messageSound);
+                messages.push({ sender, message, timestamp });
+                localStorage.setItem('chatMessages', JSON.stringify(messages));
                 scrollToBottom();
             }
+        }
 
-            window.removePhoto = function(index) {
-                selectedPhotos.splice(index, 1);
-                localStorage.setItem('selectedPhotos', JSON.stringify(selectedPhotos));
-                updateImagePreview();
-                scrollToBottom();
-            };
+        function sendMessage() {
+            const message = userInput.value.trim();
+            if (message.length === 0) return;
 
-            window.submitPhotos = function() {
-                if (selectedPhotos.length < 2) {
-                    alert('Please upload at least one full-body shot and one portrait.');
+            addMessageToChat('user', message);
+            userInput.value = '';
+            userInput.style.height = '0.75rem';
+            sendBtn.disabled = true;
+
+            simulateTyping('', () => {
+                if (isApplicationActive) {
+                    if (applicationQuestions[currentQuestion].field === 'photos') {
+                        if (message.toLowerCase() === 'i understand') {
+                            photoModal.classList.remove('hidden');
+                            photoModal.querySelector('.modal-content').classList.add('show');
+                        } else {
+                            addMessageToChat('ai', "Please type 'I understand' to open the photo upload modal or ask a question about the photo requirements.");
+                            setTimeout(() => {
+                                askQuestion(currentQuestion);
+                                scrollToBottom();
+                            }, 100);
+                        }
+                    } else {
+                        processApplicationAnswer(message);
+                    }
+                } else {
+                    const response = generateAIResponse(message);
+                    addMessageToChat('ai', response);
+                }
+            });
+        }
+
+        function generateAIResponse(userMessage) {
+            const lowerMessage = userMessage.toLowerCase();
+
+            if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey')) {
+                return "Hello! I'm Assistant, your professional model application assistant. How may I assist you today?";
+            } else if (lowerMessage.includes('measurement') || lowerMessage.includes('bust') || lowerMessage.includes('waist') || lowerMessage.includes('hip')) {
+                return "Please provide your measurements one at a time. I'll ask for each measurement individually during the application process.";
+            } else if (lowerMessage.includes('height') || lowerMessage.includes('tall')) {
+                return "Height requirements vary by market. Please provide your height during the application process.";
+            } else if (lowerMessage.includes('photo') || lowerMessage.includes('picture') || lowerMessage.includes('image')) {
+                return "For your application portfolio, you'll need: 1) A full-body shot in form-fitting clothing (swimsuit or athletic wear preferred), and 2) A clean portrait with minimal makeup. Both should be well-lit with a neutral background. Digital submissions should be high resolution. Photos must be one full body and one portrait, without makeup or filters, no merged or profile shots. You may upload up to 6 photos total via the upload modal.";
+            } else if (lowerMessage.includes('instagram') || lowerMessage.includes('tiktok') || lowerMessage.includes('social media')) {
+                return "Social media presence is increasingly important. Please provide links to your Instagram and/or TikTok profiles if available. Ensure profiles are public and represent your professional image.";
+            } else if (lowerMessage.includes('just & co') || lowerMessage.includes('just and co') || lowerMessage.includes('agency')) {
+                return "The 'Just & Co' field documents your agency representation history. List current or past agencies, or 'Independent' if unrepresented. Exclusive contracts should be disclosed.";
+            } else if (lowerMessage.includes('process') || lowerMessage.includes('next step') || lowerMessage.includes('what happens')) {
+                return "Our review process: 1) Initial application screening (2-3 weeks), 2) Potential callback for interview, 3) Test shoots if applicable, 4) Final evaluation. We maintain high standards and appreciate your patience.";
+            } else if (lowerMessage.includes('requirement') || lowerMessage.includes('need') || lowerMessage.includes('qualification')) {
+                return "Key evaluation criteria include: 1) Photogenic qualities, 2) Professional demeanor, 3) Distinctive features, 4) Proportional measurements, 5) Portfolio potential. Training and experience are assets but not mandatory.";
+            } else if (lowerMessage.includes('age') || lowerMessage.includes('old') || lowerMessage.includes('young')) {
+                return "We consider applicants aged 16+ (with parental consent for minors). There's no upper age limit—we represent diverse demographics including mature models. Different markets have varying age preferences.";
+            } else if (lowerMessage.includes('location') || lowerMessage.includes('where') || lowerMessage.includes('city')) {
+                return "Please specify your current location. While we're based in major fashion capitals, we work with talent worldwide. Some opportunities may require relocation or extensive travel.";
+            } else if (lowerMessage.includes('time') || lowerMessage.includes('long') || lowerMessage.includes('response')) {
+                return "Our review timeline is typically a week for initial response. Due to volume, we may not respond to all applications. You're welcome to follow up after 3 weeks if you haven't heard from us.";
+            } else if (lowerMessage.includes('start') || lowerMessage.includes('begin modeling') || lowerMessage.includes('when can i start')) {
+                return "Please specify when you would like to begin modeling. This helps us align opportunities with your availability.";
+            } else if (lowerMessage.includes('thank')) {
+                return "You're most welcome. It's my pleasure to assist you with your professional modeling application.";
+            } else {
+                return "For inquiries, please click the WhatsApp button below to connect with our team.";
+            }
+        }
+
+        function startApplication() {
+            // Check for cooldown
+            const cooldownCheck = checkCooldown();
+            if (cooldownCheck.onCooldown) {
+                addMessageToChat('ai', cooldownCheck.message);
+                return;
+            }
+            
+            // Check for existing application
+            if (applicationData.email) {
+                const shouldContinue = confirm(
+                    `You have an application in progress for ${applicationData.email}.\n\n` +
+                    `• Click OK to continue where you left off\n` +
+                    `• Click Cancel to start a new application`
+                );
+                
+                if (shouldContinue) {
+                    // Resume at current question
+                    isApplicationActive = true;
+                    localStorage.setItem('isApplicationActive', JSON.stringify(isApplicationActive));
+                    askQuestion(currentQuestion);
                     return;
                 }
-                photoModal.classList.add('hidden');
-                photoModal.querySelector('.modal-content').classList.remove('show');
-                addMessageToChat('user', `Uploaded ${selectedPhotos.length} photo(s)`);
+            }
+
+            isApplicationActive = true;
+            currentQuestion = 0;
+            localStorage.setItem('isApplicationActive', JSON.stringify(isApplicationActive));
+            localStorage.setItem('currentQuestion', currentQuestion);
+
+            // Clear previous data if starting new
+            applicationData = {
+                firstName: '', lastName: '', bust: '', waist: '', hips: '', justCo: '',
+                height: '', instagram: '', tiktok: '', location: '', dob: '',
+                startDate: '', email: '', altContact: ''
+            };
+            selectedPhotos = [];
+            localStorage.setItem('applicationData', JSON.stringify(applicationData));
+            localStorage.setItem('selectedPhotos', JSON.stringify(selectedPhotos));
+
+            // Clear chat except welcome message
+            while (chatContainer.children.length > 2) {
+                chatContainer.removeChild(chatContainer.children[1]);
+            }
+            messages = [];
+            localStorage.setItem('chatMessages', JSON.stringify(messages));
+
+            addMessageToChat('ai', "Thank you for choosing to begin your professional modeling application. I'll guide you through each required field systematically. Please provide accurate information for optimal evaluation.");
+
+            setTimeout(() => {
+                askQuestion(currentQuestion);
+                scrollToBottom();
+            }, 100);
+        }
+
+        function askQuestion(index) {
+            if (index >= applicationQuestions.length) {
+                showApplicationReview();
+                return;
+            }
+
+            const question = applicationQuestions[index];
+            addMessageToChat('ai', question.question);
+            scrollToBottom();
+        }
+
+        function processApplicationAnswer(answer) {
+            const currentField = applicationQuestions[currentQuestion].field;
+            if (currentField !== 'photos') {
+                const validationError = validators[currentField]?.(answer);
+                if (validationError) {
+                    addMessageToChat('ai', `❌ ${validationError}`);
+                    setTimeout(() => {
+                        askQuestion(currentQuestion);
+                        scrollToBottom();
+                    }, 100);
+                    return;
+                }
+                applicationData[currentField] = answer;
+                localStorage.setItem('applicationData', JSON.stringify(applicationData));
                 currentQuestion++;
                 localStorage.setItem('currentQuestion', currentQuestion);
                 setTimeout(() => {
                     askQuestion(currentQuestion);
                     scrollToBottom();
                 }, 100);
-            };
+            }
+        }
 
-            window.closePhotoModal = function() {
-                selectedPhotos = [];
-                localStorage.setItem('selectedPhotos', JSON.stringify(selectedPhotos));
-                photoModal.classList.add('hidden');
-                photoModal.querySelector('.modal-content').classList.remove('show');
-                addMessageToChat('ai', 'Photo upload cancelled. Please upload your photos to continue.');
+        function showApplicationReview() {
+            const errors = [];
+            for (const [field, value] of Object.entries(applicationData)) {
+                const error = validators[field]?.(value);
+                if (error) errors.push(`${field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}: ${error}`);
+            }
+            if (selectedPhotos.length < 2 || selectedPhotos.length > 6) {
+                errors.push('Photos: You must upload between 2 and 6 photos');
+            }
+
+            if (errors.length > 0) {
+                addMessageToChat('ai', `❌ Please complete all required fields before submitting.`);
                 setTimeout(() => {
                     askQuestion(currentQuestion);
                     scrollToBottom();
                 }, 100);
-            };
-
-            window.saveFieldEdit = function() {
-                if (currentEditField === 'photos') {
-                    editFieldModal.classList.add('hidden');
-                    editFieldModal.querySelector('.modal-content').classList.remove('show');
-                    photoModal.classList.remove('hidden');
-                    photoModal.querySelector('.modal-content').classList.add('show');
-                    return;
-                }
-                const newValue = editFieldInput.value.trim();
-                const validationError = validators[currentEditField]?.(newValue);
-                if (validationError) {
-                    alert(validationError);
-                    return;
-                }
-                applicationData[currentEditField] = newValue;
-                localStorage.setItem('applicationData', JSON.stringify(applicationData));
-                editFieldModal.classList.add('hidden');
-                editFieldModal.querySelector('.modal-content').classList.remove('show');
-                showApplicationReview();
-            };
-
-            window.closeEditModal = function() {
-                editFieldModal.classList.add('hidden');
-                editFieldModal.querySelector('.modal-content').classList.remove('show');
-                scrollToBottom();
-            };
-
-            window.clearChatHistory = function() {
-                localStorage.removeItem('chatMessages');
-                localStorage.removeItem('applicationData');
-                localStorage.removeItem('currentQuestion');
-                localStorage.removeItem('isApplicationActive');
-                localStorage.removeItem('selectedPhotos');
-                messages = [];
-                applicationData = {
-                    firstName: '', lastName: '', bust: '', waist: '', hips: '', justCo: '',
-                    height: '', instagram: '', tiktok: '', location: '', dob: '',
-                    startDate: '', email: '', altContact: ''
-                };
-                currentQuestion = 0;
-                isApplicationActive = false;
-                selectedPhotos = [];
-                while (chatContainer.children.length > 2) {
-                    chatContainer.removeChild(chatContainer.children[1]);
-                }
-                clearChatModal.classList.add('hidden');
-                clearChatModal.querySelector('.modal-content').classList.remove('show');
-                scrollToBottom();
-            };
-
-            window.keepChatHistory = function() {
-                clearChatModal.classList.add('hidden');
-                clearChatModal.querySelector('.modal-content').classList.remove('show');
-                restoreMessages();
-                scrollToBottom();
-            };
-
-            function getCurrentTime() {
-                const now = new Date();
-                const hours = now.getHours().toString().padStart(2, '0');
-                const minutes = now.getMinutes().toString().padStart(2, '0');
-                return `${hours}:${minutes}`;
+                return;
             }
 
-            function simulateTyping(message, callback) {
-                typingIndicator.classList.remove('hidden');
-                const delay = 500 + message.length * 20;
-                setTimeout(() => {
-                    typingIndicator.classList.add('hidden');
-                    callback();
-                }, delay);
+            const summaryDiv = document.createElement('div');
+            summaryDiv.className = 'summary-container grid grid-cols-1 sm:grid-cols-2 gap-2 p-2 bg-gray-50 rounded-lg border border-gray-200';
+            for (const [key, value] of Object.entries(applicationData)) {
+                if (value) {
+                    const displayKey = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+                    const fieldDiv = document.createElement('div');
+                    fieldDiv.className = 'summary-field';
+                    fieldDiv.dataset.field = key;
+                    fieldDiv.innerHTML = `<span class="font-bold">${displayKey}:</span> ${value}`;
+                    summaryDiv.appendChild(fieldDiv);
+                }
             }
+            const photosDiv = document.createElement('div');
+            photosDiv.className = 'summary-photos';
+            photosDiv.dataset.field = 'photos';
+            selectedPhotos.forEach((photo, index) => {
+                const img = document.createElement('img');
+                img.src = photo.data;
+                img.alt = `Uploaded photo ${index + 1}`;
+                photosDiv.appendChild(img);
+            });
+            summaryDiv.appendChild(photosDiv);
 
-            function addMessageToChat(sender, message) {
+            addMessageToChat('ai', `📋 APPLICATION SUMMARY\n\nPlease review your information. Click and hold any field to edit, then submit when ready.`);
+            const botMessages = document.querySelectorAll('.chat-bubble:not(.justify-end)');
+            const lastBotMessage = botMessages[botMessages.length - 1].querySelector('.bg-white');
+            lastBotMessage.appendChild(summaryDiv);
+
+            const actionDiv = document.createElement('div');
+            actionDiv.className = 'flex space-x-2 mt-2';
+            actionDiv.innerHTML = `
+                <button onclick="submitApplication()" class="option-button bg-black hover:bg-gray-800 text-white">
+                    <i class="fas fa-check mr-1"></i> Submit Application
+                </button>
+                <button onclick="clearChatHistory()" class="option-button bg-gray-300 hover:bg-gray-400 text-gray-800">
+                    <i class="fas fa-times mr-1"></i> Cancel
+                </button>
+            `;
+            lastBotMessage.appendChild(actionDiv);
+
+            summaryDiv.querySelectorAll('.summary-field, .summary-photos').forEach(field => {
+                field.addEventListener('mousedown', (e) => {
+                    holdTimer = setTimeout(() => {
+                        currentEditField = field.dataset.field;
+                        if (currentEditField === 'photos') {
+                            photoModal.classList.remove('hidden');
+                            photoModal.querySelector('.modal-content').classList.add('show');
+                        } else {
+                            editFieldInput.value = applicationData[currentEditField] || '';
+                            editFieldModal.querySelector('#edit-modal-title').textContent = `Edit ${currentEditField.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}`;
+                            editFieldModal.classList.remove('hidden');
+                            editFieldModal.querySelector('.modal-content').classList.add('show');
+                        }
+                        scrollToBottom();
+                    }, 500);
+                });
+                field.addEventListener('mouseup', () => clearTimeout(holdTimer));
+                field.addEventListener('mouseleave', () => clearTimeout(holdTimer));
+                field.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    holdTimer = setTimeout(() => {
+                        currentEditField = field.dataset.field;
+                        if (currentEditField === 'photos') {
+                            photoModal.classList.remove('hidden');
+                            photoModal.querySelector('.modal-content').classList.add('show');
+                        } else {
+                            editFieldInput.value = applicationData[currentEditField] || '';
+                            editFieldModal.querySelector('#edit-modal-title').textContent = `Edit ${currentEditField.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}`;
+                            editFieldModal.classList.remove('hidden');
+                            editFieldModal.querySelector('.modal-content').classList.add('show');
+                        }
+                        scrollToBottom();
+                    }, 500);
+                });
+                field.addEventListener('touchend', () => clearTimeout(holdTimer));
+                field.addEventListener('touchcancel', () => clearTimeout(holdTimer));
+            });
+
+            scrollToBottom();
+        }
+
+        async function submitApplication() {
+            // Prevent multiple submissions
+            if (isSubmitting) {
+                return;
+            }
+            
+            isSubmitting = true;
+            
+            // Disable submit button
+            const submitBtn = document.querySelector('button[onclick="submitApplication()"]');
+            const originalText = submitBtn ? submitBtn.innerHTML : '';
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Submitting...';
+            }
+            
+            // Show loading message
+            addMessageToChat('user', 'Submit my application');
+            addMessageToChat('ai', '⏳ Submitting your application...');
+            
+            // Track submission time
+            localStorage.setItem('lastApplicationSubmission', Date.now().toString());
+            
+            try {
+                // Validate data client-side first
+                const errors = [];
+                for (const [field, value] of Object.entries(applicationData)) {
+                    const error = validators[field]?.(value);
+                    if (error) errors.push(`${field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}: ${error}`);
+                }
+                if (selectedPhotos.length < 2 || selectedPhotos.length > 6) {
+                    errors.push('Photos: You must upload between 2 and 6 photos');
+                }
+                
+                if (errors.length > 0) {
+                    addMessageToChat('ai', '⚠️ Please complete all required fields before submitting.');
+                    throw new Error('Validation failed');
+                }
+                
+                // Create FormData
+                const formData = new FormData();
+                for (const [key, value] of Object.entries(applicationData)) {
+                    if (value) {
+                        formData.append(key, value);
+                    }
+                }
+                
+                // Add photos
+                const photoPromises = selectedPhotos.map(async (photo) => {
+                    const response = await fetch(photo.data);
+                    const blob = await response.blob();
+                    return blob;
+                });
+                
+                const photoBlobs = await Promise.all(photoPromises);
+                photoBlobs.forEach((blob, index) => {
+                    formData.append('photos', blob, `photo${index + 1}.jpg`);
+                });
+                
+                // Submit to API
+                const response = await fetch(`${config.apiBaseUrl}/applications`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    // SUCCESS - Clear everything
+                    clearApplicationData();
+                    
+                    // Show success message
+                    const appId = data.applicationId || 'APP' + Date.now().toString().slice(-8);
+                    addMessageToChat('ai', `✅ APPLICATION SUBMITTED SUCCESSFULLY!\n\nYour application #${appId} has been received.\n\nOur team will review it within 7-10 business days.`);
+                    
+                    // Add navigation buttons
+                    const actionDiv = document.createElement('div');
+                    actionDiv.className = 'flex space-x-2 mt-4';
+                    actionDiv.innerHTML = `
+                        <button onclick="window.location.href='home.html'" 
+                                class="option-button bg-green-600 hover:bg-green-700 text-white">
+                            <i class="fas fa-home mr-1"></i> Return to Home
+                        </button>
+                        <button onclick="clearChatHistory()" 
+                                class="option-button bg-gray-300 hover:bg-gray-400 text-gray-800">
+                            <i class="fas fa-redo mr-1"></i> Start New Application
+                        </button>
+                    `;
+                    
+                    const botMessages = document.querySelectorAll('.chat-bubble:not(.justify-end)');
+                    if (botMessages.length > 0) {
+                        const lastBotMessage = botMessages[botMessages.length - 1].querySelector('.bg-white');
+                        lastBotMessage.appendChild(actionDiv);
+                    }
+                    
+                } else {
+                    // Handle API errors gracefully
+                    let errorMessage = 'Unable to submit application. Please try again.';
+                    
+                    if (data.message) {
+                        if (data.message.includes('already submitted') || data.message.includes('24 hours') || data.message.includes('wait')) {
+                            errorMessage = data.message;
+                        } else if (data.message.includes('photos')) {
+                            errorMessage = 'Please upload between 2 and 6 photos.';
+                        } else {
+                            errorMessage = data.message;
+                        }
+                    }
+                    
+                    addMessageToChat('ai', `❌ ${errorMessage}`);
+                    
+                    // Re-enable submit button
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalText;
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Submission error:', error);
+                
+                // Show user-friendly error message
+                if (error.message !== 'Validation failed') {
+                    addMessageToChat('ai', '⚠️ There was a problem submitting your application. Please check your connection and try again.');
+                }
+                
+                // Re-enable submit button
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }
+                
+            } finally {
+                isSubmitting = false;
+                scrollToBottom();
+            }
+        }
+
+        function restoreMessages() {
+            messages.forEach(({ sender, message, timestamp }) => {
                 const messageDiv = document.createElement('div');
                 messageDiv.className = `chat-bubble flex ${sender === 'user' ? 'justify-end' : 'flex-row'}`;
-                const timestamp = getCurrentTime();
-                const isAskQuestion = message === 'I have a question about the application' && sender === 'user';
+                const isAppQuestion = isApplicationActive && applicationQuestions[currentQuestion] && applicationQuestions[currentQuestion].question === message;
                 const isAIResponseToQuestion = sender === 'ai' && messages.length > 0 && messages[messages.length - 1].message === 'I have a question about the application' && messages[messages.length - 1].sender === 'user';
 
                 if (sender === 'user') {
@@ -1051,21 +1551,7 @@
                             <i class="fas fa-user text-white text-sm" aria-label="User"></i>
                         </div>
                     `;
-                    chatContainer.insertBefore(messageDiv, typingIndicator);
-                    playSound(sendSound);
-                    messages.push({ sender, message, timestamp });
-                    localStorage.setItem('chatMessages', JSON.stringify(messages));
-                    scrollToBottom();
-
-                    // Respond to "Ask a Question" button
-                    if (isAskQuestion) {
-                        simulateTyping('For inquiries, please click the WhatsApp button below to connect with our team.', () => {
-                            addMessageToChat('ai', 'For inquiries, please click the WhatsApp button below to connect with our team.');
-                        });
-                    }
                 } else {
-                    const currentQ = applicationQuestions[currentQuestion];
-                    const isAppQuestion = isApplicationActive && currentQ && currentQ.question === message;
                     messageDiv.innerHTML = `
                         <div class="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 flex items-center justify-center mr-2 avatar">
                             <i class="fas fa-robot text-gray-600 text-sm" aria-label=" Assistant, AI Assistant"></i>
@@ -1073,9 +1559,9 @@
                         <div class="bg-white p-3 rounded-lg border border-gray-200">
                             <p class="text-gray-800 text-sm font-semibold"> Assistant</p>
                             <p class="text-gray-800 text-sm">${message}</p>
-                            ${isAppQuestion && currentQ.example ?
-                                `<div class="example-box">${currentQ.example}</div>` : ''}
-                            ${isAppQuestion && currentQ.field === 'photos' ?
+                            ${isAppQuestion && applicationQuestions.find(q => q.question === message)?.example ?
+                                `<div class="example-box">${applicationQuestions.find(q => q.question === message).example}</div>` : ''}
+                            ${isAppQuestion && applicationQuestions.find(q => q.question === message)?.field === 'photos' ?
                                 `<div class="mt-2">
                                     <button onclick="document.getElementById('photo-upload-modal').classList.remove('hidden'); document.getElementById('photo-upload-modal').querySelector('.modal-content').classList.add('show')" class="option-button">
                                         Upload Photos
@@ -1090,392 +1576,60 @@
                             <div class="message-timestamp">${timestamp}</div>
                         </div>
                     `;
-                    chatContainer.insertBefore(messageDiv, typingIndicator);
-                    playSound(messageSound);
-                    messages.push({ sender, message, timestamp });
-                    localStorage.setItem('chatMessages', JSON.stringify(messages));
-                    scrollToBottom();
-                }
-            }
-
-            function sendMessage() {
-                const message = userInput.value.trim();
-                if (message.length === 0) return;
-
-                addMessageToChat('user', message);
-                userInput.value = '';
-                userInput.style.height = '0.75rem';
-                sendBtn.disabled = true;
-
-                simulateTyping('', () => {
-                    if (isApplicationActive) {
-                        if (applicationQuestions[currentQuestion].field === 'photos') {
-                            if (message.toLowerCase() === 'i understand') {
-                                photoModal.classList.remove('hidden');
-                                photoModal.querySelector('.modal-content').classList.add('show');
-                            } else {
-                                addMessageToChat('ai', "Please type 'I understand' to open the photo upload modal or ask a question about the photo requirements.");
-                                setTimeout(() => {
-                                    askQuestion(currentQuestion);
-                                    scrollToBottom();
-                                }, 100);
-                            }
-                        } else {
-                            processApplicationAnswer(message);
-                        }
-                    } else {
-                        const response = generateAIResponse(message);
-                        addMessageToChat('ai', response);
-                    }
-                });
-            }
-
-            function generateAIResponse(userMessage) {
-                const lowerMessage = userMessage.toLowerCase();
-
-                if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey')) {
-                    return "Hello! I'm Assistant, your professional model application assistant. How may I assist you today?";
-                } else if (lowerMessage.includes('measurement') || lowerMessage.includes('bust') || lowerMessage.includes('waist') || lowerMessage.includes('hip')) {
-                    return "Please provide your measurements one at a time. I'll ask for each measurement individually during the application process.";
-                } else if (lowerMessage.includes('height') || lowerMessage.includes('tall')) {
-                    return "Height requirements vary by market. Please provide your height during the application process.";
-                } else if (lowerMessage.includes('photo') || lowerMessage.includes('picture') || lowerMessage.includes('image')) {
-                    return "For your application portfolio, you'll need: 1) A full-body shot in form-fitting clothing (swimsuit or athletic wear preferred), and 2) A clean portrait with minimal makeup. Both should be well-lit with a neutral background. Digital submissions should be high resolution. Photos must be one full body and one portrait, without makeup or filters, no merged or profile shots. You may upload up to 6 photos total via the upload modal.";
-                } else if (lowerMessage.includes('instagram') || lowerMessage.includes('tiktok') || lowerMessage.includes('social media')) {
-                    return "Social media presence is increasingly important. Please provide links to your Instagram and/or TikTok profiles if available. Ensure profiles are public and represent your professional image.";
-                } else if (lowerMessage.includes('just & co') || lowerMessage.includes('just and co') || lowerMessage.includes('agency')) {
-                    return "The 'Just & Co' field documents your agency representation history. List current or past agencies, or 'Independent' if unrepresented. Exclusive contracts should be disclosed.";
-                } else if (lowerMessage.includes('process') || lowerMessage.includes('next step') || lowerMessage.includes('what happens')) {
-                    return "Our review process: 1) Initial application screening (2-3 weeks), 2) Potential callback for interview, 3) Test shoots if applicable, 4) Final evaluation. We maintain high standards and appreciate your patience.";
-                } else if (lowerMessage.includes('requirement') || lowerMessage.includes('need') || lowerMessage.includes('qualification')) {
-                    return "Key evaluation criteria include: 1) Photogenic qualities, 2) Professional demeanor, 3) Distinctive features, 4) Proportional measurements, 5) Portfolio potential. Training and experience are assets but not mandatory.";
-                } else if (lowerMessage.includes('age') || lowerMessage.includes('old') || lowerMessage.includes('young')) {
-                    return "We consider applicants aged 16+ (with parental consent for minors). There's no upper age limit—we represent diverse demographics including mature models. Different markets have varying age preferences.";
-                } else if (lowerMessage.includes('location') || lowerMessage.includes('where') || lowerMessage.includes('city')) {
-                    return "Please specify your current location. While we're based in major fashion capitals, we work with talent worldwide. Some opportunities may require relocation or extensive travel.";
-                } else if (lowerMessage.includes('time') || lowerMessage.includes('long') || lowerMessage.includes('response')) {
-                    return "Our review timeline is typically a week for initial response. Due to volume, we may not respond to all applications. You're welcome to follow up after 3 weeks if you haven't heard from us.";
-                } else if (lowerMessage.includes('start') || lowerMessage.includes('begin modeling') || lowerMessage.includes('when can i start')) {
-                    return "Please specify when you would like to begin modeling. This helps us align opportunities with your availability.";
-                } else if (lowerMessage.includes('thank')) {
-                    return "You're most welcome. It's my pleasure to assist you with your professional modeling application.";
-                } else {
-                    return "For inquiries, please click the WhatsApp button below to connect with our team.";
-                }
-            }
-
-            function startApplication() {
-                isApplicationActive = true;
-                currentQuestion = 0;
-                localStorage.setItem('isApplicationActive', JSON.stringify(isApplicationActive));
-                localStorage.setItem('currentQuestion', currentQuestion);
-
-                while (chatContainer.children.length > 2) {
-                    chatContainer.removeChild(chatContainer.children[1]);
-                }
-                messages = [];
-                localStorage.setItem('chatMessages', JSON.stringify(messages));
-
-                addMessageToChat('ai', "Thank you for choosing to begin your professional modeling application. I'll guide you through each required field systematically. Please provide accurate information for optimal evaluation.");
-
-                setTimeout(() => {
-                    askQuestion(currentQuestion);
-                    scrollToBottom();
-                }, 100);
-            }
-
-            function askQuestion(index) {
-                if (index >= applicationQuestions.length) {
-                    showApplicationReview();
-                    return;
                 }
 
-                const question = applicationQuestions[index];
-                addMessageToChat('ai', question.question);
+                chatContainer.insertBefore(messageDiv, typingIndicator);
+            });
+            if (messages.length > 0) {
+                updateImagePreview();
                 scrollToBottom();
             }
+        }
 
-            function processApplicationAnswer(answer) {
-                const currentField = applicationQuestions[currentQuestion].field;
-                if (currentField !== 'photos') {
-                    const validationError = validators[currentField]?.(answer);
-                    if (validationError) {
-                        addMessageToChat('ai', `Error: ${validationError}. Please try again.`);
-                        setTimeout(() => {
-                            askQuestion(currentQuestion);
-                            scrollToBottom();
-                        }, 100);
-                        return;
-                    }
-                    applicationData[currentField] = answer;
-                    localStorage.setItem('applicationData', JSON.stringify(applicationData));
-                    currentQuestion++;
-                    localStorage.setItem('currentQuestion', currentQuestion);
-                    setTimeout(() => {
-                        askQuestion(currentQuestion);
-                        scrollToBottom();
-                    }, 100);
+        // Check cooldown on page load
+        function checkPageLoadCooldown() {
+            const cooldown = localStorage.getItem('applicationCooldown');
+            if (cooldown && Date.now() < parseInt(cooldown)) {
+                const hoursLeft = Math.ceil((parseInt(cooldown) - Date.now()) / (1000 * 60 * 60));
+                
+                // Disable start button
+                const startBtn = document.querySelector('button[onclick="startApplication()"]');
+                if (startBtn) {
+                    startBtn.disabled = true;
+                    startBtn.innerHTML = `<i class="fas fa-clock mr-1"></i> Wait ${hoursLeft}h`;
+                    startBtn.title = `Please wait ${hoursLeft} hour(s) before applying again`;
                 }
             }
+        }
 
-            function showApplicationReview() {
-                const errors = [];
-                for (const [field, value] of Object.entries(applicationData)) {
-                    const error = validators[field]?.(value);
-                    if (error) errors.push(`${field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}: ${error}`);
-                }
-                if (selectedPhotos.length < 2 || selectedPhotos.length > 6) {
-                    errors.push('Photos: You must upload between 2 and 6 photos');
-                }
+        if (localStorage.getItem('chatMessages') && JSON.parse(localStorage.getItem('chatMessages')).length > 0) {
+            clearChatModal.classList.remove('hidden');
+            clearChatModal.querySelector('.modal-content').classList.add('show');
+            scrollToBottom();
+        } else {
+            restoreMessages();
+            checkPageLoadCooldown();
+            scrollToBottom();
+        }
 
-                if (errors.length > 0) {
-                    addMessageToChat('ai', `Please correct the following errors:\n\n${errors.join('\n')}`);
-                    setTimeout(() => {
-                        askQuestion(currentQuestion);
-                        scrollToBottom();
-                    }, 100);
-                    return;
-                }
+        window.startApplication = startApplication;
+        window.submitApplication = submitApplication;
+        window.addMessageToChat = addMessageToChat;
+        window.closePhotoModal = closePhotoModal;
+        window.submitPhotos = submitPhotos;
+        window.removePhoto = removePhoto;
+        window.saveFieldEdit = saveFieldEdit;
+        window.closeEditModal = closeEditModal;
+        window.clearChatHistory = clearChatHistory;
+        window.keepChatHistory = keepChatHistory;
 
-                const summaryDiv = document.createElement('div');
-                summaryDiv.className = 'summary-container grid grid-cols-1 sm:grid-cols-2 gap-2 p-2 bg-gray-50 rounded-lg border border-gray-200';
-                for (const [key, value] of Object.entries(applicationData)) {
-                    if (value) {
-                        const displayKey = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
-                        const fieldDiv = document.createElement('div');
-                        fieldDiv.className = 'summary-field';
-                        fieldDiv.dataset.field = key;
-                        fieldDiv.innerHTML = `<span class="font-bold">${displayKey}:</span> ${value}`;
-                        summaryDiv.appendChild(fieldDiv);
-                    }
-                }
-                const photosDiv = document.createElement('div');
-                photosDiv.className = 'summary-photos';
-                photosDiv.dataset.field = 'photos';
-                selectedPhotos.forEach((photo, index) => {
-                    const img = document.createElement('img');
-                    img.src = photo.data;
-                    img.alt = `Uploaded photo ${index + 1}`;
-                    photosDiv.appendChild(img);
-                });
-                summaryDiv.appendChild(photosDiv);
+        // Initialize
+        adjustSectionPadding();
+    });
 
-                addMessageToChat('ai', `APPLICATION SUMMARY\n\nYour photos have been uploaded. Please ensure they include one full-body shot and one portrait (without makeup or filters, no merged or profile shots). Click and hold any field to edit, then submit when ready.`);
-                const botMessages = document.querySelectorAll('.chat-bubble:not(.justify-end)');
-                const lastBotMessage = botMessages[botMessages.length - 1].querySelector('.bg-white');
-                lastBotMessage.appendChild(summaryDiv);
-
-                const actionDiv = document.createElement('div');
-                actionDiv.className = 'flex space-x-2 mt-2';
-                actionDiv.innerHTML = `
-                    <button onclick="submitApplication()" class="option-button bg-black hover:bg-gray-800 text-white">
-                        <i class="fas fa-check mr-1"></i> Submit Application
-                    </button>
-                `;
-                lastBotMessage.appendChild(actionDiv);
-
-                summaryDiv.querySelectorAll('.summary-field, .summary-photos').forEach(field => {
-                    field.addEventListener('mousedown', (e) => {
-                        holdTimer = setTimeout(() => {
-                            currentEditField = field.dataset.field;
-                            if (currentEditField === 'photos') {
-                                photoModal.classList.remove('hidden');
-                                photoModal.querySelector('.modal-content').classList.add('show');
-                            } else {
-                                editFieldInput.value = applicationData[currentEditField] || '';
-                                editFieldModal.querySelector('#edit-modal-title').textContent = `Edit ${currentEditField.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}`;
-                                editFieldModal.classList.remove('hidden');
-                                editFieldModal.querySelector('.modal-content').classList.add('show');
-                            }
-                            scrollToBottom();
-                        }, 500);
-                    });
-                    field.addEventListener('mouseup', () => clearTimeout(holdTimer));
-                    field.addEventListener('mouseleave', () => clearTimeout(holdTimer));
-                    field.addEventListener('touchstart', (e) => {
-                        e.preventDefault();
-                        holdTimer = setTimeout(() => {
-                            currentEditField = field.dataset.field;
-                            if (currentEditField === 'photos') {
-                                photoModal.classList.remove('hidden');
-                                photoModal.querySelector('.modal-content').classList.add('show');
-                            } else {
-                                editFieldInput.value = applicationData[currentEditField] || '';
-                                editFieldModal.querySelector('#edit-modal-title').textContent = `Edit ${currentEditField.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}`;
-                                editFieldModal.classList.remove('hidden');
-                                editFieldModal.querySelector('.modal-content').classList.add('show');
-                            }
-                            scrollToBottom();
-                        }, 500);
-                    });
-                    field.addEventListener('touchend', () => clearTimeout(holdTimer));
-                    field.addEventListener('touchcancel', () => clearTimeout(holdTimer));
-                });
-
-                scrollToBottom();
-            }
-
-            async function submitApplication() {
-                const errors = [];
-                for (const [field, value] of Object.entries(applicationData)) {
-                    const error = validators[field]?.(value);
-                    if (error) errors.push(`${field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}: ${error}`);
-                }
-                if (selectedPhotos.length < 2 || selectedPhotos.length > 6) {
-                    errors.push('Photos: You must upload between 2 and 6 photos');
-                }
-
-                if (errors.length > 0) {
-                    addMessageToChat('ai', `Cannot submit due to the following errors:\n\n${errors.join('\n')}`);
-                    setTimeout(() => {
-                        showApplicationReview();
-                        scrollToBottom();
-                    }, 100);
-                    return;
-                }
-
-                addMessageToChat('user', 'Submit my application');
-                addMessageToChat('ai', 'submitting your application ...');
-                typingIndicator.classList.remove('hidden');
-
-                const formData = new FormData();
-                for (const [key, value] of Object.entries(applicationData)) {
-                    formData.append(key, value);
-                }
-                try {
-                    const photoBlobs = await Promise.all(
-                        selectedPhotos.map(async (photo, index) => {
-                            const res = await fetch(photo.data);
-                            const blob = await res.blob();
-                            return { blob, name: photo.name };
-                        })
-                    );
-                    photoBlobs.forEach(({ blob, name }, index) => {
-                        formData.append('photos', blob, name);
-                    });
-
-                    const response = await fetch(`${config.apiBaseUrl}/applications`, {
-                        method: 'POST',
-                        body: formData
-                    });
-
-                    const data = await response.json();
-
-                    typingIndicator.classList.add('hidden');
-                    if (response.ok) {
-                        addMessageToChat('ai', `APPLICATION SUBMITTED\n\nThank you for your professional submission. We've received your information and photos, and will conduct a thorough review. Our team will contact you within a week if we wish to proceed.`);
-                        localStorage.removeItem('chatMessages');
-                        localStorage.removeItem('applicationData');
-                        localStorage.removeItem('currentQuestion');
-                        localStorage.removeItem('isApplicationActive');
-                        localStorage.removeItem('selectedPhotos');
-                        messages = [];
-                        applicationData = {
-                            firstName: '', lastName: '', bust: '', waist: '', hips: '', justCo: '',
-                            height: '', instagram: '', tiktok: '', location: '', dob: '',
-                            startDate: '', email: '', altContact: ''
-                        };
-                        currentQuestion = 0;
-                        isApplicationActive = false;
-                        selectedPhotos = [];
-                    } else {
-                        addMessageToChat('ai', `Error: ${data.message || 'Failed to submit application. Please correct your inputs and try again.'}`);
-                        setTimeout(() => {
-                            showApplicationReview();
-                            scrollToBottom();
-                        }, 100);
-                    }
-                } catch (error) {
-                    console.error('Error submitting application:', error);
-                    typingIndicator.classList.add('hidden');
-                    addMessageToChat('ai', 'Error: Server error. Please try again later.');
-                    scrollToBottom();
-                }
-            }
-
-            function restoreMessages() {
-                messages.forEach(({ sender, message, timestamp }) => {
-                    const messageDiv = document.createElement('div');
-                    messageDiv.className = `chat-bubble flex ${sender === 'user' ? 'justify-end' : 'flex-row'}`;
-                    const isAppQuestion = isApplicationActive && applicationQuestions[currentQuestion] && applicationQuestions[currentQuestion].question === message;
-                    const isAIResponseToQuestion = sender === 'ai' && messages.length > 0 && messages[messages.length - 1].message === 'I have a question about the application' && messages[messages.length - 1].sender === 'user';
-
-                    if (sender === 'user') {
-                        messageDiv.innerHTML = `
-                            <div class="bg-black text-white p-3 rounded-lg">
-                                <p class="text-sm">${message}</p>
-                                <div class="message-timestamp">${timestamp}</div>
-                            </div>
-                            <div class="w-8 h-8 rounded-full bg-gray-800 flex-shrink-0 flex items-center justify-center ml-2 avatar">
-                                <i class="fas fa-user text-white text-sm" aria-label="User"></i>
-                            </div>
-                        `;
-                    } else {
-                        messageDiv.innerHTML = `
-                            <div class="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 flex items-center justify-center mr-2 avatar">
-                                <i class="fas fa-robot text-gray-600 text-sm" aria-label=" Assistant, AI Assistant"></i>
-                            </div>
-                            <div class="bg-white p-3 rounded-lg border border-gray-200">
-                                <p class="text-gray-800 text-sm font-semibold"> Assistant</p>
-                                <p class="text-gray-800 text-sm">${message}</p>
-                                ${isAppQuestion && applicationQuestions.find(q => q.question === message)?.example ?
-                                    `<div class="example-box">${applicationQuestions.find(q => q.question === message).example}</div>` : ''}
-                                ${isAppQuestion && applicationQuestions.find(q => q.question === message)?.field === 'photos' ?
-                                    `<div class="mt-2">
-                                        <button onclick="document.getElementById('photo-upload-modal').classList.remove('hidden'); document.getElementById('photo-upload-modal').querySelector('.modal-content').classList.add('show')" class="option-button">
-                                            Upload Photos
-                                        </button>
-                                    </div>` : ''}
-                                ${isAIResponseToQuestion ? `
-                                    <div class="mt-2">
-                                        <a href="https://wa.me/+2347080717976?text=Hi,%20I%20have%20a%20question%20about%20my%20Beige%20Model%20Agency%20application" target="_blank" class="whatsapp-button">
-                                            <i class="fab fa-whatsapp mr-1"></i> Chat on WhatsApp
-                                        </a>
-                                    </div>` : ''}
-                                <div class="message-timestamp">${timestamp}</div>
-                            </div>
-                        `;
-                    }
-
-                    chatContainer.insertBefore(messageDiv, typingIndicator);
-                });
-                if (messages.length > 0) {
-                    updateImagePreview();
-                    scrollToBottom();
-                }
-            }
-
-            if (localStorage.getItem('chatMessages') && JSON.parse(localStorage.getItem('chatMessages')).length > 0) {
-                clearChatModal.classList.remove('hidden');
-                clearChatModal.querySelector('.modal-content').classList.add('show');
-                scrollToBottom();
-            } else {
-                restoreMessages();
-                scrollToBottom();
-            }
-
-            window.startApplication = startApplication;
-            window.submitApplication = submitApplication;
-            window.addMessageToChat = addMessageToChat;
-            window.closePhotoModal = closePhotoModal;
-            window.submitPhotos = submitPhotos;
-            window.removePhoto = removePhoto;
-            window.saveFieldEdit = saveFieldEdit;
-            window.closeEditModal = closeEditModal;
-            window.clearChatHistory = clearChatHistory;
-            window.keepChatHistory = keepChatHistory;
-
-            // Initialize
-            adjustSectionPadding();
-        });
-
-        window.addEventListener('load', () => {
-            adjustSectionPadding();
-        });
-    </script>
+    window.addEventListener('load', () => {
+        adjustSectionPadding();
+    });
+</script>
 </body>
 </html>
-
-
-
-
