@@ -2,1939 +2,1634 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Beige | Manage Applications</title>
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: {
-                            50: '#faf6f0',
-                            100: '#f5ede1',
-                            200: '#ebdbc3',
-                            300: '#dfc39d',
-                            400: '#d2a16d',
-                            500: '#c8854a',
-                            600: '#ba6f3f',
-                            700: '#9b5835',
-                            800: '#7d4730',
-                            900: '#663b29',
-                            950: '#361e15',
-                        },
-                        secondary: {
-                            50: '#f8fafc',
-                            100: '#f1f5f9',
-                            200: '#e2e8f0',
-                            300: '#cbd5e1',
-                            400: '#94a3b8',
-                            500: '#64748b',
-                            600: '#475569',
-                            700: '#334155',
-                            800: '#1e293b',
-                            900: '#0f172a',
-                            950: '#020617',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="Apply to become a model with Beige Model Agency using our AI assistant,.">
+    <meta name="keywords" content="model application, Beige agency, AI assistant, talent application">
+    <title>AI Model Application Assistant | Beige</title>
+     <link rel="icon" href="img/logo.jpeg" type="image/x-icon">
+    <link rel="shortcut icon" href="img/logo.jpeg" type="image/x-icon">
+    <script src="https://cdn.tailwindcss.com?cache_bust=20250812"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css?cache_bust=20250812">
     <style>
+        @font-face {
+            font-family: 'Didot';
+            src: url('/fonts/Didot.woff2') format('woff2'),
+                 url('/fonts/Didot.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'Didot';
+            src: url('/fonts/Didot-Bold.woff2') format('woff2'),
+                 url('/fonts/Didot-Bold.woff') format('woff');
+            font-weight: bold;
+            font-style: normal;
+        }
+        * {
+            box-sizing: border-box;
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8fafc;
-            color: #1e293b;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-        .sidebar {
-            transition: width 0.3s ease, box-shadow 0.3s ease;
-            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-            box-shadow: 1px 0 10px rgba(0, 0, 0, 0.05);
-        }
-        .sidebar-collapsed {
-            width: 60px;
-        }
-        .sidebar-collapsed .sidebar-text {
-            display: none;
-        }
-        .sidebar-collapsed .logo-text {
-            display: none;
-        }
-        .sidebar-collapsed .nav-item {
-            justify-content: center;
-        }
-        .content-area {
-            transition: margin-left 0.3s ease;
-            background-color: #f8fafc;
-        }
-        .content-expanded {
-            margin-left: 60px;
-        }
-        .card {
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            animation: cardEnter 0.4s ease-out forwards;
-        }
-        .card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-        @keyframes cardEnter {
-            from {
-                opacity: 0;
-                transform: translateY(15px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        .modal {
-            transition: opacity 0.2s ease, transform 0.2s ease;
-            backdrop-filter: blur(2px);
-        }
-        .modal-enter {
-            opacity: 0;
-            transform: scale(0.95);
-        }
-        .modal-enter-active {
-            opacity: 1;
-            transform: scale(1);
-        }
-        .modal-exit {
-            opacity: 1;
-            transform: scale(1);
-        }
-        .modal-exit-active {
-            opacity: 0;
-            transform: scale(0.95);
-        }
-        .alert {
-            animation: slideIn 0.3s ease-out;
-            border-radius: 6px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        @keyframes slideIn {
-            from {
-                transform: translateY(-20px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-        .form-input {
-            border: 1px solid #e2e8f0;
-            padding: 0.5rem 0.75rem;
-            border-radius: 6px;
-            width: 100%;
-            font-size: 0.8125rem;
-            background-color: #fff;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
-        }
-        .form-input:focus {
-            border-color: #c8854a;
-            box-shadow: 0 0 0 3px rgba(200, 133, 74, 0.15);
-            background-color: #faf6f0;
-        }
-        .form-select {
-            border: 1px solid #e2e8f0;
-            padding: 0.5rem 0.75rem;
-            border-radius: 6px;
-            width: 100%;
-            font-size: 0.8125rem;
-            background-color: white;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
-            background-position: right 0.5rem center;
-            background-repeat: no-repeat;
-            background-size: 1.25em 1.25em;
-        }
-        .form-select:focus {
-            border-color: #c8854a;
-            box-shadow: 0 0 0 3px rgba(200, 133, 74, 0.15);
-            background-color: #faf6f0;
-        }
-        .form-button {
-            background-color: #c8854a;
-            color: white;
-            padding: 0.5rem 0.75rem;
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .form-button:hover {
-            background-color: #ba6f3f;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(200, 133, 74, 0.3);
-        }
-        .form-button:disabled {
-            background-color: #e2e8f0;
-            color: #94a3b8;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-        .spinner {
-            width: 0.875rem;
-            height: 0.875rem;
-            border: 2px solid #c8854a;
-            border-top-color: transparent;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-        .tooltip {
-            position: relative;
-        }
-        .tooltip:hover:after {
-            content: attr(data-tooltip);
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #1e293b;
-            color: white;
-            padding: 0.375rem 0.75rem;
-            border-radius: 4px;
-            font-size: 0.6875rem;
-            font-weight: 500;
-            white-space: nowrap;
-            z-index: 10;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-            margin-bottom: 6px;
-        }
-        header {
-            background: linear-gradient(90deg, #ffffff 0%, #f8fafc 100%);
-            box-shadow: 0 1px 8px rgba(0, 0, 0, 0.05);
-        }
-        .nav-item {
-            border-radius: 6px;
-            margin: 0 6px;
-            transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
-        }
-        .nav-item:hover {
-            transform: translateX(3px);
-        }
-        .nav-item.active {
-            background-color: #faf6f0;
-            color: #c8854a;
-            font-weight: 600;
-        }
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 0.2rem 0.6rem;
-            border-radius: 9999px;
-            font-size: 0.6875rem;
-            font-weight: 500;
-            text-transform: uppercase;
-        }
-        .badge-pending {
-            background-color: #fef3c7;
-            color: #d97706;
-        }
-        .badge-reviewed {
-            background-color: #dbeafe;
-            color: #2563eb;
-        }
-        .badge-accepted {
-            background-color: #d1fae5;
-            color: #059669;
-        }
-        .badge-rejected {
-            background-color: #fee2e2;
-            color: #dc2626;
-        }
-        .badge-merged {
-            background-color: #e0e7ff;
-            color: #4f46e5;
-        }
-        .badge-date {
-            background-color: #f5f3ff;
-            color: #7c3aed;
-            border: 1px solid #ddd6fe;
-        }
-        .photo-thumbnail {
-            object-fit: cover;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .photo-thumbnail:hover {
-            transform: scale(1.05);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-        }
-        .carousel-container {
-            position: relative;
-            width: 100%;
-            overflow: hidden;
-        }
-        .carousel-slide {
+            font-family: 'Didot', serif;
+            scroll-behavior: smooth;
+            overflow-x: hidden;
+            font-weight: 400;
             display: flex;
-            transition: transform 0.3s ease-in-out;
+            flex-direction: column;
+            background-color: #f7f7f8;
         }
-        .carousel-image {
-            width: 100%;
-            max-height: 70vh;
-            object-fit: contain;
+        main {
+            flex: 1 0 auto;
+            scroll-margin-top: clamp(4rem, 10vw, 6rem);
+        }
+        footer {
             flex-shrink: 0;
         }
-        .carousel-nav {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background-color: rgba(0, 0, 0, 0.5);
-            color: white;
-            padding: 0.5rem;
-            border-radius: 50%;
+        .container {
+            max-width: 1280px;
+            margin-left: auto;
+            margin-right: auto;
+            padding-left: clamp(1rem, 3vw, 1.5rem);
+            padding-right: clamp(1rem, 3vw, 1.5rem);
+        }
+        .desktop-nav-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.9);
+            z-index: 60;
+            padding: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            min-height: 64px;
+        }
+        .desktop-nav-bar a[href="index.html"] {
+            font-size: clamp(1.5rem, 2.5vw, 3rem);
+            font-weight: 300;
+            color: black;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            max-width: 90vw;
+            z-index: 65;
+        }
+        .desktop-nav-bar a[href="home.html"] {
+            font-size: clamp(1rem, 1.5vw, 1.25rem);
+        }
+        .menu-toggle {
+            display: none;
+            position: relative;
+            width: 24px;
+            height: 24px;
             cursor: pointer;
-            transition: background-color 0.2s ease;
+            z-index: 65;
         }
-        .carousel-nav:hover {
-            background-color: rgba(0, 0, 0, 0.7);
-        }
-        .carousel-prev {
-            left: 1rem;
-        }
-        .carousel-next {
-            right: 1rem;
-        }
-        .carousel-counter {
+        .menu-toggle span {
+            display: block;
             position: absolute;
-            bottom: 1rem;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: rgba(0, 0, 0, 0.5);
-            color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
+            height: 3px;
+            width: 100%;
+            background: #000000;
+            border-radius: 3px;
+            opacity: 1;
+            left: 0;
+            transform: rotate(0deg);
+            transition: all 0.3s ease;
         }
-        .lazy-photo {
-            background-color: #f3f4f6;
-            min-height: 80px;
+        .menu-toggle span:nth-child(1) {
+            top: 4px;
+        }
+        .menu-toggle span:nth-child(2) {
+            top: 10px;
+        }
+        .menu-toggle span:nth-child(3) {
+            top: 16px;
+        }
+        .menu-toggle.active span:nth-child(1) {
+            top: 10px;
+            transform: rotate(45deg);
+        }
+        .menu-toggle.active span:nth-child(2) {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        .menu-toggle.active span:nth-child(3) {
+            top: 10px;
+            transform: rotate(-45deg);
+        }
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            z-index: 55;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .mobile-menu.active {
+            display: flex;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .mobile-menu a {
+            font-size: clamp(1rem, 4vw, 1.5rem);
+            color: black;
+            text-decoration: none;
+            text-transform: uppercase;
+            margin: 1.5rem 0;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.3s ease, transform 0.3s ease, color 0.3s ease;
+        }
+        .mobile-menu.active a {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .mobile-menu.active a:nth-child(1) { transition-delay: 0.2s; }
+        .mobile-menu.active a:nth-child(2) { transition-delay: 0.3s; }
+        .mobile-menu.active a:nth-child(3) { transition-delay: 0.4s; }
+        .mobile-menu.active a:nth-child(4) { transition-delay: 0.5s; }
+        .mobile-menu.active a:nth-child(5) { transition-delay: 0.6s; }
+        .mobile-menu a[href="home.html"] {
+            font-size: clamp(1.25rem, 5vw, 1.75rem);
+        }
+        .mobile-menu a:hover, .mobile-menu a:focus {
+            color: #4b5563;
+            transform: scale(1.05);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        @keyframes bubbleIn {
+            0% { opacity: 0; transform: translateY(10px) scale(0.95); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes avatarBounce {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .chat-bubble {
+            animation: bubbleIn 0.3s ease-out forwards;
+            max-width: 80%;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        .chat-bubble .avatar {
+            animation: avatarBounce 0.3s ease-in-out;
+        }
+        @keyframes typing {
+            0% { transform: translateY(0); opacity: 0.4; }
+            50% { transform: translateY(-2px); opacity: 1; }
+            100% { transform: translateY(0); opacity: 0.4; }
+        }
+        .typing-dot {
+            animation: typing 1s infinite ease-in-out;
+            width: 8px;
+            height: 8px;
+            background: #666;
+            border-radius: 50%;
+        }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        .example-box {
+            background: #f5f5f5;
+            border-left: 3px solid #000;
+            padding: 0.5rem 0.75rem;
+            margin-top: 0.5rem;
+            border-radius: 0 4px 4px 0;
+            font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+        }
+        .option-button {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            padding: 0.375rem 0.75rem;
+            margin: 0.25rem;
+            font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .option-button:hover, .option-button:focus {
+            background: #e0e0e0;
+            outline: 2px solid #000;
+            outline-offset: 2px;
+        }
+        .option-button.selected {
+            background: #000;
+            color: white;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.75);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 50;
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 1.5rem;
+            max-width: 95%;
+            width: 500px;
+            border: 1px solid #000;
+            border-radius: 0.5rem;
+            transform: scale(0.95);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        .modal-content.show {
+            transform: scale(1);
+            opacity: 1;
+        }
+        .modal-content h3 {
+            font-size: clamp(1.125rem, 4vw, 1.25rem);
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: #000;
+            text-shadow: none;
+        }
+        .modal-content p {
+            color: #333;
+            margin-bottom: 1.5rem;
+            font-size: clamp(0.875rem, 2.5vw, 1rem);
+        }
+        .modal-content button {
+            background-color: #000;
+            color: #fff;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        .modal-content button:hover, .modal-content button:focus {
+            background-color: #333;
+            outline: 2px solid #000;
+            outline-offset: 2px;
+        }
+        .modal-content input, .modal-content textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 0.25rem;
+            font-size: clamp(0.875rem, 2.5vw, 1rem);
+            margin-bottom: 1rem;
+        }
+        .image-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .image-preview img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border: 1px solid #ddd;
+            border-radius: 0.5rem;
+            transition: transform 0.2s ease;
+        }
+        .image-preview img:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .image-preview .remove-btn {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #000;
+            color: #fff;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
         }
-        .name-break {
-            word-break: break-word;
-            overflow-wrap: break-word;
+        .image-preview .remove-btn:hover, .image-preview .remove-btn:focus {
+            background: #333;
         }
-        .image-preloader {
-            display: none;
+        .input-area {
+            position: fixed;
+            bottom: env(safe-area-inset-bottom, 0);
+            left: 0;
+            width: 100%;
+            max-width: 100%;
+            background-color: #fff;
+            padding: 0.25rem;
+            box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
-        .date-display {
-            background-color: #f8fafc;
-            border-radius: 4px;
-            padding: 3px 6px;
-            font-size: 0.7rem;
+        .input-container {
+            flex-grow: 1;
+            background: #f7f7f8;
+            border: 1px solid #d1d5db;
+            border-radius: 1.5rem;
+            padding: 0.25rem 0.5rem;
+        }
+        .input-area textarea {
+            background: transparent;
+            border: none;
+            outline: none;
+            resize: none;
+            width: 100%;
+            font-size: clamp(0.875rem, 2.5vw, 1rem);
+            line-height: 1.25;
+            min-height: 0.75rem;
+            max-height: 2rem;
+            padding: 0.25rem 0.5rem;
+        }
+        .input-area .send-btn {
+            background: transparent;
+            color: #000;
+            border: none;
+            padding: 0.25rem;
+            width: 2.5rem;
+            height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s, transform 0.2s;
+            flex-shrink: 0;
+        }
+        .input-area .send-btn i {
+            font-size: 1.125rem;
+        }
+        .input-area .send-btn:hover:not(:disabled), .input-area .send-btn:focus:not(:disabled) {
+            color: #333;
+            transform: scale(1.1);
+        }
+        .input-area .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            background: #FFFFFF;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            max-width: 80%;
+            animation: bubbleIn 0.3s ease-out forwards;
+        }
+        .message-timestamp {
+            font-size: 0.75rem;
+            color: #667781;
+            margin-top: 0.25rem;
+            text-align: right;
+        }
+        .summary-container {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 0.5rem;
+            cursor: pointer;
+            user-select: none;
+        }
+        .summary-field {
+            padding: 0.25rem;
+            border-radius: 0.25rem;
+            transition: background-color 0.2s;
+        }
+        .summary-field:hover {
+            background-color: #e0e0e0;
+        }
+        .summary-photos {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        .summary-photos img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border: 1px solid #ddd;
+            border-radius: 0.25rem;
+        }
+        .message-sound {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .hero-title {
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            font-weight: bold;
+            text-align: center;
+            margin: 1rem 0;
+            color: #000;
+        }
+        .whatsapp-button {
+            background: #25D366;
+            color: white;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            padding: 0.375rem 0.75rem;
+            margin: 0.25rem;
+            font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 4px;
+        }
+        .whatsapp-button:hover, .whatsapp-button:focus {
+            background: #20b955;
+            outline: 2px solid #000;
+            outline-offset: 2px;
+        }
+        @media (min-width: 640px) {
+            .container {
+                padding-left: clamp(1.5rem, 3vw, 2rem);
+                padding-right: clamp(1.5rem, 3vw, 2rem);
+            }
+            .menu-toggle {
+                display: none !important;
+            }
+            .mobile-menu {
+                display: none !important;
+            }
+            .chat-container-wrapper {
+                padding: 0 1rem clamp(2rem, 5vw, 4rem) 1rem;
+                max-width: 768px;
+                margin-left: auto;
+                margin-right: auto;
+                border-radius: 0.5rem;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            }
+            .chat-container {
+                padding: 0.75rem;
+                max-height: calc(100vh - 64px - 74px);
+            }
+            .input-area {
+                max-width: 768px;
+                left: 50%;
+                transform: translateX(-50%);
+                padding: 0.5rem 1rem;
+            }
+        }
+        @media (min-width: 1024px) {
+            .container {
+                max-width: 1280px;
+            }
+            .chat-container-wrapper {
+                max-width: 896px;
+            }
+            .input-area {
+                max-width: 896px;
+            }
+        }
+        @media (max-width: 639px) {
+            .desktop-nav-bar .desktop-nav {
+                display: none !important;
+            }
+            .desktop-nav-bar {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            .menu-toggle {
+                display: flex;
+                align-items: center;
+            }
+            .desktop-nav-bar a[href="index.html"] {
+                position: relative;
+                z-index: 65;
+            }
+            .chat-container-wrapper {
+                padding: 0 0.25rem clamp(1.5rem, 5vw, 3rem) 0.25rem;
+                margin: 0;
+                border-radius: 0;
+                box-shadow: none;
+            }
+            .chat-container {
+                padding: 0.25rem;
+            }
+            .modal-content {
+                width: 95%;
+                padding: 1rem;
+            }
         }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800">
-    <!-- Sidebar -->
-    <div class="sidebar fixed top-0 left-0 h-screen bg-white shadow-md z-50 w-56 flex flex-col">
-        <div class="p-3 flex items-center justify-between border-b border-gray-200">
-            <div class="flex items-center">
-                <div class="w-8 h-8 rounded-full bg-primary-500 flex items-center justify-center text-white font-bold text-sm">
-                    B
-                </div>
-                <span class="logo-text ml-2 text-lg font-semibold">Beige Admin</span>
+<body class="min-h-screen flex flex-col">
+ <nav class="desktop-nav-bar fixed top-0 left-0 right-0 bg-white bg-opacity-90 shadow-sm z-50 flex items-center">
+        <div class="container flex justify-between items-center">
+            <a href="index.html" class="font-bold tracking-wider" aria-label="Beige Home">BEIGE</a>
+            <div class="desktop-nav flex space-x-8">
+                <a href="home.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase" aria-label="Home">HOME</a>
+                <a href="about.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase" aria-label="About Us">ABOUT US</a>
+                <a href="models.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase" aria-label="Models">MODELS</a>
+                <a href="booking.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase" aria-label="Book a Model">BOOK A MODEL</a>
+                <a href="become-model.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase" aria-label="Become a Model">BECOME A MODEL</a>
+                <a href="contact.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase" aria-label="Contact">CONTACT</a>
+                <a href="discount.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase" aria-label="10% Discount">EXCLUSIVE OFFERS</a>
             </div>
-            <button id="sidebar-toggle" class="text-gray-500 hover:text-gray-700" aria-label="Toggle Sidebar">
-                <i class="fas fa-bars text-sm"></i>
-            </button>
-        </div>
-        <div class="flex-1 overflow-y-auto py-3">
-            <nav>
-                <div class="px-3 mb-3">
-                    <p class="sidebar-text text-xs font-semibold text-gray-500 uppercase tracking-wider">Dashboard</p>
-                </div>
-                <ul>
-                    <li>
-                        <a href="admin.html" data-section="overview-section" class="nav-item flex items-center px-3 py-2 text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-colors">
-                            <i class="fas fa-tachometer-alt w-5 text-center"></i>
-                            <span class="sidebar-text ml-2 text-sm">Overview</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="manage-models.html" data-section="models-section" class="nav-item flex items-center px-3 py-2 text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-colors">
-                            <i class="fas fa-users w-5 text-center"></i>
-                            <span class="sidebar-text ml-2 text-sm">Models</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="manage-bookings.html" data-section="bookings-section" class="nav-item flex items-center px-3 py-2 text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-colors">
-                            <i class="fas fa-calendar-check w-5 text-center"></i>
-                            <span class="sidebar-text ml-2 text-sm">Bookings</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="manage-applications.html" data-section="applications-section" class="nav-item flex items-center px-3 py-2 text-gray-700 bg-primary-50 text-primary-600 active">
-                            <i class="fas fa-envelope w-5 text-center"></i>
-                            <span class="sidebar-text ml-2 text-sm">Applications</span>
-                        </a>
-                    </li>
-                </ul>
-                <div class="px-3 mt-4 mb-3">
-                    <p class="sidebar-text text-xs font-semibold text-gray-500 uppercase tracking-wider">Content</p>
-                </div>
-                <ul>
-                     <li>
-                        <a href="manage-about-companies.html" data-section="team-section" class="nav-item flex items-center px-3 py-2 text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-colors">
-                            <i class="fas fa-user-tie w-5 text-center"></i>
-                            <span class="sidebar-text ml-2 text-sm">About & Companies</span>
-                        </a>
-                    </li>
-                  
-                    <li>
-                        <a href="manage-team-members.html" data-section="team-section" class="nav-item flex items-center px-3 py-2 text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-colors">
-                            <i class="fas fa-user-tie w-5 text-center"></i>
-                            <span class="sidebar-text ml-2 text-sm">Team</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="manage-newsletter-subscribers.html" data-section="newsletter-section" class="nav-item flex items-center px-3 py-2 text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-colors">
-                            <i class="fas fa-newspaper w-5 text-center"></i>
-                            <span class="sidebar-text ml-2 text-sm">Newsletter</span>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-        </div>
-        <div class="p-3 border-t border-gray-200 flex items-center">
-            <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
-                <i class="fas fa-user text-gray-500 text-sm"></i>
+            <div class="menu-toggle" onclick="toggleMenu()" aria-label="Toggle Menu">
+                <span></span>
+                <span></span>
+                <span></span>
             </div>
-            <div class="sidebar-text ml-2">
-                <p class="text-sm font-medium">Admin User</p>
-                <p class="text-xs text-gray-500">Super Admin</p>
-            </div>
-            <button id="logout-btn" class="sidebar-text ml-auto text-gray-500 hover:text-gray-700" aria-label="Logout">
-                <i class="fas fa-sign-out-alt text-sm"></i>
-            </button>
         </div>
-    </div>
+        <div class="mobile-menu" role="dialog" aria-label="Mobile Navigation Menu">
+            <a href="home.html" aria-label="Home">HOME</a>
+            <a href="about.html" aria-label="About Us">ABOUT US</a>
+            <a href="models.html" aria-label="Models">MODELS</a>
+            <a href="booking.html" aria-label="Book a Model">BOOK A MODEL</a>
+            <a href="become-model.html" aria-label="Become a Model">BECOME A MODEL</a>
+            <a href="contact.html" aria-label="Contact">CONTACT</a>
+           <a href="discount.html" aria-label="10% Discount" 
+   style="background-color: black; color: white; padding: 8px 16px; 
+          text-decoration: none; display: inline-block; 
+          border-radius: 4px; font-weight: bold;">
+   EXCLUSIVE OFFERS
+</a>
 
-    <!-- Main Content -->
-    <div class="content-area ml-56 min-h-screen">
-        <!-- Top Navigation -->
-        <header class="bg-white shadow-sm py-3 px-4 flex items-center justify-between sticky top-0 z-40">
-            <div class="flex items-center">
-                <h1 class="text-lg font-bold text-gray-900" id="dashboard-title">Manage Applications</h1>
-            </div>
-            <div class="flex items-center space-x-3">
-                <button class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors" aria-label="Notifications">
-                    <i class="fas fa-bell text-sm"></i>
-                </button>
-                <button class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors" aria-label="Messages">
-                    <i class="fas fa-envelope text-sm"></i>
-                </button>
-                <div class="relative">
-                    <button id="user-menu-button" class="flex items-center space-x-1 focus:outline-none" aria-label="User Menu">
-                        <div class="w-6 h-6 rounded-full bg-primary-500 flex items-center justify-center text-white font-medium text-xs">
-                            A
-                        </div>
-                        <span class="hidden md:inline-block text-sm font-medium">Admin User</span>
-                        <i class="fas fa-chevron-down text-xs"></i>
-                    </button>
-                    <div id="user-menu" class="hidden absolute right-0 mt-1 w-40 bg-white rounded-lg shadow-lg py-1 z-50">
-                        <a href="#" class="block px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-colors">Your Profile</a>
-                        <a href="#" class="block px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-colors">Settings</a>
-                        <a href="#" id="menu-logout" class="block px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-colors">Sign out</a>
+        </div>
+    </nav>
+    <!-- Main content -->
+    <main class="flex-1 flex flex-col">
+        <!-- Chat container -->
+        <div class="chat-container-wrapper w-full sm:mx-auto sm:max-w-3xl flex-1 flex flex-col">
+            <div id="chat-container" class="chat-container flex-1 overflow-y-auto custom-scrollbar">
+                <!-- Welcome message -->
+                <div class="chat-bubble flex">
+                    <div class="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 flex items-center justify-center mr-2 avatar">
+                        <i class="fas fa-robot text-gray-600 text-sm" aria-label=" Assistant, AI Assistant"></i>
                     </div>
-                </div>
-            </div>
-        </header>
-
-        <!-- Main Dashboard Content -->
-        <main class="p-4">
-            <div id="dashboard">
-                <!-- Applications Section -->
-                <div id="applications-section">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-base font-semibold text-gray-900">Applications</h2>
-                        <div class="flex items-center space-x-2">
-                            <div class="relative">
-                                <select id="merge-option" class="form-select text-xs" aria-label="Merge Option">
-                                    <option value="email">Merge by Email</option>
-                                    <option value="name">Merge by Name</option>
-                                    <option value="none">Don't Merge</option>
-                                </select>
-                            </div>
-                            <input type="text" id="search-applications" class="form-input text-xs" placeholder="Search applications..." aria-label="Search applications">
-                            <button class="form-button text-xs" onclick="loadApplications()" aria-label="Refresh Applications">
-                                <i class="fas fa-sync-alt mr-1"></i> Refresh
+                    <div class="bg-white p-2 rounded-lg border border-gray-200">
+                        <p class="text-gray-800 text-sm font-semibold"> Assistant</p>
+                        <p class="text-gray-800 text-sm">Hello! I'm, your Model Application Assistant.</p>
+                        <p class="text-gray-800 text-sm mt-1">I'll guide you through the application process step by step with precision and professionalism.</p>
+                        <div class="mt-2 flex flex-wrap gap-2">
+                            <button onclick="startApplication()" class="option-button px-2 py-1 bg-black hover:bg-gray-800 rounded-full text-xs text-white transition">
+                                <i class="fas fa-play mr-1"></i> Start Application
+                            </button>
+                            <button onclick="addMessageToChat('user', 'I have a question about the application')" class="option-button px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-xs text-gray-800 transition">
+                                <i class="fas fa-question mr-1"></i> Ask a Question
                             </button>
                         </div>
+                        <div class="message-timestamp" id="welcome-timestamp"></div>
                     </div>
-                    <div id="application-loading" class="text-center text-xs py-3 hidden">
-                        <span class="spinner"></span> Loading...
-                    </div>
-                    <p id="application-error" class="text-red-500 text-xs py-2 hidden"></p>
-                    <div id="application-stats" class="mb-4 flex space-x-2">
-                        <div class="bg-white rounded-lg shadow-sm p-3 text-xs">
-                            <span class="font-medium">Total Applications:</span> <span id="total-apps">0</span>
+                </div>
+                <!-- Typing indicator -->
+                <div id="typing-indicator" class="typing-indicator hidden">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 flex items-center justify-center mr-2 avatar">
+                            <i class="fas fa-robot text-gray-600 text-sm" aria-label=" Assistant, AI Assistant"></i>
                         </div>
-                        <div class="bg-white rounded-lg shadow-sm p-3 text-xs">
-                            <span class="font-medium">Merged Groups:</span> <span id="merged-groups">0</span>
+                        <div class="flex flex-col">
+                            <p class="text-gray-800 text-sm font-semibold"> Assistant</p>
+                            <div class="flex space-x-1">
+                                <div class="typing-dot"></div>
+                                <div class="typing-dot"></div>
+                                <div class="typing-dot"></div>
+                            </div>
                         </div>
-                        <div class="bg-white rounded-lg shadow-sm p-3 text-xs">
-                            <span class="font-medium">Duplicates Found:</span> <span id="duplicates-count">0</span>
-                        </div>
-                        <div class="bg-white rounded-lg shadow-sm p-3 text-xs">
-                            <span class="font-medium">Recent (7 days):</span> <span id="recent-apps">0</span>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="application-grid"></div>
-                    <div id="pagination-controls" class="mt-6 flex justify-center items-center space-x-2 hidden">
-                        <button id="prev-page" class="form-button text-xs" disabled>
-                            <i class="fas fa-chevron-left mr-1"></i> Previous
-                        </button>
-                        <span class="text-xs text-gray-600" id="page-info">Page 1 of 1</span>
-                        <button id="next-page" class="form-button text-xs" disabled>
-                            Next <i class="fas fa-chevron-right ml-1"></i>
-                        </button>
                     </div>
                 </div>
             </div>
-        </main>
-    </div>
 
-    <!-- Success Alert -->
-    <div id="success-alert" class="fixed top-3 right-3 z-50 hidden">
-        <div class="bg-green-50 border-l-4 border-green-500 p-3">
-            <div class="flex">
-                <div class="flex-shrink-0">
-                    <i class="fas fa-check-circle text-green-500 text-sm"></i>
+            <!-- Input area -->
+            <div class="input-area">
+                <div class="input-container">
+                    <textarea
+                        id="user-input"
+                        rows="1"
+                        placeholder="Message Assistant..."
+                        class="w-full"
+                    ></textarea>
                 </div>
-                <div class="ml-2">
-                    <p id="success-message" class="text-xs font-medium text-green-700">Action completed successfully!</p>
-                </div>
-                <div class="ml-auto pl-2">
-                    <button id="close-success-alert" class="text-green-500 hover:text-green-700" aria-label="Close Success Alert">
-                        <i class="fas fa-times text-sm"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Error Alert -->
-    <div id="error-alert" class="fixed top-3 right-3 z-50 hidden">
-        <div class="bg-red-50 border-l-4 border-red-500 p-3">
-            <div class="flex">
-                <div class="flex-shrink-0">
-                    <i class="fas fa-exclamation-circle text-red-500 text-sm"></i>
-                </div>
-                <div class="ml-2">
-                    <p id="error-message" class="text-xs font-medium text-red-700">An error occurred.</p>
-                </div>
-                <div class="ml-auto pl-2">
-                    <button id="close-error-alert" class="text-red-500 hover:text-red-700" aria-label="Close Error Alert">
-                        <i class="fas fa-times text-sm"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Confirmation Modal -->
-    <div id="confirmation-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-sm">
-            <div class="p-4">
-                <div class="flex items-center justify-center w-10 h-10 mx-auto bg-red-100 rounded-full">
-                    <i class="fas fa-exclamation text-red-600 text-base"></i>
-                </div>
-                <div class="mt-2 text-center sm:mt-3">
-                    <h3 id="confirmation-title" class="text-base font-semibold text-gray-900">Confirm Action</h3>
-                    <div class="mt-1">
-                        <p id="confirmation-message" class="text-xs text-gray-500">Are you sure you want to perform this action?</p>
-                    </div>
-                </div>
-            </div>
-            <div class="px-4 py-3 sm:flex sm:flex-row-reverse bg-gray-50 rounded-b-lg">
-                <button id="confirm-action" type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-3 py-1.5 bg-red-600 text-xs font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-2 sm:w-auto">
-                    <span class="confirm-text">Confirm</span>
-                    <span class="spinner hidden ml-2"></span>
-                </button>
-                <button id="cancel-action" type="button" class="mt-2 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-3 py-1.5 bg-white text-xs font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:mt-0 sm:ml-2 sm:w-auto">Cancel</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Photo Modal -->
-    <div id="photo-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full">
-            <div class="p-4 flex justify-between items-center border-b border-gray-200">
-                <h3 class="text-base font-semibold text-gray-900">Application Photos</h3>
-                <button id="close-photo-modal" class="text-gray-500 hover:text-gray-700" aria-label="Close Photo Modal">
-                    <i class="fas fa-times text-sm"></i>
+                <button id="send-btn" class="send-btn" disabled>
+                    <i class="fas fa-paper-plane text-lg"></i>
                 </button>
             </div>
-            <div class="p-4">
-                <div class="carousel-container">
-                    <div id="carousel-slide" class="carousel-slide"></div>
-                    <button id="carousel-prev" class="carousel-nav carousel-prev hidden" aria-label="Previous Photo">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                    <button id="carousel-next" class="carousel-nav carousel-next hidden" aria-label="Next Photo">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                    <div id="carousel-counter" class="carousel-counter"></div>
-                </div>
+        </div>
+    </main>
+
+    <!-- Photo Upload Modal -->
+    <div id="photo-upload-modal" class="modal-overlay hidden" role="dialog" aria-labelledby="photo-modal-title" aria-describedby="photo-modal-desc">
+        <div class="modal-content">
+            <h3 id="photo-modal-title">Upload Your Photos</h3>
+            <p id="photo-modal-desc">You must upload one full-body shot and one portrait (without makeup or filters, no merged or profile shots). You may also upload up to four additional photos (max 6 total). Accepted formats: JPG, PNG. Max size: 5MB per image.</p>
+            <div class="image-preview" id="image-preview"></div>
+            <input type="file" id="photo-input" accept="image/jpeg,image/png" multiple class="mb-4">
+            <div class="flex space-x-2">
+                <button onclick="submitPhotos()" class="flex-1">Submit Photos</button>
+                <button onclick="closePhotoModal()" class="flex-1 bg-gray-500 hover:bg-gray-600">Cancel</button>
             </div>
         </div>
     </div>
 
-    <!-- Image Preloader (hidden) -->
-    <div class="image-preloader">
-        <img id="preload-image" style="display: none;">
+    <!-- Edit Field Modal -->
+    <div id="edit-field-modal" class="modal-overlay hidden" role="dialog" aria-labelledby="edit-modal-title" aria-describedby="edit-modal-desc">
+        <div class="modal-content">
+            <h3 id="edit-modal-title">Edit Field</h3>
+            <p id="edit-modal-desc">Edit the selected field below.</p>
+            <textarea id="edit-field-input" rows="1" class="w-full"></textarea>
+            <div class="flex space-x-2">
+                <button onclick="saveFieldEdit()" class="flex-1">Save</button>
+                <button onclick="closeEditModal()" class="flex-1 bg-gray-500 hover:bg-gray-600">Cancel</button>
+            </div>
+        </div>
     </div>
+
+    <!-- Clear Chat Modal -->
+    <div id="clear-chat-modal" class="modal-overlay hidden" role="dialog" aria-labelledby="clear-chat-title" aria-describedby="clear-chat-desc">
+        <div class="modal-content">
+            <h3 id="clear-chat-title">Clear Chat History</h3>
+            <p id="clear-chat-desc">Do you want to clear the chat history and start a new application?</p>
+            <div class="flex space-x-2">
+                <button onclick="clearChatHistory()" class="flex-1">Yes</button>
+                <button onclick="keepChatHistory()" class="flex-1 bg-gray-500 hover:bg-gray-600">No</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sound elements -->
+    <audio id="message-sound" class="message-sound" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-positive-interface-beep-221.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="send-sound" class="message-sound" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-modern-click-box-check-1120.mp3" type="audio/mpeg">
+    </audio>
 
    <script>
-    // State management
-    let applicationsData = [];
-    let groupedApplicationsData = {};
-    let currentPage = 1;
-    let itemsPerPage = 20;
-    let totalPages = 1;
-    let touchStartHandler = null;
-    let touchEndHandler = null;
-    let searchTimeout = null;
-    let photoModalObserver = null;
-    let imageCache = new Map();
-    
-    // Image loading configuration
-    const IMAGE_CONFIG = {
-        MAX_RETRIES: 2,
-        RETRY_DELAY: 1000,
-        LOAD_TIMEOUT: 10000,
-        THUMBNAIL_SIZE: '200x200',
-        PLACEHOLDER_COLOR: '#f3f4f6',
-        PLACEHOLDER_TEXT: 'Loading...'
+    const config = { 
+        apiBaseUrl: window.location.hostname === 'localhost' 
+            ? 'http://localhost:3000/api' 
+            : '/api' 
     };
-    
-    // Store loading promises to prevent duplicate loads
-    const imageLoadPromises = new Map();
-    
-    function decodeToken(token) {
-        if (!token) {
-            console.error('No token provided for decoding');
-            return false;
-        }
-        try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            const exp = payload.exp * 1000;
-            const now = Date.now();
-            return exp > now;
-        } catch (error) {
-            console.error('Error decoding token:', error);
-            return false;
+
+    function escapeHtml(str) {
+        if (typeof str !== 'string') return str || '';
+        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function toggleMenu() {
+        const mobileMenu = document.querySelector('.mobile-menu');
+        const menuToggle = document.querySelector('.menu-toggle');
+        mobileMenu.classList.toggle('active');
+        menuToggle.classList.toggle('active');
+        mobileMenu.setAttribute('aria-hidden', !mobileMenu.classList.contains('active'));
+    }
+
+    function adjustSectionPadding() {
+        const main = document.querySelector('main');
+        const navBar = document.querySelector('.desktop-nav-bar');
+        const inputArea = document.querySelector('.input-area');
+        const chatContainer = document.getElementById('chat-container');
+        if (main && navBar && inputArea && chatContainer) {
+            const navHeight = navBar.offsetHeight;
+            const inputHeight = inputArea.offsetHeight;
+            main.style.paddingTop = `${navHeight}px`;
+            chatContainer.style.paddingBottom = `${inputHeight + 16}px`;
+            chatContainer.style.maxHeight = `calc(100vh - ${navHeight}px - ${inputHeight + 16}px)`;
         }
     }
 
-    const token = localStorage.getItem('token');
-    const dashboard = document.getElementById('dashboard');
-    const applicationError = document.getElementById('application-error');
-    const applicationLoading = document.getElementById('application-loading');
-    const sidebar = document.querySelector('.sidebar');
-    const contentArea = document.querySelector('.content-area');
-    const userMenuButton = document.getElementById('user-menu-button');
-    const userMenu = document.getElementById('user-menu');
-    const mergeOption = document.getElementById('merge-option');
-    const prevPageBtn = document.getElementById('prev-page');
-    const nextPageBtn = document.getElementById('next-page');
-    const pageInfo = document.getElementById('page-info');
-    const paginationControls = document.getElementById('pagination-controls');
+    document.addEventListener('DOMContentLoaded', function() {
+        adjustSectionPadding();
+        window.addEventListener('resize', adjustSectionPadding);
 
-    // Initial token check
-    if (!token || !decodeToken(token)) {
-        console.log('No valid token found, redirecting to login');
-        window.location.href = 'admin.html';
-    } else {
-        console.log('Token is valid');
-        dashboard.classList.remove('hidden');
-        loadApplications();
-    }
+        // Set welcome message timestamp
+        document.getElementById('welcome-timestamp').textContent = getCurrentTime();
 
-    // Sidebar toggle
-    document.getElementById('sidebar-toggle').addEventListener('click', () => {
-        sidebar.classList.toggle('sidebar-collapsed');
-        contentArea.classList.toggle('content-expanded');
-    });
+        let applicationData = JSON.parse(localStorage.getItem('applicationData')) || {
+            firstName: '',
+            lastName: '',
+            bust: '',
+            waist: '',
+            hips: '',
+            justCo: '',
+            height: '',
+            instagram: '',
+            tiktok: '',
+            location: '',
+            dob: '',
+            startDate: '',
+            email: '',
+            altContact: ''
+        };
+        let currentQuestion = parseInt(localStorage.getItem('currentQuestion')) || 0;
+        let isApplicationActive = JSON.parse(localStorage.getItem('isApplicationActive')) || false;
+        let selectedPhotos = JSON.parse(localStorage.getItem('selectedPhotos')) || [];
+        let messages = JSON.parse(localStorage.getItem('chatMessages')) || [];
+        let currentEditField = null;
+        let holdTimer = null;
+        let isSubmitting = false;
 
-    // User menu toggle
-    userMenuButton.addEventListener('click', () => {
-        userMenu.classList.toggle('hidden');
-    });
+        const validators = {
+            firstName: (value) => !value ? 'First name is required' : null,
+            lastName: (value) => !value ? 'Last name is required' : null,
+            bust: (value) => !value ? 'Bust measurement is required' : null,
+            waist: (value) => !value ? 'Waist measurement is required' : null,
+            hips: (value) => !value ? 'Hip measurement is required' : null,
+            justCo: (value) => !value ? 'Agency representation status is required' : null,
+            height: (value) => !value ? 'Height is required' : null,
+            instagram: () => null,
+            tiktok: () => null,
+            location: (value) => !value ? 'Location is required' : null,
+            dob: (value) => !value ? 'Date of birth is required' : null,
+            startDate: (value) => !value ? 'Start date is required' : null,
+            email: (value) => {
+                if (!value) return 'Email is required';
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Please enter a valid email address';
+                return null;
+            },
+            altContact: (value) => !value ? 'Alternative contact method is required' : null
+        };
 
-    // Logout handlers
-    document.getElementById('logout-btn').addEventListener('click', () => {
-        console.log('Logging out, clearing token');
-        localStorage.removeItem('token');
-        window.location.href = 'admin.html';
-        userMenu.classList.add('hidden');
-    });
+        const applicationQuestions = [
+            { question: "Let's begin with your first name. Please provide your first name.", field: 'firstName', example: "Example: Jane" },
+            { question: "Thank you! Now, please provide your last name.", field: 'lastName', example: "Example: Smith" },
+            { question: "Please provide your bust measurement.", field: 'bust', example: "Example: 86" },
+            { question: "Please provide your waist measurement.", field: 'waist', example: "Example: 61" },
+            { question: "Please provide your hip measurement.", field: 'hips', example: "Example: 89" },
+            { question: "Please provide your agency representation status (current or past agencies, or 'Independent' if unrepresented).", field: 'justCo', example: "Example: ------ Model Management or Independent" },
+            { question: "Please provide your height.", field: 'height', example: "Example: 5 feet 9 inches" },
+            { question: "You will need to submit two photos: one full-body shot and one portrait. Please click the button below to upload your photos or ask any questions about the photo requirements.", field: 'photos', example: "Example response: I understand" },
+            { question: "If you have an Instagram profile, please share your username or link.", field: 'instagram', example: "Example: yourusername or leave blank" },
+            { question: "If you have a TikTok account, please provide your username or link.", field: 'tiktok', example: "Example: yourusername or leave blank" },
+            { question: "Please specify your current location.", field: 'location', example: "Example: Los Angeles, USA" },
+            { question: "Please provide your date of birth.", field: 'dob', example: "Example: May 15, 1995" },
+            { question: "When would you like to begin modeling?", field: 'startDate', example: "Example: January 2026" },
+            { question: "Please provide an email address we can use to contact you.", field: 'email', example: "Example: yourname@example.com" },
+            { question: "Please provide an alternative contact method.", field: 'altContact', example: "Example: +1239077178197 or alternate@example.com" }
+        ];
 
-    document.getElementById('menu-logout').addEventListener('click', (e) => {
-        e.preventDefault();
-        console.log('Logging out via menu, clearing token');
-        localStorage.removeItem('token');
-        window.location.href = 'admin.html';
-        userMenu.classList.add('hidden');
-    });
+        const chatContainer = document.getElementById('chat-container');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const typingIndicator = document.getElementById('typing-indicator');
+        const messageSound = document.getElementById('message-sound');
+        const sendSound = document.getElementById('send-sound');
+        const photoInput = document.getElementById('photo-input');
+        const imagePreview = document.getElementById('image-preview');
+        const photoModal = document.getElementById('photo-upload-modal');
+        const editFieldModal = document.getElementById('edit-field-modal');
+        const editFieldInput = document.getElementById('edit-field-input');
+        const clearChatModal = document.getElementById('clear-chat-modal');
 
-    // Close alerts
-    document.getElementById('close-success-alert').addEventListener('click', () => {
-        document.getElementById('success-alert').classList.add('hidden');
-    });
-
-    document.getElementById('close-error-alert').addEventListener('click', () => {
-        document.getElementById('error-alert').classList.add('hidden');
-    });
-
-    // Photo modal close
-    document.getElementById('close-photo-modal').addEventListener('click', () => {
-        closePhotoModal();
-    });
-
-    // Close photo modal on outside click
-    document.getElementById('photo-modal').addEventListener('click', (e) => {
-        if (e.target === document.getElementById('photo-modal')) {
-            closePhotoModal();
-        }
-    });
-
-    // Close photo modal on Escape key
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && !document.getElementById('photo-modal').classList.contains('hidden')) {
-            closePhotoModal();
-        }
-    });
-
-    // Pagination controls
-    prevPageBtn.addEventListener('click', () => {
-        if (currentPage > 1) {
-            currentPage--;
-            renderCurrentPage();
-        }
-    });
-
-    nextPageBtn.addEventListener('click', () => {
-        if (currentPage < totalPages) {
-            currentPage++;
-            renderCurrentPage();
-        }
-    });
-
-    // Search with debouncing
-    document.getElementById('search-applications').addEventListener('input', (e) => {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => {
-            filterApplications(e.target.value);
-        }, 300);
-    });
-
-    // Merge option change
-    mergeOption.addEventListener('change', () => {
-        currentPage = 1;
-        processApplications();
-    });
-
-    // Function to format date - UPDATED FORMAT
-    function formatDate(dateString) {
-        if (!dateString) return 'N/A';
-        
-        try {
-            const date = new Date(dateString);
-            if (isNaN(date.getTime())) return 'N/A';
-            
-            const now = new Date();
-            const diffTime = Math.abs(now - date);
-            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-            
-            // Format for recent dates (today, yesterday)
-            if (diffDays === 0) {
-                // Show time for today
-                const hours = date.getHours();
-                const minutes = String(date.getMinutes()).padStart(2, '0');
-                const ampm = hours >= 12 ? 'PM' : 'AM';
-                const formattedHours = hours % 12 || 12;
-                return `Today at ${formattedHours}:${minutes} ${ampm}`;
-            } else if (diffDays === 1) {
-                // Show time for yesterday
-                const hours = date.getHours();
-                const minutes = String(date.getMinutes()).padStart(2, '0');
-                const ampm = hours >= 12 ? 'PM' : 'AM';
-                const formattedHours = hours % 12 || 12;
-                return `Yesterday at ${formattedHours}:${minutes} ${ampm}`;
-            } else if (diffDays < 7) {
-                // Show day name and time for this week
-                const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-                const dayName = dayNames[date.getDay()];
-                const hours = date.getHours();
-                const minutes = String(date.getMinutes()).padStart(2, '0');
-                const ampm = hours >= 12 ? 'PM' : 'AM';
-                const formattedHours = hours % 12 || 12;
-                return `${dayName} at ${formattedHours}:${minutes} ${ampm}`;
-            }
-            
-            // Format as full date with time for older dates
-            const day = date.getDate();
-            const month = date.toLocaleDateString('en-US', { month: 'long' });
-            const year = date.getFullYear();
-            const hours = date.getHours();
-            const minutes = String(date.getMinutes()).padStart(2, '0');
-            const ampm = hours >= 12 ? 'PM' : 'AM';
-            const formattedHours = hours % 12 || 12;
-            
-            // Return format: "March 15, 2024 at 2:30 PM"
-            return `${month} ${day}, ${year} at ${formattedHours}:${minutes} ${ampm}`;
-        } catch (error) {
-            console.error('Error formatting date:', error);
-            return 'N/A';
-        }
-    }
-
-    // Function to get time ago - UPDATED FORMAT
-    function getTimeAgo(dateString) {
-        if (!dateString) return '';
-        
-        try {
-            const date = new Date(dateString);
-            if (isNaN(date.getTime())) return '';
-            
-            const now = new Date();
-            const diffTime = Math.abs(now - date);
-            const diffMinutes = Math.floor(diffTime / (1000 * 60));
-            const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
-            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-            const diffWeeks = Math.floor(diffDays / 7);
-            const diffMonths = Math.floor(diffDays / 30);
-            const diffYears = Math.floor(diffDays / 365);
-            
-            if (diffMinutes < 60) {
-                return diffMinutes === 1 ? '1 minute ago' : `${diffMinutes} minutes ago`;
-            } else if (diffHours < 24) {
-                return diffHours === 1 ? '1 hour ago' : `${diffHours} hours ago`;
-            } else if (diffDays < 7) {
-                return diffDays === 1 ? '1 day ago' : `${diffDays} days ago`;
-            } else if (diffWeeks < 4) {
-                return diffWeeks === 1 ? '1 week ago' : `${diffWeeks} weeks ago`;
-            } else if (diffMonths < 12) {
-                return diffMonths === 1 ? '1 month ago' : `${diffMonths} months ago`;
-            } else {
-                return diffYears === 1 ? '1 year ago' : `${diffYears} years ago`;
-            }
-        } catch (error) {
-            return '';
-        }
-    }
-
-    // Function to get simple date for display (without time)
-    function getSimpleDate(dateString) {
-        if (!dateString) return 'N/A';
-        
-        try {
-            const date = new Date(dateString);
-            if (isNaN(date.getTime())) return 'N/A';
-            
-            const day = String(date.getDate()).padStart(2, '0');
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const year = date.getFullYear();
-            
-            return `${day}/${month}/${year}`;
-        } catch (error) {
-            return 'N/A';
-        }
-    }
-
-    // Function to load image with retry logic and timeout
-    function loadImageWithRetry(url, retries = IMAGE_CONFIG.MAX_RETRIES, timeout = IMAGE_CONFIG.LOAD_TIMEOUT) {
-        // Return cached promise if exists
-        if (imageLoadPromises.has(url)) {
-            return imageLoadPromises.get(url);
-        }
-        
-        const loadPromise = new Promise((resolve, reject) => {
-            const img = new Image();
-            let retryCount = 0;
-            
-            // Set timeout
-            const timeoutId = setTimeout(() => {
-                if (retryCount < retries) {
-                    retryLoad();
-                } else {
-                    reject(new Error('Image load timeout'));
-                    imageLoadPromises.delete(url);
-                }
-            }, timeout);
-            
-            const retryLoad = () => {
-                retryCount++;
-                clearTimeout(timeoutId);
-                
-                // Add cache busting query parameter for retry
-                const cacheBustUrl = retryCount > 0 ? 
-                    `${url}${url.includes('?') ? '&' : '?'}_cb=${Date.now()}` : 
-                    url;
-                
-                img.src = cacheBustUrl;
-                
-                // Set new timeout
-                setTimeout(() => {
-                    if (!img.complete && retryCount < retries) {
-                        retryLoad();
-                    }
-                }, timeout);
-            };
-            
-            img.onload = () => {
-                clearTimeout(timeoutId);
-                imageCache.set(url, img);
-                resolve(img);
-                imageLoadPromises.delete(url);
-            };
-            
-            img.onerror = () => {
-                if (retryCount < retries) {
-                    console.log(`Retrying image load (${retryCount + 1}/${retries}): ${url}`);
-                    setTimeout(retryLoad, IMAGE_CONFIG.RETRY_DELAY);
-                } else {
-                    clearTimeout(timeoutId);
-                    reject(new Error(`Failed to load image after ${retries} retries`));
-                    imageLoadPromises.delete(url);
-                }
-            };
-            
-            // Start initial load
-            retryLoad();
+        // Add event listeners for mobile menu
+        document.querySelectorAll('.mobile-menu a').forEach(link => {
+            link.addEventListener('click', toggleMenu);
         });
-        
-        imageLoadPromises.set(url, loadPromise);
-        return loadPromise;
-    }
-    
-    // Function to create image placeholder
-    function createImagePlaceholder(index, total) {
-        const placeholder = document.createElement('div');
-        placeholder.className = 'image-placeholder bg-gray-100 rounded relative overflow-hidden';
-        placeholder.style.minHeight = '80px';
-        placeholder.innerHTML = `
-            <div class="absolute inset-0 flex flex-col items-center justify-center">
-                <div class="spinner-small w-6 h-6 border-2 border-primary-300 border-t-primary-600 rounded-full animate-spin mb-2"></div>
-                <span class="text-xs text-gray-500">Loading ${index + 1}/${total}</span>
-            </div>
-        `;
-        return placeholder;
-    }
-    
-    // Function to create image error fallback
-    function createImageErrorFallback() {
-        const fallback = document.createElement('div');
-        fallback.className = 'image-fallback bg-gray-100 rounded flex items-center justify-center';
-        fallback.style.minHeight = '80px';
-        fallback.innerHTML = `
-            <div class="text-center">
-                <i class="fas fa-image text-gray-300 text-xl mb-1"></i>
-                <p class="text-xs text-gray-400">Image failed to load</p>
-            </div>
-        `;
-        return fallback;
-    }
-    
-    // Function to lazy load image into container
-    function lazyLoadImage(container, imageUrl, index, totalImages) {
-        // Create and insert placeholder
-        const placeholder = createImagePlaceholder(index, totalImages);
-        container.innerHTML = '';
-        container.appendChild(placeholder);
-        
-        // Load image with retry
-        loadImageWithRetry(imageUrl)
-            .then(img => {
-                // Create image element
-                const imageElement = document.createElement('img');
-                imageElement.src = img.src;
-                imageElement.alt = `Thumbnail ${index + 1}`;
-                imageElement.className = 'photo-thumbnail w-full h-20 object-cover rounded transition-opacity duration-300';
-                imageElement.style.opacity = '0';
-                imageElement.loading = 'lazy';
-                
-                // Replace placeholder with image
-                container.innerHTML = '';
-                container.appendChild(imageElement);
-                
-                // Fade in image
-                setTimeout(() => {
-                    imageElement.style.opacity = '1';
-                }, 50);
-                
-                // Add click event
-                imageElement.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const card = this.closest('.card');
-                    const photos = [];
-                    const thumbnails = card.querySelectorAll('.photo-thumbnail');
-                    const clickedIndex = Array.from(thumbnails).indexOf(this);
-                    
-                    thumbnails.forEach(thumb => {
-                        if (thumb.src) {
-                            photos.push(thumb.src);
-                        }
-                    });
-                    
-                    if (photos.length > 0 && clickedIndex >= 0) {
-                        showPhotoModal(photos, clickedIndex);
-                    }
+
+        // Play sound function
+        function playSound(soundElement) {
+            soundElement.currentTime = 0;
+            soundElement.play().catch(e => console.log("Sound playback prevented:", e));
+        }
+
+        // Scroll to bottom
+        let scrollTimeout = null;
+        const scrollToBottom = () => {
+            if (scrollTimeout) clearTimeout(scrollTimeout);
+            requestAnimationFrame(() => {
+                chatContainer.scrollTo({
+                    top: chatContainer.scrollHeight,
+                    behavior: 'smooth'
                 });
-            })
-            .catch(error => {
-                console.error('Failed to load image:', imageUrl, error);
-                // Replace with error fallback
-                container.innerHTML = '';
-                container.appendChild(createImageErrorFallback());
+                scrollTimeout = setTimeout(() => {
+                    const isScrolledToBottom = Math.abs(chatContainer.scrollHeight - chatContainer.scrollTop - chatContainer.clientHeight) <= 1;
+                    if (!isScrolledToBottom) {
+                        chatContainer.scrollTo({
+                            top: chatContainer.scrollHeight,
+                            behavior: 'smooth'
+                        });
+                    }
+                }, 200);
             });
-    }
-
-    // Function to preload images intelligently
-    function preloadImages(imageUrls, priority = 'low') {
-        if (!Array.isArray(imageUrls) || imageUrls.length === 0) return;
-        
-        // Limit concurrent loads based on priority
-        const maxConcurrent = priority === 'high' ? 4 : 2;
-        const queue = [...imageUrls];
-        
-        const loadNext = () => {
-            if (queue.length === 0) return;
-            
-            const url = queue.shift();
-            if (!imageCache.has(url) && !imageLoadPromises.has(url)) {
-                loadImageWithRetry(url, 1) // Only 1 retry for preload
-                    .catch(() => {}) // Silent fail for preload
-                    .finally(loadNext);
-            } else {
-                loadNext();
-            }
         };
-        
-        // Start loading
-        for (let i = 0; i < Math.min(maxConcurrent, imageUrls.length); i++) {
-            loadNext();
-        }
-    }
 
-    function closePhotoModal() {
-        const photoModal = document.getElementById('photo-modal');
-        
-        // Remove touch event listeners to prevent memory leaks
-        if (touchStartHandler && touchEndHandler) {
-            const carouselSlide = document.getElementById('carousel-slide');
-            if (carouselSlide) {
-                carouselSlide.removeEventListener('touchstart', touchStartHandler);
-                carouselSlide.removeEventListener('touchend', touchEndHandler);
-            }
-            touchStartHandler = null;
-            touchEndHandler = null;
-        }
-        
-        // Clean up lazy loading observer
-        if (photoModalObserver) {
-            photoModalObserver.disconnect();
-            photoModalObserver = null;
-        }
-        
-        // Cancel any pending image loads for modal
-        document.querySelectorAll('#carousel-slide img').forEach(img => {
-            if (img.src && imageLoadPromises.has(img.src)) {
-                // We can't cancel the promise, but we can remove from promises map
-                imageLoadPromises.delete(img.src);
-            }
+        // Mutation observer for chat container
+        const observer = new MutationObserver(() => {
+            scrollToBottom();
         });
-        
-        photoModal.classList.add('modal-exit-active');
-        setTimeout(() => {
-            photoModal.classList.add('hidden');
-            photoModal.classList.remove('modal-exit-active');
-            // Clear carousel content to free memory
-            document.getElementById('carousel-slide').innerHTML = '';
-        }, 200);
-    }
+        observer.observe(chatContainer, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
 
-    let currentPhotoIndex = 0;
-    let photos = [];
+        // Resize observer for chat container
+        const resizeObserver = new ResizeObserver(() => {
+            scrollToBottom();
+        });
+        resizeObserver.observe(chatContainer);
 
-    function showPhotoModal(photoArray, startIndex = 0) {
-        if (!Array.isArray(photoArray) || photoArray.length === 0) {
-            console.error('Invalid photo array:', photoArray);
-            return;
-        }
-        
-        photos = photoArray;
-        currentPhotoIndex = Math.min(Math.max(startIndex, 0), photos.length - 1);
-        const photoModal = document.getElementById('photo-modal');
-        const carouselSlide = document.getElementById('carousel-slide');
-        const carouselPrev = document.getElementById('carousel-prev');
-        const carouselNext = document.getElementById('carousel-next');
-        const carouselCounter = document.getElementById('carousel-counter');
-
-        carouselSlide.innerHTML = '';
-        
-        // Create loading placeholders for all images
-        photos.forEach((url, index) => {
-            const slideContainer = document.createElement('div');
-            slideContainer.className = 'carousel-slide-item relative w-full flex-shrink-0';
-            
-            // Create loading overlay
-            const loadingOverlay = document.createElement('div');
-            loadingOverlay.className = 'absolute inset-0 flex items-center justify-center bg-gray-100';
-            loadingOverlay.innerHTML = `
-                <div class="text-center">
-                    <div class="spinner w-8 h-8 border-4 border-primary-300 border-t-primary-600 rounded-full animate-spin mx-auto mb-2"></div>
-                    <p class="text-sm text-gray-600">Loading image ${index + 1}/${photos.length}</p>
-                </div>
-            `;
-            
-            // Create image element
-            const img = document.createElement('img');
-            img.className = 'carousel-image w-full h-full object-contain';
-            img.alt = `Application Photo ${index + 1}`;
-            img.style.opacity = '0';
-            img.loading = 'eager'; // Eager loading for modal images
-            
-            slideContainer.appendChild(img);
-            slideContainer.appendChild(loadingOverlay);
-            carouselSlide.appendChild(slideContainer);
-            
-            // Load image with retry for modal
-            loadImageWithRetry(url, IMAGE_CONFIG.MAX_RETRIES, 15000)
-                .then(loadedImg => {
-                    img.src = loadedImg.src;
-                    img.style.opacity = '1';
-                    loadingOverlay.style.display = 'none';
-                })
-                .catch(error => {
-                    console.error('Failed to load modal image:', url, error);
-                    loadingOverlay.innerHTML = `
-                        <div class="text-center p-4">
-                            <i class="fas fa-exclamation-triangle text-yellow-500 text-2xl mb-2"></i>
-                            <p class="text-sm text-gray-700">Image failed to load</p>
-                            <button class="mt-2 px-3 py-1 bg-primary-500 text-white text-xs rounded hover:bg-primary-600 transition-colors retry-load">
-                                Retry
-                            </button>
-                        </div>
-                    `;
-                    
-                    // Add retry button handler
-                    loadingOverlay.querySelector('.retry-load')?.addEventListener('click', () => {
-                        loadingOverlay.innerHTML = `
-                            <div class="text-center">
-                                <div class="spinner w-8 h-8 border-4 border-primary-300 border-t-primary-600 rounded-full animate-spin mx-auto mb-2"></div>
-                                <p class="text-sm text-gray-600">Retrying...</p>
-                            </div>
-                        `;
-                        
-                        loadImageWithRetry(url)
-                            .then(loadedImg => {
-                                img.src = loadedImg.src;
-                                img.style.opacity = '1';
-                                loadingOverlay.style.display = 'none';
-                            })
-                            .catch(() => {
-                                loadingOverlay.innerHTML = `
-                                    <div class="text-center p-4">
-                                        <i class="fas fa-times-circle text-red-500 text-2xl mb-2"></i>
-                                        <p class="text-sm text-gray-700">Still cannot load image</p>
-                                    </div>
-                                `;
-                            });
-                    });
-                });
+        // Auto-resize textarea
+        userInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = `${Math.min(this.scrollHeight, 64)}px`;
+            sendBtn.disabled = this.value.trim().length === 0;
+            scrollToBottom();
         });
 
-        updateCarousel();
-        carouselSlide.style.transform = `translateX(-${currentPhotoIndex * 100}%)`;
-        carouselPrev.classList.toggle('hidden', photos.length <= 1);
-        carouselNext.classList.toggle('hidden', photos.length <= 1);
-        carouselCounter.textContent = `${currentPhotoIndex + 1} / ${photos.length}`;
-
-        // Remove old event listeners if they exist
-        if (touchStartHandler && touchEndHandler) {
-            carouselSlide.removeEventListener('touchstart', touchStartHandler);
-            carouselSlide.removeEventListener('touchend', touchEndHandler);
-        }
-
-        // Add new touch event listeners
-        touchStartHandler = (e) => {
-            e.preventDefault();
-            touchStartX = e.changedTouches[0].screenX;
-        };
-
-        touchEndHandler = (e) => {
-            e.preventDefault();
-            const touchEndX = e.changedTouches[0].screenX;
-            if (touchEndX < touchStartX - 50) {
-                showNextPhoto();
-            } else if (touchEndX > touchStartX + 50) {
-                showPrevPhoto();
-            }
-        };
-
-        carouselSlide.addEventListener('touchstart', touchStartHandler, { passive: false });
-        carouselSlide.addEventListener('touchend', touchEndHandler, { passive: false });
-
-        photoModal.classList.remove('hidden');
-        photoModal.classList.add('modal-enter-active');
-        setTimeout(() => photoModal.classList.remove('modal-enter-active'), 200);
-    }
-
-    function showPrevPhoto() {
-        if (currentPhotoIndex > 0) {
-            currentPhotoIndex--;
-            updateCarousel();
-        }
-    }
-
-    function showNextPhoto() {
-        if (currentPhotoIndex < photos.length - 1) {
-            currentPhotoIndex++;
-            updateCarousel();
-        }
-    }
-
-    function updateCarousel() {
-        const carouselSlide = document.getElementById('carousel-slide');
-        const carouselPrev = document.getElementById('carousel-prev');
-        const carouselNext = document.getElementById('carousel-next');
-        const carouselCounter = document.getElementById('carousel-counter');
-
-        if (carouselSlide) {
-            carouselSlide.style.transform = `translateX(-${currentPhotoIndex * 100}%)`;
-        }
-        if (carouselPrev) {
-            carouselPrev.classList.toggle('hidden', currentPhotoIndex === 0);
-        }
-        if (carouselNext) {
-            carouselNext.classList.toggle('hidden', currentPhotoIndex === photos.length - 1);
-        }
-        if (carouselCounter) {
-            carouselCounter.textContent = `${currentPhotoIndex + 1} / ${photos.length}`;
-        }
-    }
-
-    document.getElementById('carousel-prev').addEventListener('click', showPrevPhoto);
-    document.getElementById('carousel-next').addEventListener('click', showNextPhoto);
-
-    // Function to group applications by email and merge them
-    function groupApplicationsByEmail(applications) {
-        const grouped = {};
-        let duplicates = 0;
-        
-        applications.forEach(application => {
-            const email = application.email.toLowerCase();
-            
-            if (!grouped[email]) {
-                // First application from this email
-                grouped[email] = { 
-                    ...application, 
-                    mergedIds: [application._id]
-                };
-            } else {
-                // Merge with existing application
-                const existing = grouped[email];
-                
-                // Merge photos (avoid duplicates)
-                const allPhotos = [...existing.photos, ...application.photos];
-                const uniquePhotos = [...new Set(allPhotos)];
-                
-                // Update the existing entry
-                existing.mergedCount = (existing.mergedCount || 1) + 1;
-                existing.mergedIds.push(application._id);
-                existing.photos = uniquePhotos;
-                
-                // Keep the most recent status if there's a conflict
-                if (application.createdAt && existing.createdAt) {
-                    if (new Date(application.createdAt) > new Date(existing.createdAt)) {
-                        existing.status = application.status;
-                        existing.createdAt = application.createdAt;
-                    }
+        // Handle mobile keyboard
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', () => {
+                if (document.activeElement === userInput) {
+                    scrollToBottom();
                 }
-                
-                // Update with any missing data from newer application
-                Object.keys(application).forEach(key => {
-                    if (!existing[key] && application[key]) {
-                        existing[key] = application[key];
-                    }
-                });
-                
-                duplicates++;
-            }
-        });
-        
-        return { grouped, duplicates };
-    }
-
-    // Function to group applications by name and merge them
-    function groupApplicationsByName(applications) {
-        const grouped = {};
-        let duplicates = 0;
-        
-        applications.forEach(application => {
-            const nameKey = `${application.firstName?.toLowerCase() || ''} ${application.lastName?.toLowerCase() || ''}`.trim();
-            
-            if (!grouped[nameKey]) {
-                // First application from this name
-                grouped[nameKey] = { 
-                    ...application, 
-                    mergedIds: [application._id]
-                };
-            } else {
-                // Merge with existing application
-                const existing = grouped[nameKey];
-                
-                // Merge photos (avoid duplicates)
-                const allPhotos = [...existing.photos, ...application.photos];
-                const uniquePhotos = [...new Set(allPhotos)];
-                
-                // Update the existing entry
-                existing.mergedCount = (existing.mergedCount || 1) + 1;
-                existing.mergedIds.push(application._id);
-                existing.photos = uniquePhotos;
-                
-                // Keep the most recent status if there's a conflict
-                if (application.createdAt && existing.createdAt) {
-                    if (new Date(application.createdAt) > new Date(existing.createdAt)) {
-                        existing.status = application.status;
-                        existing.createdAt = application.createdAt;
-                    }
-                }
-                
-                // Update with any missing data from newer application
-                Object.keys(application).forEach(key => {
-                    if (!existing[key] && application[key]) {
-                        existing[key] = application[key];
-                    }
-                });
-                
-                duplicates++;
-            }
-        });
-        
-        return { grouped, duplicates };
-    }
-
-    async function loadApplications() {
-        applicationLoading.classList.remove('hidden');
-        applicationError.classList.add('hidden');
-        try {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                throw new Error('No token found in localStorage');
-            }
-            
-            const response = await fetch('/api/applications', {
-                headers: { 'Authorization': `Bearer ${token}` }
             });
-            
-            if (!response.ok) {
-                const data = await response.json().catch(() => ({}));
-                if (response.status === 401) {
-                    localStorage.removeItem('token');
-                    window.location.href = 'admin.html';
+        }
+
+        // Scroll on textarea focus
+        userInput.addEventListener('focus', () => {
+            setTimeout(scrollToBottom, 100);
+        });
+
+        // Send message on Enter
+        userInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (userInput.value.trim().length > 0) {
+                    sendMessage();
+                }
+            }
+        });
+
+        // Send button click
+        sendBtn.addEventListener('click', sendMessage);
+
+        // Handle photo input change
+        photoInput.addEventListener('change', function(e) {
+            const files = Array.from(e.target.files);
+            if (selectedPhotos.length + files.length > 6) {
+                alert('You can upload a maximum of 6 photos.');
+                return;
+            }
+
+            files.forEach(file => {
+                if (file.size > 5 * 1024 * 1024) {
+                    alert(`File ${file.name} exceeds 5MB limit.`);
                     return;
                 }
-                throw new Error(data.message || `HTTP error: ${response.status}`);
-            }
-            
-            applicationsData = await response.json();
-            processApplications();
-            
-        } catch (error) {
-            applicationError.textContent = error.message || 'Error loading applications';
-            applicationError.classList.remove('hidden');
-            document.getElementById('error-message').textContent = error.message;
-            document.getElementById('error-alert').classList.remove('hidden');
-            setTimeout(() => document.getElementById('error-alert').classList.add('hidden'), 3000);
-        } finally {
-            applicationLoading.classList.add('hidden');
-        }
-    }
+                if (!['image/jpeg', 'image/png'].includes(file.type)) {
+                    alert(`File ${file.name} must be JPG or PNG.`);
+                    return;
+                }
 
-    function processApplications() {
-        // Update stats
-        document.getElementById('total-apps').textContent = applicationsData.length;
-        
-        // Calculate recent applications (last 7 days)
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-        const recentApps = applicationsData.filter(app => {
-            if (!app.createdAt) return false;
-            const appDate = new Date(app.createdAt);
-            return appDate >= sevenDaysAgo;
-        }).length;
-        document.getElementById('recent-apps').textContent = recentApps;
-        
-        const mergeType = mergeOption.value;
-        let result;
-        
-        if (mergeType === 'email') {
-            result = groupApplicationsByEmail(applicationsData);
-        } else if (mergeType === 'name') {
-            result = groupApplicationsByName(applicationsData);
-        } else {
-            // Don't merge
-            groupedApplicationsData = {};
-            applicationsData.forEach(app => {
-                groupedApplicationsData[app._id] = { 
-                    ...app, 
-                    mergedIds: [app._id]
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    selectedPhotos.push({ name: file.name, data: event.target.result });
+                    localStorage.setItem('selectedPhotos', JSON.stringify(selectedPhotos));
+                    updateImagePreview();
                 };
+                reader.readAsDataURL(file);
             });
-            result = { grouped: groupedApplicationsData, duplicates: 0 };
-        }
-        
-        groupedApplicationsData = result.grouped;
-        
-        // Preload thumbnail images intelligently (low priority)
-        const allPhotos = [];
-        Object.values(groupedApplicationsData).forEach(app => {
-            if (app.photos && Array.isArray(app.photos)) {
-                allPhotos.push(...app.photos.slice(0, 3)); // Only preload first 3 thumbnails
-            }
-        });
-        preloadImages([...new Set(allPhotos)], 'low');
-        
-        // Update stats
-        document.getElementById('merged-groups').textContent = Object.keys(groupedApplicationsData).length;
-        document.getElementById('duplicates-count').textContent = result.duplicates;
-        
-        // Calculate pagination
-        const totalItems = Object.keys(groupedApplicationsData).length;
-        totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
-        currentPage = Math.min(currentPage, totalPages);
-        
-        renderCurrentPage();
-    }
 
-    function extractUsernameFromUrl(url, platform) {
-        if (!url) return null;
-        
-        try {
-            let cleanUrl = url.trim();
+            photoInput.value = '';
+            scrollToBottom();
+        });
+
+        function updateImagePreview() {
+            imagePreview.innerHTML = '';
+            selectedPhotos.forEach((photo, index) => {
+                const previewDiv = document.createElement('div');
+                previewDiv.className = 'relative';
+                previewDiv.innerHTML = `
+                    <img src="${photo.data}" alt="Preview ${index + 1}">
+                    <span class="remove-btn" onclick="removePhoto(${index})">&times;</span>
+                `;
+                imagePreview.appendChild(previewDiv);
+            });
+            scrollToBottom();
+        }
+
+        window.removePhoto = function(index) {
+            selectedPhotos.splice(index, 1);
+            localStorage.setItem('selectedPhotos', JSON.stringify(selectedPhotos));
+            updateImagePreview();
+            scrollToBottom();
+        };
+
+        window.submitPhotos = function() {
+            if (selectedPhotos.length < 2) {
+                alert('Please upload at least one full-body shot and one portrait.');
+                return;
+            }
+            photoModal.classList.add('hidden');
+            photoModal.querySelector('.modal-content').classList.remove('show');
+            addMessageToChat('user', `Uploaded ${selectedPhotos.length} photo(s)`);
+            currentQuestion++;
+            localStorage.setItem('currentQuestion', currentQuestion);
+            setTimeout(() => {
+                askQuestion(currentQuestion);
+                scrollToBottom();
+            }, 100);
+        };
+
+        window.closePhotoModal = function() {
+            selectedPhotos = [];
+            localStorage.setItem('selectedPhotos', JSON.stringify(selectedPhotos));
+            photoModal.classList.add('hidden');
+            photoModal.querySelector('.modal-content').classList.remove('show');
+            addMessageToChat('ai', 'Photo upload cancelled. Please upload your photos to continue.');
+            setTimeout(() => {
+                askQuestion(currentQuestion);
+                scrollToBottom();
+            }, 100);
+        };
+
+        window.saveFieldEdit = function() {
+            if (currentEditField === 'photos') {
+                editFieldModal.classList.add('hidden');
+                editFieldModal.querySelector('.modal-content').classList.remove('show');
+                photoModal.classList.remove('hidden');
+                photoModal.querySelector('.modal-content').classList.add('show');
+                return;
+            }
+            const newValue = editFieldInput.value.trim();
+            const validationError = validators[currentEditField]?.(newValue);
+            if (validationError) {
+                alert(validationError);
+                return;
+            }
+            applicationData[currentEditField] = newValue;
+            localStorage.setItem('applicationData', JSON.stringify(applicationData));
+            editFieldModal.classList.add('hidden');
+            editFieldModal.querySelector('.modal-content').classList.remove('show');
+            showApplicationReview();
+        };
+
+        window.closeEditModal = function() {
+            editFieldModal.classList.add('hidden');
+            editFieldModal.querySelector('.modal-content').classList.remove('show');
+            scrollToBottom();
+        };
+
+        window.clearChatHistory = function() {
+            localStorage.removeItem('chatMessages');
+            localStorage.removeItem('applicationData');
+            localStorage.removeItem('currentQuestion');
+            localStorage.removeItem('isApplicationActive');
+            localStorage.removeItem('selectedPhotos');
+            messages = [];
+            applicationData = {
+                firstName: '', lastName: '', bust: '', waist: '', hips: '', justCo: '',
+                height: '', instagram: '', tiktok: '', location: '', dob: '',
+                startDate: '', email: '', altContact: ''
+            };
+            currentQuestion = 0;
+            isApplicationActive = false;
+            selectedPhotos = [];
+            while (chatContainer.children.length > 2) {
+                chatContainer.removeChild(chatContainer.children[1]);
+            }
+            clearChatModal.classList.add('hidden');
+            clearChatModal.querySelector('.modal-content').classList.remove('show');
+            scrollToBottom();
+        };
+
+        window.keepChatHistory = function() {
+            clearChatModal.classList.add('hidden');
+            clearChatModal.querySelector('.modal-content').classList.remove('show');
+            restoreMessages();
+            scrollToBottom();
+        };
+
+        function getCurrentTime() {
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            return `${hours}:${minutes}`;
+        }
+
+        function simulateTyping(message, callback) {
+            typingIndicator.classList.remove('hidden');
+            const delay = 500 + message.length * 20;
+            setTimeout(() => {
+                typingIndicator.classList.add('hidden');
+                callback();
+            }, delay);
+        }
+
+        function clearApplicationData() {
+            localStorage.removeItem('applicationData');
+            localStorage.removeItem('currentQuestion');
+            localStorage.removeItem('isApplicationActive');
+            localStorage.removeItem('selectedPhotos');
+            localStorage.removeItem('chatMessages');
             
-            // If it's just a username (without @), add it
-            if (!cleanUrl.includes('http') && !cleanUrl.includes('.') && !cleanUrl.includes('/')) {
-                // It's likely just a username
+            // Set a 24-hour cooldown for new applications from same browser
+            localStorage.setItem('applicationCooldown', (Date.now() + (24 * 60 * 60 * 1000)).toString());
+        }
+
+        function checkCooldown() {
+            const cooldown = localStorage.getItem('applicationCooldown');
+            const lastSubmission = localStorage.getItem('lastApplicationSubmission');
+            
+            // Check 24-hour cooldown
+            if (cooldown && Date.now() < parseInt(cooldown)) {
+                const hoursLeft = Math.ceil((parseInt(cooldown) - Date.now()) / (1000 * 60 * 60));
                 return {
-                    url: platform === 'instagram' ? `https://instagram.com/${cleanUrl}` : `https://tiktok.com/@${cleanUrl}`,
-                    username: cleanUrl.replace('@', '')
+                    onCooldown: true,
+                    message: `⏳ You recently submitted an application. Please wait ${hoursLeft} hour(s) before applying again.`
                 };
             }
             
-            // Ensure URL has protocol
-            if (!cleanUrl.startsWith('http')) {
-                cleanUrl = 'https://' + cleanUrl;
-            }
-            
-            const urlObj = new URL(cleanUrl);
-            const pathParts = urlObj.pathname.split('/').filter(part => part);
-            
-            let username = '';
-            
-            if (platform === 'instagram') {
-                // Instagram: https://instagram.com/username
-                // Instagram: https://www.instagram.com/username/
-                username = pathParts[0] || '';
-                
-                // If it's a direct @username input
-                if (!username && cleanUrl.includes('@')) {
-                    const match = cleanUrl.match(/@([\w\._]+)/);
-                    if (match) username = match[1];
-                }
-                
-                if (username) {
+            // Check 5-second submission cooldown
+            if (lastSubmission) {
+                const timeSinceLast = Date.now() - parseInt(lastSubmission);
+                if (timeSinceLast < 5000) { // 5 seconds
+                    const secondsLeft = Math.ceil((5000 - timeSinceLast) / 1000);
                     return {
-                        url: `https://instagram.com/${username}`,
-                        username: username
-                    };
-                }
-            } else if (platform === 'tiktok') {
-                // TikTok: https://tiktok.com/@username
-                // TikTok: https://www.tiktok.com/@username
-                if (pathParts.length > 0) {
-                    username = pathParts[0];
-                    // Remove @ symbol if present
-                    if (username.startsWith('@')) {
-                        username = username.substring(1);
-                    }
-                }
-                
-                // If it's a direct @username input
-                if (!username && cleanUrl.includes('@')) {
-                    const match = cleanUrl.match(/@([\w\._]+)/);
-                    if (match) username = match[1];
-                }
-                
-                if (username) {
-                    return {
-                        url: `https://tiktok.com/@${username}`,
-                        username: username
+                        onCooldown: true,
+                        message: `⏳ Please wait ${secondsLeft} second(s) before submitting again.`
                     };
                 }
             }
             
-            // If we couldn't extract username, return the original URL
-            return {
-                url: cleanUrl,
-                username: cleanUrl.replace('https://', '').replace('www.', '').split('/')[0]
-            };
-            
-        } catch (error) {
-            console.error('Error parsing social URL:', url, error);
-            // Return simple fallback
-            return {
-                url: url,
-                username: url.replace('https://', '').replace('www.', '').split('/')[0] || platform
-            };
+            return { onCooldown: false };
         }
-    }
 
-    function renderCurrentPage() {
-        const applicationGrid = document.getElementById('application-grid');
-        const startIndex = (currentPage - 1) * itemsPerPage;
-        const endIndex = startIndex + itemsPerPage;
-        const appsToDisplay = Object.values(groupedApplicationsData).slice(startIndex, endIndex);
-        
-        // Clear grid first to free memory
-        applicationGrid.innerHTML = '';
-        
-        // Use DocumentFragment for efficient DOM updates
-        const fragment = document.createDocumentFragment();
-        
-        appsToDisplay.forEach((app, index) => {
-            const div = document.createElement('div');
-            div.className = 'card bg-white rounded-lg overflow-hidden';
-            div.style.animationDelay = `${index * 0.05}s`;
-            
-            // Display merged application count
-            const applicationCount = app.mergedIds ? app.mergedIds.length : 1;
-            const isMerged = applicationCount > 1;
-            
-            // Extract Instagram and TikTok usernames
-            const instagramInfo = app.instagram ? extractUsernameFromUrl(app.instagram, 'instagram') : null;
-            const tiktokInfo = app.tiktok ? extractUsernameFromUrl(app.tiktok, 'tiktok') : null;
-            
-            // Format dates
-            const appliedDate = formatDate(app.createdAt);
-            const timeAgo = getTimeAgo(app.createdAt);
-            const simpleDate = getSimpleDate(app.createdAt);
-            const updatedDate = app.updatedAt && app.createdAt !== app.updatedAt ? formatDate(app.updatedAt) : null;
-            
-            // Determine if application is recent (within 24 hours)
-            const isRecent = app.createdAt ? (new Date() - new Date(app.createdAt)) < (24 * 60 * 60 * 1000) : false;
-            
-            // Truncate username for display if too long
-            const truncateUsername = (username) => {
-                if (!username) return '';
-                if (username.length > 15) {
-                    return username.substring(0, 15) + '...';
-                }
-                return username;
-            };
-            
-            div.innerHTML = `
-                <div class="p-4">
-                    <div class="flex justify-between items-center mb-2">
-                        <div class="flex items-center max-w-[70%]">
-                            <h4 class="text-sm font-semibold text-gray-900 name-break">
-                                ${escapeHtml(app.firstName || '')} ${escapeHtml(app.lastName || '')}
-                            </h4>
-                            ${isMerged ? 
-                                `<span class="ml-2 badge badge-merged">${applicationCount} merged</span>` : 
-                                ''}
-                        </div>
-                        <span class="badge badge-${app.status || 'pending'}">${app.status || 'pending'}</span>
+        function addMessageToChat(sender, message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-bubble flex ${sender === 'user' ? 'justify-end' : 'flex-row'}`;
+            const timestamp = getCurrentTime();
+            const isAskQuestion = message === 'I have a question about the application' && sender === 'user';
+            const isAIResponseToQuestion = sender === 'ai' && messages.length > 0 && messages[messages.length - 1].message === 'I have a question about the application' && messages[messages.length - 1].sender === 'user';
+
+            if (sender === 'user') {
+                messageDiv.innerHTML = `
+                    <div class="bg-black text-white p-3 rounded-lg">
+                        <p class="text-sm">${message}</p>
+                        <div class="message-timestamp">${timestamp}</div>
                     </div>
-                    
-                    <!-- UPDATED DATE DISPLAY SECTION -->
-                    <div class="mb-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                        <div class="flex items-start justify-between">
-                            <div class="flex items-start">
-                                <i class="fas fa-calendar-check mt-0.5 mr-2 text-primary-500"></i>
-                                <div>
-                                    <div class="text-sm font-semibold text-gray-900">Applied Date</div>
-                                    <div class="text-xs text-gray-700 mt-1">${appliedDate}</div>
-                                    ${timeAgo ? `<div class="text-xs text-gray-500 mt-0.5">(${timeAgo})</div>` : ''}
-                                    <div class="text-xs text-gray-500 mt-1">Date: ${simpleDate}</div>
-                                </div>
-                            </div>
-                            ${isRecent ? 
-                                `<span class="badge badge-date flex items-center">
-                                    <i class="fas fa-bolt mr-1 text-xs"></i> New
-                                </span>` : 
-                                ''}
-                        </div>
-                        ${updatedDate ? `
-                            <div class="mt-3 pt-3 border-t border-gray-200">
-                                <div class="flex items-start">
-                                    <i class="fas fa-sync-alt mt-0.5 mr-2 text-gray-400 text-xs"></i>
-                                    <div>
-                                        <div class="text-xs font-medium text-gray-700">Last Updated</div>
-                                        <div class="text-xs text-gray-600 mt-0.5">${updatedDate}</div>
-                                    </div>
-                                </div>
-                            </div>
-                        ` : ''}
+                    <div class="w-8 h-8 rounded-full bg-gray-800 flex-shrink-0 flex items-center justify-center ml-2 avatar">
+                        <i class="fas fa-user text-white text-sm" aria-label="User"></i>
                     </div>
-                    
-                    <div class="space-y-1.5 text-xs text-gray-600">
-                        <p><strong>Email:</strong> ${escapeHtml(app.email || '')}</p>
-                        <p><strong>Alt Contact:</strong> ${escapeHtml(app.altContact || 'N/A')}</p>
-                        <p><strong>Bust:</strong> ${app.bust || 'N/A'} cm</p>
-                        <p><strong>Waist:</strong> ${app.waist || 'N/A'} cm</p>
-                        <p><strong>Hips:</strong> ${app.hips || 'N/A'} cm</p>
-                        <p><strong>Agency:</strong> ${escapeHtml(app.justCo || 'N/A')}</p>
-                        <p><strong>Height:</strong> ${app.height || 'N/A'}</p>
-                        <p><strong>Photos:</strong> <span class="text-blue-500 hover:underline cursor-pointer view-photos-btn">View ${(app.photos || []).length} photo(s)</span></p>
-                        
-                        <!-- Instagram Link with Username -->
-                        <p class="flex items-center">
-                            <strong class="mr-2">Instagram:</strong>
-                            ${instagramInfo ? 
-                                `<a href="${instagramInfo.url}" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:text-blue-700 hover:underline flex items-center">
-                                    <i class="fab fa-instagram mr-1 text-pink-500"></i>
-                                    <span class="username">${truncateUsername(instagramInfo.username)}</span>
-                                    <i class="fas fa-external-link-alt ml-1 text-xs text-gray-400"></i>
-                                </a>` : 
-                                '<span class="text-gray-500">N/A</span>'}
-                        </p>
-                        
-                        <!-- TikTok Link with Username -->
-                        <p class="flex items-center">
-                            <strong class="mr-2">TikTok:</strong>
-                            ${tiktokInfo ? 
-                                `<a href="${tiktokInfo.url}" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:text-blue-700 hover:underline flex items-center">
-                                    <i class="fab fa-tiktok mr-1 text-gray-800"></i>
-                                    <span class="username">${truncateUsername(tiktokInfo.username)}</span>
-                                    <i class="fas fa-external-link-alt ml-1 text-xs text-gray-400"></i>
-                                </a>` : 
-                                '<span class="text-gray-500">N/A</span>'}
-                        </p>
-                        
-                        <p><strong>Location:</strong> ${escapeHtml(app.location || 'N/A')}</p>
-                        <p><strong>DOB:</strong> ${app.dob ? new Date(app.dob).toLocaleDateString('en-US', { 
-                            year: 'numeric', 
-                            month: 'long', 
-                            day: 'numeric' 
-                        }) : 'N/A'}</p>
-                        <p><strong>Start Date:</strong> ${escapeHtml(app.startDate || 'N/A')}</p>
-                        ${isMerged ? 
-                            `<p class="text-xs text-gray-500 italic mt-2">${applicationCount} application(s) merged into one entry</p>` : 
-                            ''}
-                    </div>
-                    <div class="mt-3">
-                        <label for="status-${app._id || index}" class="block text-xs font-medium text-gray-700 mb-1">Status</label>
-                        <select id="status-${app._id || index}" class="form-select text-xs" aria-label="Application Status">
-                            <option value="pending" ${app.status === 'pending' ? 'selected' : ''}>Pending</option>
-                            <option value="reviewed" ${app.status === 'reviewed' ? 'selected' : ''}>Reviewed</option>
-                            <option value="accepted" ${app.status === 'accepted' ? 'selected' : ''}>Accepted</option>
-                            <option value="rejected" ${app.status === 'rejected' ? 'selected' : ''}>Rejected</option>
-                        </select>
-                    </div>
-                    <div class="mt-3 flex space-x-2">
-                        <button class="update-btn form-button text-xs tooltip" data-tooltip="${isMerged ? 'Update all merged applications' : 'Update status'}" aria-label="Update Application Status">
-                            <i class="fas fa-save mr-1"></i> ${isMerged ? 'Update All' : 'Update'}
-                        </button>
-                        <button class="delete-btn form-button bg-red-500 hover:bg-red-600 text-xs tooltip" data-tooltip="${isMerged ? 'Delete all merged applications' : 'Delete application'}" aria-label="Delete Application">
-                            <i class="fas fa-trash mr-1"></i> ${isMerged ? 'Delete All' : 'Delete'}
-                        </button>
-                    </div>
-                    <div class="mt-3 grid grid-cols-3 gap-2 photo-grid" id="photo-grid-${app._id || index}">
-                        <!-- Images will be lazy loaded here -->
-                    </div>
-                </div>
-            `;
-            fragment.appendChild(div);
-        });
-        
-        // Append fragment to grid
-        applicationGrid.appendChild(fragment);
-        
-        // Set up event listeners
-        setupEventListeners();
-        
-        // Lazy load images for each application
-        setTimeout(() => {
-            appsToDisplay.forEach((app, index) => {
-                const photoGrid = document.getElementById(`photo-grid-${app._id || index}`);
-                if (photoGrid && app.photos && app.photos.length > 0) {
-                    // Show only first 3 images initially
-                    const photosToShow = app.photos.slice(0, 3);
-                    photosToShow.forEach((photo, photoIndex) => {
-                        const container = document.createElement('div');
-                        container.className = 'photo-container relative rounded overflow-hidden';
-                        container.style.minHeight = '80px';
-                        photoGrid.appendChild(container);
-                        
-                        // Lazy load the image
-                        lazyLoadImage(container, photo, photoIndex, photosToShow.length);
+                `;
+                chatContainer.insertBefore(messageDiv, typingIndicator);
+                playSound(sendSound);
+                messages.push({ sender, message, timestamp });
+                localStorage.setItem('chatMessages', JSON.stringify(messages));
+                scrollToBottom();
+
+                // Respond to "Ask a Question" button
+                if (isAskQuestion) {
+                    simulateTyping('For inquiries, please click the WhatsApp button below to connect with our team.', () => {
+                        addMessageToChat('ai', 'For inquiries, please click the WhatsApp button below to connect with our team.');
                     });
-                    
-                    // Show "more photos" message if applicable
-                    if (app.photos.length > 3) {
-                        const moreDiv = document.createElement('div');
-                        moreDiv.className = 'col-span-3 text-center text-xs text-gray-500 mt-1';
-                        moreDiv.textContent = `+${app.photos.length - 3} more photos`;
-                        photoGrid.appendChild(moreDiv);
+                }
+            } else {
+                const currentQ = applicationQuestions[currentQuestion];
+                const isAppQuestion = isApplicationActive && currentQ && currentQ.question === message;
+                messageDiv.innerHTML = `
+                    <div class="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 flex items-center justify-center mr-2 avatar">
+                        <i class="fas fa-robot text-gray-600 text-sm" aria-label=" Assistant, AI Assistant"></i>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg border border-gray-200">
+                        <p class="text-gray-800 text-sm font-semibold"> Assistant</p>
+                        <p class="text-gray-800 text-sm">${message}</p>
+                        ${isAppQuestion && currentQ.example ?
+                            `<div class="example-box">${currentQ.example}</div>` : ''}
+                        ${isAppQuestion && currentQ.field === 'photos' ?
+                            `<div class="mt-2">
+                                <button onclick="document.getElementById('photo-upload-modal').classList.remove('hidden'); document.getElementById('photo-upload-modal').querySelector('.modal-content').classList.add('show')" class="option-button">
+                                    Upload Photos
+                                </button>
+                            </div>` : ''}
+                        ${isAIResponseToQuestion ? `
+                            <div class="mt-2">
+                                <a href="https://wa.me/+2347080717976?text=Hi,%20I%20have%20a%20question%20about%20my%20Beige%20Model%20Agency%20application" target="_blank" class="whatsapp-button">
+                                    <i class="fab fa-whatsapp mr-1"></i> Chat on WhatsApp
+                                </a>
+                            </div>` : ''}
+                        <div class="message-timestamp">${timestamp}</div>
+                    </div>
+                `;
+                chatContainer.insertBefore(messageDiv, typingIndicator);
+                playSound(messageSound);
+                messages.push({ sender, message, timestamp });
+                localStorage.setItem('chatMessages', JSON.stringify(messages));
+                scrollToBottom();
+            }
+        }
+
+        function sendMessage() {
+            const message = userInput.value.trim();
+            if (message.length === 0) return;
+
+            addMessageToChat('user', message);
+            userInput.value = '';
+            userInput.style.height = '0.75rem';
+            sendBtn.disabled = true;
+
+            simulateTyping('', () => {
+                if (isApplicationActive) {
+                    if (applicationQuestions[currentQuestion].field === 'photos') {
+                        if (message.toLowerCase() === 'i understand') {
+                            photoModal.classList.remove('hidden');
+                            photoModal.querySelector('.modal-content').classList.add('show');
+                        } else {
+                            addMessageToChat('ai', "Please type 'I understand' to open the photo upload modal or ask a question about the photo requirements.");
+                            setTimeout(() => {
+                                askQuestion(currentQuestion);
+                                scrollToBottom();
+                            }, 100);
+                        }
+                    } else {
+                        processApplicationAnswer(message);
                     }
-                    
-                    // Show "no photos" message if empty
-                    if (app.photos.length === 0) {
-                        const noPhotosDiv = document.createElement('p');
-                        noPhotosDiv.className = 'text-xs text-gray-500 col-span-3 text-center';
-                        noPhotosDiv.textContent = 'No photos';
-                        photoGrid.appendChild(noPhotosDiv);
-                    }
+                } else {
+                    const response = generateAIResponse(message);
+                    addMessageToChat('ai', response);
                 }
             });
-        }, 100);
-        
-        // Update pagination controls
-        updatePaginationControls();
-    }
+        }
 
-    function setupEventListeners() {
-        // View photos buttons
-        document.querySelectorAll('.view-photos-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                const card = this.closest('.card');
-                const photos = [];
-                // Collect photos from thumbnails
-                card.querySelectorAll('.photo-thumbnail').forEach(img => {
-                    if (img.src) {
-                        photos.push(img.src);
-                    }
-                });
-                if (photos.length > 0) {
-                    showPhotoModal(photos);
-                }
-            });
-        });
-        
-        // Update buttons
-        document.querySelectorAll('.update-btn').forEach(btn => {
-            btn.addEventListener('click', async function() {
-                const card = this.closest('.card');
-                const appId = card.querySelector('h4').textContent.split(' ').slice(0, 2).join(' ') + '_' + Date.now();
-                const mergedIds = [appId]; // Simplified for demo
-                const isMerged = card.querySelector('.badge-merged') !== null;
-                
-                // Show loading state on button
-                const originalHTML = this.innerHTML;
-                this.innerHTML = '<span class="spinner"></span> Updating...';
-                this.disabled = true;
-                
-                await updateApplicationStatus(appId, isMerged, mergedIds);
-                
-                // Restore button state
-                this.innerHTML = originalHTML;
-                this.disabled = false;
-            });
-        });
-        
-        // Delete buttons
-        document.querySelectorAll('.delete-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const card = this.closest('.card');
-                const appId = card.querySelector('h4').textContent.split(' ').slice(0, 2).join(' ') + '_' + Date.now();
-                const mergedIds = [appId]; // Simplified for demo
-                const isMerged = card.querySelector('.badge-merged') !== null;
-                deleteApplication(appId, isMerged, mergedIds);
-            });
-        });
-    }
+        function generateAIResponse(userMessage) {
+            const lowerMessage = userMessage.toLowerCase();
 
-    function updatePaginationControls() {
-        pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
-        prevPageBtn.disabled = currentPage === 1;
-        nextPageBtn.disabled = currentPage === totalPages;
-        paginationControls.classList.toggle('hidden', totalPages <= 1);
-    }
+            if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey')) {
+                return "Hello! I'm Assistant, your professional model application assistant. How may I assist you today?";
+            } else if (lowerMessage.includes('measurement') || lowerMessage.includes('bust') || lowerMessage.includes('waist') || lowerMessage.includes('hip')) {
+                return "Please provide your measurements one at a time. I'll ask for each measurement individually during the application process.";
+            } else if (lowerMessage.includes('height') || lowerMessage.includes('tall')) {
+                return "Height requirements vary by market. Please provide your height during the application process.";
+            } else if (lowerMessage.includes('photo') || lowerMessage.includes('picture') || lowerMessage.includes('image')) {
+                return "For your application portfolio, you'll need: 1) A full-body shot in form-fitting clothing (swimsuit or athletic wear preferred), and 2) A clean portrait with minimal makeup. Both should be well-lit with a neutral background. Digital submissions should be high resolution. Photos must be one full body and one portrait, without makeup or filters, no merged or profile shots. You may upload up to 6 photos total via the upload modal.";
+            } else if (lowerMessage.includes('instagram') || lowerMessage.includes('tiktok') || lowerMessage.includes('social media')) {
+                return "Social media presence is increasingly important. Please provide links to your Instagram and/or TikTok profiles if available. Ensure profiles are public and represent your professional image.";
+            } else if (lowerMessage.includes('just & co') || lowerMessage.includes('just and co') || lowerMessage.includes('agency')) {
+                return "The 'Just & Co' field documents your agency representation history. List current or past agencies, or 'Independent' if unrepresented. Exclusive contracts should be disclosed.";
+            } else if (lowerMessage.includes('process') || lowerMessage.includes('next step') || lowerMessage.includes('what happens')) {
+                return "Our review process: 1) Initial application screening (2-3 weeks), 2) Potential callback for interview, 3) Test shoots if applicable, 4) Final evaluation. We maintain high standards and appreciate your patience.";
+            } else if (lowerMessage.includes('requirement') || lowerMessage.includes('need') || lowerMessage.includes('qualification')) {
+                return "Key evaluation criteria include: 1) Photogenic qualities, 2) Professional demeanor, 3) Distinctive features, 4) Proportional measurements, 5) Portfolio potential. Training and experience are assets but not mandatory.";
+            } else if (lowerMessage.includes('age') || lowerMessage.includes('old') || lowerMessage.includes('young')) {
+                return "We consider applicants aged 16+ (with parental consent for minors). There's no upper age limit—we represent diverse demographics including mature models. Different markets have varying age preferences.";
+            } else if (lowerMessage.includes('location') || lowerMessage.includes('where') || lowerMessage.includes('city')) {
+                return "Please specify your current location. While we're based in major fashion capitals, we work with talent worldwide. Some opportunities may require relocation or extensive travel.";
+            } else if (lowerMessage.includes('time') || lowerMessage.includes('long') || lowerMessage.includes('response')) {
+                return "Our review timeline is typically a week for initial response. Due to volume, we may not respond to all applications. You're welcome to follow up after 3 weeks if you haven't heard from us.";
+            } else if (lowerMessage.includes('start') || lowerMessage.includes('begin modeling') || lowerMessage.includes('when can i start')) {
+                return "Please specify when you would like to begin modeling. This helps us align opportunities with your availability.";
+            } else if (lowerMessage.includes('thank')) {
+                return "You're most welcome. It's my pleasure to assist you with your professional modeling application.";
+            } else {
+                return "For inquiries, please click the WhatsApp button below to connect with our team.";
+            }
+        }
 
-    function filterApplications(searchTerm) {
-        const term = searchTerm.toLowerCase();
-        const cards = document.querySelectorAll('#application-grid .card');
-        
-        cards.forEach(card => {
-            const name = card.querySelector('h4').textContent.toLowerCase();
-            const email = card.querySelector('p strong').nextSibling.textContent.toLowerCase();
-            card.style.display = name.includes(term) || email.includes(term) ? '' : 'none';
-        });
-    }
-
-    function escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
-    async function updateApplicationStatus(id, isMerged = false, mergedIds = [id]) {
-        const status = document.getElementById(`status-${id}`)?.value || 'pending';
-        applicationError.classList.add('hidden');
-        
-        try {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                throw new Error('No token found in localStorage');
+        function startApplication() {
+            // Check for cooldown
+            const cooldownCheck = checkCooldown();
+            if (cooldownCheck.onCooldown) {
+                addMessageToChat('ai', cooldownCheck.message);
+                return;
             }
             
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 500));
-            
-            document.getElementById('success-message').textContent = isMerged ? 
-                `All ${mergedIds.length} applications updated successfully!` : 
-                'Application status updated successfully!';
-            document.getElementById('success-alert').classList.remove('hidden');
-            setTimeout(() => document.getElementById('success-alert').classList.add('hidden'), 3000);
-        } catch (error) {
-            applicationError.textContent = error.message;
-            applicationError.classList.remove('hidden');
-            document.getElementById('error-message').textContent = error.message;
-            document.getElementById('error-alert').classList.remove('hidden');
-            setTimeout(() => document.getElementById('error-alert').classList.add('hidden'), 3000);
+            // Check for existing application
+            if (applicationData.email) {
+                const shouldContinue = confirm(
+                    `You have an application in progress for ${applicationData.email}.\n\n` +
+                    `• Click OK to continue where you left off\n` +
+                    `• Click Cancel to start a new application`
+                );
+                
+                if (shouldContinue) {
+                    // Resume at current question
+                    isApplicationActive = true;
+                    localStorage.setItem('isApplicationActive', JSON.stringify(isApplicationActive));
+                    askQuestion(currentQuestion);
+                    return;
+                }
+            }
+
+            isApplicationActive = true;
+            currentQuestion = 0;
+            localStorage.setItem('isApplicationActive', JSON.stringify(isApplicationActive));
+            localStorage.setItem('currentQuestion', currentQuestion);
+
+            // Clear previous data if starting new
+            applicationData = {
+                firstName: '', lastName: '', bust: '', waist: '', hips: '', justCo: '',
+                height: '', instagram: '', tiktok: '', location: '', dob: '',
+                startDate: '', email: '', altContact: ''
+            };
+            selectedPhotos = [];
+            localStorage.setItem('applicationData', JSON.stringify(applicationData));
+            localStorage.setItem('selectedPhotos', JSON.stringify(selectedPhotos));
+
+            // Clear chat except welcome message
+            while (chatContainer.children.length > 2) {
+                chatContainer.removeChild(chatContainer.children[1]);
+            }
+            messages = [];
+            localStorage.setItem('chatMessages', JSON.stringify(messages));
+
+            addMessageToChat('ai', "Thank you for choosing to begin your professional modeling application. I'll guide you through each required field systematically. Please provide accurate information for optimal evaluation.");
+
+            setTimeout(() => {
+                askQuestion(currentQuestion);
+                scrollToBottom();
+            }, 100);
         }
-    }
 
-    async function deleteApplication(id, isMerged = false, mergedIds = [id]) {
-        const confirmationModal = document.getElementById('confirmation-modal');
-        const confirmButton = document.getElementById('confirm-action');
-        const cancelButton = document.getElementById('cancel-action');
-        const confirmText = confirmButton.querySelector('.confirm-text');
-        const confirmSpinner = confirmButton.querySelector('.spinner');
-        
-        document.getElementById('confirmation-title').textContent = isMerged ? 'Delete All Applications' : 'Delete Application';
-        document.getElementById('confirmation-message').textContent = isMerged ? 
-            `Are you sure you want to delete all ${mergedIds.length} merged applications? This action cannot be undone.` :
-            'Are you sure you want to delete this application? This action cannot be undone.';
-        
-        confirmationModal.classList.remove('hidden');
-        confirmationModal.classList.add('modal-enter-active');
-        setTimeout(() => confirmationModal.classList.remove('modal-enter-active'), 200);
+        function askQuestion(index) {
+            if (index >= applicationQuestions.length) {
+                showApplicationReview();
+                return;
+            }
 
-        // Reset button state
-        confirmText.classList.remove('hidden');
-        confirmSpinner.classList.add('hidden');
-        confirmButton.disabled = false;
+            const question = applicationQuestions[index];
+            addMessageToChat('ai', question.question);
+            scrollToBottom();
+        }
 
-        confirmButton.onclick = async () => {
-            applicationError.classList.add('hidden');
+        function processApplicationAnswer(answer) {
+            const currentField = applicationQuestions[currentQuestion].field;
+            if (currentField !== 'photos') {
+                const validationError = validators[currentField]?.(answer);
+                if (validationError) {
+                    addMessageToChat('ai', `❌ ${validationError}`);
+                    setTimeout(() => {
+                        askQuestion(currentQuestion);
+                        scrollToBottom();
+                    }, 100);
+                    return;
+                }
+                applicationData[currentField] = answer;
+                localStorage.setItem('applicationData', JSON.stringify(applicationData));
+                currentQuestion++;
+                localStorage.setItem('currentQuestion', currentQuestion);
+                setTimeout(() => {
+                    askQuestion(currentQuestion);
+                    scrollToBottom();
+                }, 100);
+            }
+        }
+
+        function showApplicationReview() {
+            const errors = [];
+            for (const [field, value] of Object.entries(applicationData)) {
+                const error = validators[field]?.(value);
+                if (error) errors.push(`${field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}: ${error}`);
+            }
+            if (selectedPhotos.length < 2 || selectedPhotos.length > 6) {
+                errors.push('Photos: You must upload between 2 and 6 photos');
+            }
+
+            if (errors.length > 0) {
+                addMessageToChat('ai', `❌ Please complete all required fields before submitting.`);
+                setTimeout(() => {
+                    askQuestion(currentQuestion);
+                    scrollToBottom();
+                }, 100);
+                return;
+            }
+
+            const summaryDiv = document.createElement('div');
+            summaryDiv.className = 'summary-container grid grid-cols-1 sm:grid-cols-2 gap-2 p-2 bg-gray-50 rounded-lg border border-gray-200';
+            for (const [key, value] of Object.entries(applicationData)) {
+                if (value) {
+                    const displayKey = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+                    const fieldDiv = document.createElement('div');
+                    fieldDiv.className = 'summary-field';
+                    fieldDiv.dataset.field = key;
+                    fieldDiv.innerHTML = `<span class="font-bold">${displayKey}:</span> ${value}`;
+                    summaryDiv.appendChild(fieldDiv);
+                }
+            }
+            const photosDiv = document.createElement('div');
+            photosDiv.className = 'summary-photos';
+            photosDiv.dataset.field = 'photos';
+            selectedPhotos.forEach((photo, index) => {
+                const img = document.createElement('img');
+                img.src = photo.data;
+                img.alt = `Uploaded photo ${index + 1}`;
+                photosDiv.appendChild(img);
+            });
+            summaryDiv.appendChild(photosDiv);
+
+            addMessageToChat('ai', `📋 APPLICATION SUMMARY\n\nPlease review your information. Click and hold any field to edit, then submit when ready.`);
+            const botMessages = document.querySelectorAll('.chat-bubble:not(.justify-end)');
+            const lastBotMessage = botMessages[botMessages.length - 1].querySelector('.bg-white');
+            lastBotMessage.appendChild(summaryDiv);
+
+            const actionDiv = document.createElement('div');
+            actionDiv.className = 'flex space-x-2 mt-2';
+            actionDiv.innerHTML = `
+                <button onclick="submitApplication()" class="option-button bg-black hover:bg-gray-800 text-white">
+                    <i class="fas fa-check mr-1"></i> Submit Application
+                </button>
+                <button onclick="clearChatHistory()" class="option-button bg-gray-300 hover:bg-gray-400 text-gray-800">
+                    <i class="fas fa-times mr-1"></i> Cancel
+                </button>
+            `;
+            lastBotMessage.appendChild(actionDiv);
+
+            summaryDiv.querySelectorAll('.summary-field, .summary-photos').forEach(field => {
+                field.addEventListener('mousedown', (e) => {
+                    holdTimer = setTimeout(() => {
+                        currentEditField = field.dataset.field;
+                        if (currentEditField === 'photos') {
+                            photoModal.classList.remove('hidden');
+                            photoModal.querySelector('.modal-content').classList.add('show');
+                        } else {
+                            editFieldInput.value = applicationData[currentEditField] || '';
+                            editFieldModal.querySelector('#edit-modal-title').textContent = `Edit ${currentEditField.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}`;
+                            editFieldModal.classList.remove('hidden');
+                            editFieldModal.querySelector('.modal-content').classList.add('show');
+                        }
+                        scrollToBottom();
+                    }, 500);
+                });
+                field.addEventListener('mouseup', () => clearTimeout(holdTimer));
+                field.addEventListener('mouseleave', () => clearTimeout(holdTimer));
+                field.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    holdTimer = setTimeout(() => {
+                        currentEditField = field.dataset.field;
+                        if (currentEditField === 'photos') {
+                            photoModal.classList.remove('hidden');
+                            photoModal.querySelector('.modal-content').classList.add('show');
+                        } else {
+                            editFieldInput.value = applicationData[currentEditField] || '';
+                            editFieldModal.querySelector('#edit-modal-title').textContent = `Edit ${currentEditField.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}`;
+                            editFieldModal.classList.remove('hidden');
+                            editFieldModal.querySelector('.modal-content').classList.add('show');
+                        }
+                        scrollToBottom();
+                    }, 500);
+                });
+                field.addEventListener('touchend', () => clearTimeout(holdTimer));
+                field.addEventListener('touchcancel', () => clearTimeout(holdTimer));
+            });
+
+            scrollToBottom();
+        }
+
+        async function submitApplication() {
+            // Prevent multiple submissions
+            if (isSubmitting) {
+                return;
+            }
             
-            // Show loading state
-            confirmText.classList.add('hidden');
-            confirmSpinner.classList.remove('hidden');
-            confirmButton.disabled = true;
+            isSubmitting = true;
+            
+            // Disable submit button
+            const submitBtn = document.querySelector('button[onclick="submitApplication()"]');
+            const originalText = submitBtn ? submitBtn.innerHTML : '';
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Submitting...';
+            }
+            
+            // Show loading message
+            addMessageToChat('user', 'Submit my application');
+            addMessageToChat('ai', '⏳ Submitting your application...');
+            
+            // Track submission time
+            localStorage.setItem('lastApplicationSubmission', Date.now().toString());
             
             try {
-                const token = localStorage.getItem('token');
-                if (!token) {
-                    throw new Error('No token found in localStorage');
+                // Validate data client-side first
+                const errors = [];
+                for (const [field, value] of Object.entries(applicationData)) {
+                    const error = validators[field]?.(value);
+                    if (error) errors.push(`${field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}: ${error}`);
+                }
+                if (selectedPhotos.length < 2 || selectedPhotos.length > 6) {
+                    errors.push('Photos: You must upload between 2 and 6 photos');
                 }
                 
-                // Fast delete - simulate with minimal delay
-                await new Promise(resolve => setTimeout(resolve, 300));
+                if (errors.length > 0) {
+                    addMessageToChat('ai', '⚠️ Please complete all required fields before submitting.');
+                    throw new Error('Validation failed');
+                }
                 
-                // Remove from UI immediately for better UX
-                const cards = document.querySelectorAll('.card');
-                cards.forEach(card => {
-                    const name = card.querySelector('h4').textContent;
-                    if (name.includes(id.split('_')[0])) {
-                        card.style.opacity = '0.5';
-                        card.style.pointerEvents = 'none';
+                // Create FormData
+                const formData = new FormData();
+                for (const [key, value] of Object.entries(applicationData)) {
+                    if (value) {
+                        formData.append(key, value);
                     }
+                }
+                
+                // Add photos
+                const photoPromises = selectedPhotos.map(async (photo) => {
+                    const response = await fetch(photo.data);
+                    const blob = await response.blob();
+                    return blob;
                 });
                 
-                // Simulate API call completion
-                setTimeout(() => {
-                    loadApplications();
-                    document.getElementById('success-message').textContent = isMerged ? 
-                        `All ${mergedIds.length} applications deleted successfully!` : 
-                        'Application deleted successfully!';
-                    document.getElementById('success-alert').classList.remove('hidden');
-                    setTimeout(() => document.getElementById('success-alert').classList.add('hidden'), 3000);
-                }, 500);
+                const photoBlobs = await Promise.all(photoPromises);
+                photoBlobs.forEach((blob, index) => {
+                    formData.append('photos', blob, `photo${index + 1}.jpg`);
+                });
+                
+                // Submit to API
+                const response = await fetch(`${config.apiBaseUrl}/applications`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    // SUCCESS - Clear everything
+                    clearApplicationData();
+                    
+                    // Show success message
+                    const appId = data.applicationId || 'APP' + Date.now().toString().slice(-8);
+                    addMessageToChat('ai', `✅ APPLICATION SUBMITTED SUCCESSFULLY!\n\nYour application #${appId} has been received.\n\nOur team will review it within 7-10 business days.`);
+                    
+                    // Add navigation buttons
+                    const actionDiv = document.createElement('div');
+                    actionDiv.className = 'flex space-x-2 mt-4';
+                    actionDiv.innerHTML = `
+                        <button onclick="window.location.href='home.html'" 
+                                class="option-button bg-green-600 hover:bg-green-700 text-white">
+                            <i class="fas fa-home mr-1"></i> Return to Home
+                        </button>
+                        <button onclick="clearChatHistory()" 
+                                class="option-button bg-gray-300 hover:bg-gray-400 text-gray-800">
+                            <i class="fas fa-redo mr-1"></i> Start New Application
+                        </button>
+                    `;
+                    
+                    const botMessages = document.querySelectorAll('.chat-bubble:not(.justify-end)');
+                    if (botMessages.length > 0) {
+                        const lastBotMessage = botMessages[botMessages.length - 1].querySelector('.bg-white');
+                        lastBotMessage.appendChild(actionDiv);
+                    }
+                    
+                } else {
+                    // Handle API errors gracefully
+                    let errorMessage = 'Unable to submit application. Please try again.';
+                    
+                    if (data.message) {
+                        if (data.message.includes('already submitted') || data.message.includes('24 hours') || data.message.includes('wait')) {
+                            errorMessage = data.message;
+                        } else if (data.message.includes('photos')) {
+                            errorMessage = 'Please upload between 2 and 6 photos.';
+                        } else {
+                            errorMessage = data.message;
+                        }
+                    }
+                    
+                    addMessageToChat('ai', `❌ ${errorMessage}`);
+                    
+                    // Re-enable submit button
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalText;
+                    }
+                }
                 
             } catch (error) {
-                applicationError.textContent = error.message;
-                applicationError.classList.remove('hidden');
-                document.getElementById('error-message').textContent = error.message;
-                document.getElementById('error-alert').classList.remove('hidden');
-                setTimeout(() => document.getElementById('error-alert').classList.add('hidden'), 3000);
+                console.error('Submission error:', error);
+                
+                // Show user-friendly error message
+                if (error.message !== 'Validation failed') {
+                    addMessageToChat('ai', '⚠️ There was a problem submitting your application. Please check your connection and try again.');
+                }
+                
+                // Re-enable submit button
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }
+                
             } finally {
-                confirmationModal.classList.add('modal-exit-active');
-                setTimeout(() => {
-                    confirmationModal.classList.add('hidden');
-                    confirmationModal.classList.remove('modal-exit-active');
-                    // Reset button
-                    confirmText.classList.remove('hidden');
-                    confirmSpinner.classList.add('hidden');
-                    confirmButton.disabled = false;
-                }, 200);
+                isSubmitting = false;
+                scrollToBottom();
             }
-        };
+        }
 
-        cancelButton.onclick = () => {
-            confirmationModal.classList.add('modal-exit-active');
-            setTimeout(() => {
-                confirmationModal.classList.add('hidden');
-                confirmationModal.classList.remove('modal-exit-active');
-            }, 200);
-        };
+        function restoreMessages() {
+            messages.forEach(({ sender, message, timestamp }) => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `chat-bubble flex ${sender === 'user' ? 'justify-end' : 'flex-row'}`;
+                const isAppQuestion = isApplicationActive && applicationQuestions[currentQuestion] && applicationQuestions[currentQuestion].question === message;
+                const isAIResponseToQuestion = sender === 'ai' && messages.length > 0 && messages[messages.length - 1].message === 'I have a question about the application' && messages[messages.length - 1].sender === 'user';
 
-        confirmationModal.addEventListener('click', (e) => {
-            if (e.target === confirmationModal) {
-                confirmationModal.classList.add('modal-exit-active');
-                setTimeout(() => {
-                    confirmationModal.classList.add('hidden');
-                    confirmationModal.classList.remove('modal-exit-active');
-                }, 200);
+                if (sender === 'user') {
+                    messageDiv.innerHTML = `
+                        <div class="bg-black text-white p-3 rounded-lg">
+                            <p class="text-sm">${message}</p>
+                            <div class="message-timestamp">${timestamp}</div>
+                        </div>
+                        <div class="w-8 h-8 rounded-full bg-gray-800 flex-shrink-0 flex items-center justify-center ml-2 avatar">
+                            <i class="fas fa-user text-white text-sm" aria-label="User"></i>
+                        </div>
+                    `;
+                } else {
+                    messageDiv.innerHTML = `
+                        <div class="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 flex items-center justify-center mr-2 avatar">
+                            <i class="fas fa-robot text-gray-600 text-sm" aria-label=" Assistant, AI Assistant"></i>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg border border-gray-200">
+                            <p class="text-gray-800 text-sm font-semibold"> Assistant</p>
+                            <p class="text-gray-800 text-sm">${message}</p>
+                            ${isAppQuestion && applicationQuestions.find(q => q.question === message)?.example ?
+                                `<div class="example-box">${applicationQuestions.find(q => q.question === message).example}</div>` : ''}
+                            ${isAppQuestion && applicationQuestions.find(q => q.question === message)?.field === 'photos' ?
+                                `<div class="mt-2">
+                                    <button onclick="document.getElementById('photo-upload-modal').classList.remove('hidden'); document.getElementById('photo-upload-modal').querySelector('.modal-content').classList.add('show')" class="option-button">
+                                        Upload Photos
+                                    </button>
+                                </div>` : ''}
+                            ${isAIResponseToQuestion ? `
+                                <div class="mt-2">
+                                    <a href="https://wa.me/+2347080717976?text=Hi,%20I%20have%20a%20question%20about%20my%20Beige%20Model%20Agency%20application" target="_blank" class="whatsapp-button">
+                                        <i class="fab fa-whatsapp mr-1"></i> Chat on WhatsApp
+                                    </a>
+                                </div>` : ''}
+                            <div class="message-timestamp">${timestamp}</div>
+                        </div>
+                    `;
+                }
+
+                chatContainer.insertBefore(messageDiv, typingIndicator);
+            });
+            if (messages.length > 0) {
+                updateImagePreview();
+                scrollToBottom();
             }
-        });
+        }
 
-        confirmationModal.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                confirmationModal.classList.add('modal-exit-active');
-                setTimeout(() => {
-                    confirmationModal.classList.add('hidden');
-                    confirmationModal.classList.remove('modal-exit-active');
-                }, 200);
+        // Check cooldown on page load
+        function checkPageLoadCooldown() {
+            const cooldown = localStorage.getItem('applicationCooldown');
+            if (cooldown && Date.now() < parseInt(cooldown)) {
+                const hoursLeft = Math.ceil((parseInt(cooldown) - Date.now()) / (1000 * 60 * 60));
+                
+                // Disable start button
+                const startBtn = document.querySelector('button[onclick="startApplication()"]');
+                if (startBtn) {
+                    startBtn.disabled = true;
+                    startBtn.innerHTML = `<i class="fas fa-clock mr-1"></i> Wait ${hoursLeft}h`;
+                    startBtn.title = `Please wait ${hoursLeft} hour(s) before applying again`;
+                }
             }
-        });
-    }
+        }
+
+        if (localStorage.getItem('chatMessages') && JSON.parse(localStorage.getItem('chatMessages')).length > 0) {
+            clearChatModal.classList.remove('hidden');
+            clearChatModal.querySelector('.modal-content').classList.add('show');
+            scrollToBottom();
+        } else {
+            restoreMessages();
+            checkPageLoadCooldown();
+            scrollToBottom();
+        }
+
+        window.startApplication = startApplication;
+        window.submitApplication = submitApplication;
+        window.addMessageToChat = addMessageToChat;
+        window.closePhotoModal = closePhotoModal;
+        window.submitPhotos = submitPhotos;
+        window.removePhoto = removePhoto;
+        window.saveFieldEdit = saveFieldEdit;
+        window.closeEditModal = closeEditModal;
+        window.clearChatHistory = clearChatHistory;
+        window.keepChatHistory = keepChatHistory;
+
+        // Initialize
+        adjustSectionPadding();
+    });
+
+    window.addEventListener('load', () => {
+        adjustSectionPadding();
+    });
 </script>
 </body>
 </html>
