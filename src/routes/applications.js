@@ -6,18 +6,6 @@ const { check, validationResult } = require('express-validator');
 const cloudinary = require('../config/cloudinary');
 const multer = require('multer');
 const path = require('path');
-const nodemailer = require('nodemailer');
-
-// Configure Nodemailer with Elastic Email SMTP
-require('dotenv').config();
-const transporter = nodemailer.createTransport({
-    host: 'smtp.elasticemail.com',
-    port: 2525,
-    auth: {
-        user: process.env.ELASTIC_EMAIL_USERNAME, // divineshedrack1@gmail.com
-        pass: process.env.ELASTIC_EMAIL_PASSWORD // 89A9E5AF296F6FE0AE6B304A7683A9F6CF8D
-    }
-});
 
 // Configure Multer for file uploads
 const storage = multer.memoryStorage();
@@ -61,13 +49,28 @@ router.post('/', upload.array('photos', 6), applicationValidation, async (req, r
         return res.status(400).json({ message: errors.array()[0].msg });
     }
 
-    console.log('Received files:', req.files ? req.files.length : 0); // Debug log
+    console.log('Received files:', req.files ? req.files.length : 0);
     if (!req.files || req.files.length < 2 || req.files.length > 6) {
         console.log('Invalid number of files:', req.files ? req.files.length : 0);
         return res.status(400).json({ message: 'You must upload between 2 and 6 photos' });
     }
 
     try {
+        // Check for duplicate applications in the last 24 hours
+        const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+        const existingApplication = await Application.findOne({
+            email: req.body.email.toLowerCase(),
+            createdAt: { $gte: twentyFourHoursAgo }
+        });
+
+        if (existingApplication) {
+            const hoursAgo = Math.floor((new Date() - existingApplication.createdAt) / (1000 * 60 * 60));
+            console.log(`Duplicate application detected for email: ${req.body.email}`);
+            return res.status(429).json({
+                message: `You have already submitted an application. Please wait 24 hours before submitting again.`
+            });
+        }
+
         // Upload images to Cloudinary
         const photoUrls = await Promise.all(
             req.files.map(async (file) => {
@@ -76,7 +79,7 @@ router.post('/', upload.array('photos', 6), applicationValidation, async (req, r
                         folder: 'beige_applications',
                         resource_type: 'image'
                     });
-                    console.log('Uploaded to Cloudinary:', result.secure_url); // Debug log
+                    console.log('Uploaded to Cloudinary:', result.secure_url);
                     return result.secure_url;
                 } catch (uploadError) {
                     console.error('Cloudinary upload error:', uploadError);
@@ -85,57 +88,34 @@ router.post('/', upload.array('photos', 6), applicationValidation, async (req, r
             })
         );
 
-        console.log('Photo URLs:', photoUrls); // Debug log
+        console.log('Photo URLs:', photoUrls);
 
         const applicationData = {
             ...req.body,
+            email: req.body.email.toLowerCase(),
             photos: photoUrls
         };
 
-        console.log('Application data:', applicationData); // Debug log
+        console.log('Application data:', applicationData);
 
         const application = new Application(applicationData);
         await application.save();
         console.log('Application saved successfully:', application._id);
 
-        // Send email notification using Elastic Email SMTP
-        const mailOptions = {
-            from: process.env.ELASTIC_EMAIL_FROM, // divineshedrack1@gmail.com
-            to: ' a39345767@gmail.com', // Replace with your actual receiving email
-            subject: `New Application Submitted - ${req.body.firstName} ${req.body.lastName}`,
-            html: `
-                <h2>New Model Application</h2>
-                <p><strong>Name:</strong> ${req.body.firstName} ${req.body.lastName}</p>
-                <p><strong>Email:</strong> ${req.body.email}</p>
-                <p><strong>Date of Birth:</strong> ${req.body.dob}</p>
-                <p><strong>Height:</strong> ${req.body.height}</p>
-                <p><strong>Measurements:</strong> Bust: ${req.body.bust}, Waist: ${req.body.waist}, Hips: ${req.body.hips}</p>
-                <p><strong>Location:</strong> ${req.body.location}</p>
-                <p><strong>Instagram:</strong> ${req.body.instagram || 'N/A'}</p>
-                <p><strong>TikTok:</strong> ${req.body.tiktok || 'N/A'}</p>
-                <p><strong>Agency Representation:</strong> ${req.body.justCo}</p>
-                <p><strong>Available Start Date:</strong> ${req.body.startDate}</p>
-                <p><strong>Alternative Contact:</strong> ${req.body.altContact}</p>
-                <p><strong>Photos:</strong></p>
-                <ul>
-                    ${photoUrls.map(url => `<li><a href="${url}" target="_blank">View Photo</a></li>`).join('')}
-                </ul>
-                <p><strong>Application ID:</strong> ${application._id}</p>
-            `,
-            text: `New Model Application: Name: ${req.body.firstName} ${req.body.lastName}, Email: ${req.body.email}, ...`
-        };
+        // ✅ Email sending completely removed
 
-        await transporter.sendMail(mailOptions);
-        console.log('Email sent successfully via Elastic Email SMTP');
-
-        res.status(201).json({ message: 'Application submitted successfully' });
+        res.status(201).json({ 
+            message: 'Application submitted successfully',
+            applicationId: application._id
+        });
+        
     } catch (error) {
-        console.error('Error saving application or sending email:', error);
+        console.error('Error saving application:', error);
         res.status(500).json({ message: `Server error: ${error.message}` });
     }
 });
 
-// GET, PUT, DELETE routes (unchanged)
+// GET /api/applications - Get all applications (Admin only)
 router.get('/', auth, async (req, res) => {
     try {
         const applications = await Application.find().sort({ createdAt: -1 });
@@ -146,6 +126,7 @@ router.get('/', auth, async (req, res) => {
     }
 });
 
+// PUT /api/applications/:id - Update application status
 router.put('/:id', auth, [
     check('status').isIn(['pending', 'reviewed', 'accepted', 'rejected']).withMessage('Invalid status')
 ], async (req, res) => {
@@ -171,6 +152,7 @@ router.put('/:id', auth, [
     }
 });
 
+// DELETE /api/applications/:id - Delete application
 router.delete('/:id', auth, async (req, res) => {
     try {
         const application = await Application.findById(req.params.id);
