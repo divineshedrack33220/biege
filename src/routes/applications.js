@@ -6,18 +6,6 @@ const { check, validationResult } = require('express-validator');
 const cloudinary = require('../config/cloudinary');
 const multer = require('multer');
 const path = require('path');
-const nodemailer = require('nodemailer');
-
-// Configure Nodemailer with Elastic Email SMTP
-require('dotenv').config();
-const transporter = nodemailer.createTransport({
-    host: 'smtp.elasticemail.com',
-    port: 2525,
-    auth: {
-        user: process.env.ELASTIC_EMAIL_USERNAME, // divineshedrack1@gmail.com
-        pass: process.env.ELASTIC_EMAIL_PASSWORD // 89A9E5AF296F6FE0AE6B304A7683A9F6CF8D
-    }
-});
 
 // Configure Multer for file uploads
 const storage = multer.memoryStorage();
@@ -49,7 +37,7 @@ const applicationValidation = [
     check('location').notEmpty().withMessage('Location is required'),
     check('dob').notEmpty().withMessage('Date of birth is required'),
     check('startDate').notEmpty().withMessage('Start date is required'),
-    check('email').notEmpty().withMessage('Email is required'),
+    check('email').isEmail().withMessage('Please provide a valid email'),
     check('altContact').notEmpty().withMessage('Alternative contact method is required')
 ];
 
@@ -57,140 +45,194 @@ const applicationValidation = [
 router.post('/', upload.array('photos', 6), applicationValidation, async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        console.log('Validation errors:', errors.array());
-        return res.status(400).json({ message: errors.array()[0].msg });
+        return res.status(400).json({ 
+            success: false,
+            message: 'Please complete all required fields correctly.'
+        });
     }
 
-    console.log('Received files:', req.files ? req.files.length : 0); // Debug log
     if (!req.files || req.files.length < 2 || req.files.length > 6) {
-        console.log('Invalid number of files:', req.files ? req.files.length : 0);
-        return res.status(400).json({ message: 'You must upload between 2 and 6 photos' });
+        return res.status(400).json({ 
+            success: false,
+            message: 'Please upload between 2 and 6 photos.'
+        });
     }
 
     try {
-        // Upload images to Cloudinary
-        const photoUrls = await Promise.all(
-            req.files.map(async (file) => {
-                try {
-                    const result = await cloudinary.uploader.upload(`data:${file.mimetype};base64,${file.buffer.toString('base64')}`, {
-                        folder: 'beige_applications',
-                        resource_type: 'image'
-                    });
-                    console.log('Uploaded to Cloudinary:', result.secure_url); // Debug log
-                    return result.secure_url;
-                } catch (uploadError) {
-                    console.error('Cloudinary upload error:', uploadError);
-                    throw new Error(`Failed to upload ${file.originalname}: ${uploadError.message}`);
-                }
-            })
-        );
+        // Check for duplicate applications in the last 24 hours
+        const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+        const existingApplication = await Application.findOne({
+            email: req.body.email.toLowerCase(),
+            createdAt: { $gte: twentyFourHoursAgo }
+        });
 
-        console.log('Photo URLs:', photoUrls); // Debug log
+        if (existingApplication) {
+            const hoursAgo = Math.floor((new Date() - existingApplication.createdAt) / (1000 * 60 * 60));
+            const hoursLeft = 24 - hoursAgo;
+            return res.status(429).json({
+                success: false,
+                message: `You have already submitted an application. Please wait ${hoursLeft} hour(s) before submitting again.`
+            });
+        }
 
-        const applicationData = {
+        // Upload images to Cloudinary with fallback
+        const photoUrls = [];
+        for (const file of req.files) {
+            try {
+                const result = await cloudinary.uploader.upload(`data:${file.mimetype};base64,${file.buffer.toString('base64')}`, {
+                    folder: 'beige_applications',
+                    resource_type: 'image'
+                });
+                photoUrls.push(result.secure_url);
+            } catch (uploadError) {
+                console.warn('Cloudinary upload failed, using base64:', uploadError.message);
+                // Fallback to base64
+                photoUrls.push(`data:${file.mimetype};base64,${file.buffer.toString('base64')}`);
+            }
+        }
+
+        // Create and save application
+        const application = new Application({
             ...req.body,
-            photos: photoUrls
-        };
+            email: req.body.email.toLowerCase(),
+            photos: photoUrls,
+            status: 'pending'
+        });
 
-        console.log('Application data:', applicationData); // Debug log
-
-        const application = new Application(applicationData);
         await application.save();
-        console.log('Application saved successfully:', application._id);
+        console.log(`✅ Application saved: ${application._id} - ${application.email}`);
 
-        // Send email notification using Elastic Email SMTP
-        const mailOptions = {
-            from: process.env.ELASTIC_EMAIL_FROM, // divineshedrack1@gmail.com
-            to: ' a39345767@gmail.com', // Replace with your actual receiving email
-            subject: `New Application Submitted - ${req.body.firstName} ${req.body.lastName}`,
-            html: `
-                <h2>New Model Application</h2>
-                <p><strong>Name:</strong> ${req.body.firstName} ${req.body.lastName}</p>
-                <p><strong>Email:</strong> ${req.body.email}</p>
-                <p><strong>Date of Birth:</strong> ${req.body.dob}</p>
-                <p><strong>Height:</strong> ${req.body.height}</p>
-                <p><strong>Measurements:</strong> Bust: ${req.body.bust}, Waist: ${req.body.waist}, Hips: ${req.body.hips}</p>
-                <p><strong>Location:</strong> ${req.body.location}</p>
-                <p><strong>Instagram:</strong> ${req.body.instagram || 'N/A'}</p>
-                <p><strong>TikTok:</strong> ${req.body.tiktok || 'N/A'}</p>
-                <p><strong>Agency Representation:</strong> ${req.body.justCo}</p>
-                <p><strong>Available Start Date:</strong> ${req.body.startDate}</p>
-                <p><strong>Alternative Contact:</strong> ${req.body.altContact}</p>
-                <p><strong>Photos:</strong></p>
-                <ul>
-                    ${photoUrls.map(url => `<li><a href="${url}" target="_blank">View Photo</a></li>`).join('')}
-                </ul>
-                <p><strong>Application ID:</strong> ${application._id}</p>
-            `,
-            text: `New Model Application: Name: ${req.body.firstName} ${req.body.lastName}, Email: ${req.body.email}, ...`
-        };
+        // Success response
+        res.status(201).json({
+            success: true,
+            message: 'Application submitted successfully!',
+            applicationId: application._id,
+            data: {
+                id: application._id,
+                email: application.email,
+                name: `${application.firstName} ${application.lastName}`,
+                submittedAt: application.createdAt
+            }
+        });
 
-        await transporter.sendMail(mailOptions);
-        console.log('Email sent successfully via Elastic Email SMTP');
-
-        res.status(201).json({ message: 'Application submitted successfully' });
     } catch (error) {
-        console.error('Error saving application or sending email:', error);
-        res.status(500).json({ message: `Server error: ${error.message}` });
+        console.error('❌ Error saving application:', error);
+        
+        let errorMessage = 'Unable to process your application. Please try again.';
+        
+        if (error.name === 'ValidationError') {
+            errorMessage = 'Please check your information and try again.';
+        } else if (error.message.includes('duplicate')) {
+            errorMessage = 'This email has already been used recently.';
+        }
+        
+        res.status(500).json({ 
+            success: false,
+            message: errorMessage 
+        });
     }
 });
 
-// GET, PUT, DELETE routes (unchanged)
+// GET /api/applications - Get all applications (Admin only)
 router.get('/', auth, async (req, res) => {
     try {
         const applications = await Application.find().sort({ createdAt: -1 });
-        res.json(applications);
+        res.json({
+            success: true,
+            count: applications.length,
+            data: applications
+        });
     } catch (error) {
         console.error('Error fetching applications:', error);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ 
+            success: false,
+            message: 'Unable to fetch applications' 
+        });
     }
 });
 
+// PUT /api/applications/:id - Update application status
 router.put('/:id', auth, [
     check('status').isIn(['pending', 'reviewed', 'accepted', 'rejected']).withMessage('Invalid status')
 ], async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(400).json({ message: errors.array()[0].msg });
+        return res.status(400).json({ 
+            success: false,
+            message: errors.array()[0].msg 
+        });
     }
 
     try {
         const application = await Application.findByIdAndUpdate(
             req.params.id,
-            { status: req.body.status },
+            { 
+                status: req.body.status,
+                updatedAt: new Date()
+            },
             { new: true }
         );
+        
         if (!application) {
-            return res.status(404).json({ message: 'Application not found' });
+            return res.status(404).json({ 
+                success: false,
+                message: 'Application not found' 
+            });
         }
-        console.log('Application status updated:', application);
-        res.json(application);
+        
+        res.json({
+            success: true,
+            message: 'Application updated successfully',
+            data: application
+        });
     } catch (error) {
-        console.error('Error updating application status:', error);
-        res.status(500).json({ message: 'Server error' });
+        console.error('Error updating application:', error);
+        res.status(500).json({ 
+            success: false,
+            message: 'Unable to update application' 
+        });
     }
 });
 
+// DELETE /api/applications/:id - Delete application
 router.delete('/:id', auth, async (req, res) => {
     try {
         const application = await Application.findById(req.params.id);
         if (!application) {
-            console.log('Application not found for ID:', req.params.id);
-            return res.status(404).json({ message: 'Application not found' });
+            return res.status(404).json({ 
+                success: false,
+                message: 'Application not found' 
+            });
         }
 
-        // Delete associated images from Cloudinary
-        for (const photoUrl of application.photos) {
-            const publicId = photoUrl.split('/').pop().split('.')[0];
-            await cloudinary.uploader.destroy(`beige_applications/${publicId}`);
+        // Delete images from Cloudinary
+        if (application.photos && application.photos.length > 0) {
+            for (const photoUrl of application.photos) {
+                try {
+                    if (photoUrl.includes('cloudinary.com')) {
+                        const parts = photoUrl.split('/');
+                        const filename = parts[parts.length - 1];
+                        const publicId = filename.split('.')[0];
+                        await cloudinary.uploader.destroy(`beige_applications/${publicId}`);
+                    }
+                } catch (cloudinaryError) {
+                    console.warn('Failed to delete Cloudinary image:', cloudinaryError);
+                }
+            }
         }
 
         await Application.findByIdAndDelete(req.params.id);
-        console.log('Application deleted:', application);
-        res.json({ message: 'Application deleted successfully' });
+        
+        res.json({
+            success: true,
+            message: 'Application deleted successfully'
+        });
     } catch (error) {
         console.error('Error deleting application:', error);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ 
+            success: false,
+            message: 'Unable to delete application' 
+        });
     }
 });
 
