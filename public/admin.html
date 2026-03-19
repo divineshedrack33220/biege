@@ -659,614 +659,661 @@
     </div>
 
 <script>
-    let bookingsChartInstance = null;
-    let categoriesChartInstance = null;
-    let pendingItems = []; // Global variable to track pending items
-    let countdownInterval = null;
-    let retryInterval = 5; // Start with 5 seconds
-    const maxInterval = 18000; // 5 hours in seconds
-    let retryAttempt = 0;
+   let bookingsChartInstance = null;
+let categoriesChartInstance = null;
+let pendingItems = [];
+let countdownInterval = null;
+let retryInterval = 5;
+const maxInterval = 18000;
+let retryAttempt = 0;
 
-    function decodeToken(token) {
-        if (!token) {
-            console.error('No token provided for decoding');
-            return false;
-        }
-        try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            console.log('Token payload:', payload);
-            const exp = payload.exp * 1000;
-            const now = Date.now();
-            console.log('Token expires at:', new Date(exp).toLocaleString());
-            console.log('Current time:', new Date(now).toLocaleString());
-            return exp > now;
-        } catch (error) {
-            console.error('Error decoding token:', error);
-            return false;
-        }
+function decodeToken(token) {
+    if (!token) {
+        console.error('No token provided for decoding');
+        return false;
     }
-
-    const token = localStorage.getItem('token');
-    const loginSection = document.getElementById('login-section');
-    const dashboard = document.getElementById('dashboard');
-    const loginForm = document.getElementById('login-form');
-    const loginError = document.getElementById('login-error');
-    const bookingError = document.getElementById('booking-error');
-    const bookingLoading = document.getElementById('booking-loading');
-    const applicationError = document.getElementById('application-error');
-    const applicationLoading = document.getElementById('application-loading');
-    const dashboardTitle = document.getElementById('dashboard-title');
-    const navItems = document.querySelectorAll('.nav-item');
-    const sections = document.querySelectorAll('#dashboard-content > div[id$="-section"]');
-
-    // Sidebar toggle functionality
-    const sidebar = document.querySelector('.sidebar');
-    const contentArea = document.querySelector('.content-area');
-    const sidebarToggle = document.getElementById('sidebar-toggle');
-    if (sidebarToggle) {
-        sidebarToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('sidebar-collapsed');
-            contentArea.classList.toggle('content-expanded');
-        });
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        console.log('Token payload:', payload);
+        const exp = payload.exp * 1000;
+        const now = Date.now();
+        console.log('Token expires at:', new Date(exp).toLocaleString());
+        console.log('Current time:', new Date(now).toLocaleString());
+        return exp > now;
+    } catch (error) {
+        console.error('Error decoding token:', error);
+        return false;
     }
+}
 
-    // User menu toggle
-    const userMenuButton = document.getElementById('user-menu-button');
-    const userMenu = document.getElementById('user-menu');
-    if (userMenuButton) {
-        userMenuButton.addEventListener('click', () => {
-            userMenu.classList.toggle('hidden');
-        });
-    }
+const token = localStorage.getItem('token');
+const loginSection = document.getElementById('login-section');
+const dashboard = document.getElementById('dashboard');
+const loginForm = document.getElementById('login-form');
+const loginError = document.getElementById('login-error');
+const bookingError = document.getElementById('booking-error');
+const bookingLoading = document.getElementById('booking-loading');
+const applicationError = document.getElementById('application-error');
+const applicationLoading = document.getElementById('application-loading');
+const dashboardTitle = document.getElementById('dashboard-title');
+const navItems = document.querySelectorAll('.nav-item');
+const sections = document.querySelectorAll('#dashboard-content > div[id$="-section"]');
 
-    // Section navigation
-    navItems.forEach(item => {
-        item.addEventListener('click', (e) => {
-            const href = item.getAttribute('href');
-            const sectionId = item.getAttribute('data-section');
-            if (href === '#' && sectionId) {
-                e.preventDefault();
-                sections.forEach(section => {
-                    section.classList.add('hidden');
-                    if (section.id === sectionId) {
-                        section.classList.remove('hidden');
-                        if (dashboardTitle) {
-                            dashboardTitle.textContent = item.querySelector('.sidebar-text').textContent;
-                        }
-                    }
-                });
-                navItems.forEach(nav => nav.classList.remove('active'));
-                item.classList.add('active');
-            }
-        });
+// Sidebar toggle functionality
+const sidebar = document.querySelector('.sidebar');
+const contentArea = document.querySelector('.content-area');
+const sidebarToggle = document.getElementById('sidebar-toggle');
+if (sidebarToggle) {
+    sidebarToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('sidebar-collapsed');
+        contentArea.classList.toggle('content-expanded');
     });
+}
 
-    function checkOnlineStatus() {
-        return navigator.onLine;
-    }
+// User menu toggle
+const userMenuButton = document.getElementById('user-menu-button');
+const userMenu = document.getElementById('user-menu');
+if (userMenuButton) {
+    userMenuButton.addEventListener('click', () => {
+        userMenu.classList.toggle('hidden');
+    });
+}
 
-    function showOfflineAlert() {
-        const offlineAlert = document.getElementById('offline-alert');
-        const countdownTimer = document.getElementById('countdown-timer');
-        let countdown = retryInterval;
+// Section navigation
+navItems.forEach(item => {
+    item.addEventListener('click', (e) => {
+        const href = item.getAttribute('href');
+        const sectionId = item.getAttribute('data-section');
+        if (href === '#' && sectionId) {
+            e.preventDefault();
+            sections.forEach(section => {
+                section.classList.add('hidden');
+                if (section.id === sectionId) {
+                    section.classList.remove('hidden');
+                    if (dashboardTitle) {
+                        dashboardTitle.textContent = item.querySelector('.sidebar-text').textContent;
+                    }
+                }
+            });
+            navItems.forEach(nav => nav.classList.remove('active'));
+            item.classList.add('active');
+        }
+    });
+});
 
-        if (offlineAlert && countdownTimer) {
-            offlineAlert.classList.remove('hidden');
-            offlineAlert.classList.add('slideIn');
+function checkOnlineStatus() {
+    return navigator.onLine;
+}
+
+function showOfflineAlert() {
+    const offlineAlert = document.getElementById('offline-alert');
+    const countdownTimer = document.getElementById('countdown-timer');
+    let countdown = retryInterval;
+
+    if (offlineAlert && countdownTimer) {
+        offlineAlert.classList.remove('hidden');
+        offlineAlert.classList.add('slideIn');
+        countdownTimer.textContent = countdown;
+
+        clearInterval(countdownInterval);
+        countdownInterval = setInterval(() => {
+            countdown--;
             countdownTimer.textContent = countdown;
-
-            // Start countdown
-            clearInterval(countdownInterval);
-            countdownInterval = setInterval(() => {
-                countdown--;
-                countdownTimer.textContent = countdown;
-                if (countdown <= 0) {
-                    clearInterval(countdownInterval);
-                    attemptReconnect();
-                }
-            }, 1000);
-        }
-    }
-
-    function hideOfflineAlert() {
-        const offlineAlert = document.getElementById('offline-alert');
-        if (offlineAlert) {
-            offlineAlert.classList.add('hidden');
-            clearInterval(countdownInterval);
-        }
-    }
-
-    async function attemptReconnect() {
-        try {
-            await fetch('/api/ping', { method: 'HEAD', cache: 'no-store' });
-            hideOfflineAlert();
-            window.location.reload();
-        } catch (error) {
-            console.error('Reconnect attempt failed:', error);
-            retryAttempt++;
-            retryInterval = Math.min(retryInterval * 2, maxInterval);
-            if (retryInterval >= maxInterval) {
-                console.log('Max retry interval reached (5 hours). Stopping retries.');
-                hideOfflineAlert();
-                const errorMessage = document.getElementById('error-message');
-                if (errorMessage) {
-                    errorMessage.textContent = 'No internet after 5 hours. Please check your connection.';
-                    document.getElementById('error-alert').classList.remove('hidden');
-                }
-                return;
+            if (countdown <= 0) {
+                clearInterval(countdownInterval);
+                attemptReconnect();
             }
-            showOfflineAlert();
-        }
+        }, 1000);
     }
+}
 
-    window.addEventListener('offline', () => {
-        console.log('Internet connection lost');
-        retryInterval = 5;
-        retryAttempt = 0;
-        showOfflineAlert();
-    });
+function hideOfflineAlert() {
+    const offlineAlert = document.getElementById('offline-alert');
+    if (offlineAlert) {
+        offlineAlert.classList.add('hidden');
+        clearInterval(countdownInterval);
+    }
+}
 
-    window.addEventListener('online', () => {
-        console.log('Internet connection restored');
+async function attemptReconnect() {
+    try {
+        await fetch('/api/ping', { method: 'HEAD', cache: 'no-store' });
         hideOfflineAlert();
-        retryInterval = 5;
-        retryAttempt = 0;
         window.location.reload();
-    });
-
-    const retryNowButton = document.getElementById('retry-now');
-    if (retryNowButton) {
-        retryNowButton.addEventListener('click', attemptReconnect);
-    }
-
-    if (!checkOnlineStatus()) {
+    } catch (error) {
+        console.error('Reconnect attempt failed:', error);
+        retryAttempt++;
+        retryInterval = Math.min(retryInterval * 2, maxInterval);
+        if (retryInterval >= maxInterval) {
+            console.log('Max retry interval reached (5 hours). Stopping retries.');
+            hideOfflineAlert();
+            const errorMessage = document.getElementById('error-message');
+            if (errorMessage) {
+                errorMessage.textContent = 'No internet after 5 hours. Please check your connection.';
+                document.getElementById('error-alert').classList.remove('hidden');
+            }
+            return;
+        }
         showOfflineAlert();
     }
+}
 
-    // Modal controls
-    const closeLoginModal = document.getElementById('close-login-modal');
-    function closeModal() {
-        if (loginSection) {
-            loginSection.classList.add('modal-exit-active');
-            setTimeout(() => {
-                loginSection.classList.add('hidden');
-                loginSection.classList.remove('modal-exit-active');
-                if (loginError) loginError.classList.add('hidden');
-                if (loginForm) loginForm.reset();
-            }, 200);
-        }
-    }
+window.addEventListener('offline', () => {
+    console.log('Internet connection lost');
+    retryInterval = 5;
+    retryAttempt = 0;
+    showOfflineAlert();
+});
 
-    if (closeLoginModal) {
-        closeLoginModal.addEventListener('click', closeModal);
-    }
+window.addEventListener('online', () => {
+    console.log('Internet connection restored');
+    hideOfflineAlert();
+    retryInterval = 5;
+    retryAttempt = 0;
+    window.location.reload();
+});
 
-    // Close login modal on outside click or Escape key
+const retryNowButton = document.getElementById('retry-now');
+if (retryNowButton) {
+    retryNowButton.addEventListener('click', attemptReconnect);
+}
+
+if (!checkOnlineStatus()) {
+    showOfflineAlert();
+}
+
+// Modal controls
+const closeLoginModal = document.getElementById('close-login-modal');
+function closeModal() {
     if (loginSection) {
-        loginSection.addEventListener('click', (e) => {
-            if (e.target === loginSection) {
-                closeModal();
-            }
-        });
-
-        loginSection.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                closeModal();
-            }
-        });
-    }
-
-    // Initial token check
-    function initializeLoginState() {
-        if (!token) {
-            console.log('No token found in localStorage');
-            loginSection.classList.remove('hidden');
-            loginSection.classList.add('modal-enter-active');
-            setTimeout(() => loginSection.classList.remove('modal-enter-active'), 200);
-            dashboard.classList.add('hidden');
-            if (loginError) {
-                loginError.textContent = 'No session found. Please log in.';
-                loginError.classList.remove('hidden');
-            }
-        } else if (decodeToken(token)) {
-            console.log('Token is valid');
+        loginSection.classList.add('modal-exit-active');
+        setTimeout(() => {
             loginSection.classList.add('hidden');
-            dashboard.classList.remove('hidden');
-            loadDashboard();
-        } else {
-            console.log('Token is expired or invalid');
-            localStorage.removeItem('token');
-            loginSection.classList.remove('hidden');
-            loginSection.classList.add('modal-enter-active');
-            setTimeout(() => loginSection.classList.remove('modal-enter-active'), 200);
-            dashboard.classList.add('hidden');
-            if (loginError) {
-                loginError.textContent = 'Session expired. Please log in again.';
-                loginError.classList.remove('hidden');
-            }
+            loginSection.classList.remove('modal-exit-active');
+            if (loginError) loginError.classList.add('hidden');
+            if (loginForm) loginForm.reset();
+        }, 200);
+    }
+}
+
+if (closeLoginModal) {
+    closeLoginModal.addEventListener('click', closeModal);
+}
+
+if (loginSection) {
+    loginSection.addEventListener('click', (e) => {
+        if (e.target === loginSection) {
+            closeModal();
+        }
+    });
+
+    loginSection.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeModal();
+        }
+    });
+}
+
+// Initial token check
+function initializeLoginState() {
+    if (!token) {
+        console.log('No token found in localStorage');
+        loginSection.classList.remove('hidden');
+        loginSection.classList.add('modal-enter-active');
+        setTimeout(() => loginSection.classList.remove('modal-enter-active'), 200);
+        dashboard.classList.add('hidden');
+        if (loginError) {
+            loginError.textContent = 'No session found. Please log in.';
+            loginError.classList.remove('hidden');
+        }
+    } else if (decodeToken(token)) {
+        console.log('Token is valid');
+        loginSection.classList.add('hidden');
+        dashboard.classList.remove('hidden');
+        loadDashboard();
+    } else {
+        console.log('Token is expired or invalid');
+        localStorage.removeItem('token');
+        loginSection.classList.remove('hidden');
+        loginSection.classList.add('modal-enter-active');
+        setTimeout(() => loginSection.classList.remove('modal-enter-active'), 200);
+        dashboard.classList.add('hidden');
+        if (loginError) {
+            loginError.textContent = 'Session expired. Please log in again.';
+            loginError.classList.remove('hidden');
         }
     }
+}
 
-    const logoutBtn = document.getElementById('logout-btn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', () => {
-            console.log('Logging out, clearing token');
-            localStorage.removeItem('token');
-            loginSection.classList.remove('hidden');
-            loginSection.classList.add('modal-enter-active');
-            setTimeout(() => loginSection.classList.remove('modal-enter-active'), 200);
-            dashboard.classList.add('hidden');
-            if (loginError) loginError.classList.add('hidden');
-            if (loginForm) loginForm.reset();
-        });
-    }
+const logoutBtn = document.getElementById('logout-btn');
+if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+        console.log('Logging out, clearing token');
+        localStorage.removeItem('token');
+        loginSection.classList.remove('hidden');
+        loginSection.classList.add('modal-enter-active');
+        setTimeout(() => loginSection.classList.remove('modal-enter-active'), 200);
+        dashboard.classList.add('hidden');
+        if (loginError) loginError.classList.add('hidden');
+        if (loginForm) loginForm.reset();
+    });
+}
 
-    const menuLogout = document.getElementById('menu-logout');
-    if (menuLogout) {
-        menuLogout.addEventListener('click', (e) => {
-            e.preventDefault();
-            console.log('Logging out via menu, clearing token');
-            localStorage.removeItem('token');
-            loginSection.classList.remove('hidden');
-            loginSection.classList.add('modal-enter-active');
-            setTimeout(() => loginSection.classList.remove('modal-enter-active'), 200);
-            dashboard.classList.add('hidden');
-            if (loginError) loginError.classList.add('hidden');
-            if (loginForm) loginForm.reset();
-            userMenu.classList.add('hidden');
-        });
-    }
+const menuLogout = document.getElementById('menu-logout');
+if (menuLogout) {
+    menuLogout.addEventListener('click', (e) => {
+        e.preventDefault();
+        console.log('Logging out via menu, clearing token');
+        localStorage.removeItem('token');
+        loginSection.classList.remove('hidden');
+        loginSection.classList.add('modal-enter-active');
+        setTimeout(() => loginSection.classList.remove('modal-enter-active'), 200);
+        dashboard.classList.add('hidden');
+        if (loginError) loginError.classList.add('hidden');
+        if (loginForm) loginForm.reset();
+        userMenu.classList.add('hidden');
+    });
+}
 
-    if (loginForm) {
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const submitButton = loginForm.querySelector('button[type="submit"]');
-            submitButton.disabled = true;
-            submitButton.innerHTML = '<span class="spinner"></span> Logging in...';
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value;
-            if (!username || !password) {
-                if (loginError) {
-                    loginError.textContent = 'Username and password are required';
-                    loginError.classList.remove('hidden');
-                }
-                submitButton.disabled = false;
-                submitButton.innerHTML = 'Login';
-                return;
+if (loginForm) {
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const submitButton = loginForm.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<span class="spinner"></span> Logging in...';
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
+        if (!username || !password) {
+            if (loginError) {
+                loginError.textContent = 'Username and password are required';
+                loginError.classList.remove('hidden');
             }
-            try {
-                console.log('Sending login request:', { username });
-                const response = await fetch('/api/auth/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
-                const data = await response.json();
-                console.log('Login response:', data);
-                if (response.ok) {
-                    if (typeof data.token !== 'string') {
-                        console.error('Received invalid token:', data.token);
-                        if (loginError) {
-                            loginError.textContent = 'Invalid token received from server';
-                            loginError.classList.remove('hidden');
-                        }
-                        submitButton.disabled = false;
-                        submitButton.innerHTML = 'Login';
-                        return;
-                    }
-                    console.log('Storing token:', data.token);
-                    localStorage.setItem('token', data.token);
-                    console.log('Stored token:', localStorage.getItem('token'));
-                    closeModal();
-                    dashboard.classList.remove('hidden');
-                    loadDashboard();
-                } else {
+            submitButton.disabled = false;
+            submitButton.innerHTML = 'Login';
+            return;
+        }
+        try {
+            console.log('Sending login request:', { username });
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            const data = await response.json();
+            console.log('Login response:', data);
+            if (response.ok) {
+                if (typeof data.token !== 'string') {
+                    console.error('Received invalid token:', data.token);
                     if (loginError) {
-                        loginError.textContent = data.message || 'Invalid credentials';
+                        loginError.textContent = 'Invalid token received from server';
                         loginError.classList.remove('hidden');
                     }
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = 'Login';
+                    return;
                 }
-            } catch (error) {
-                console.error('Login error:', error);
+                console.log('Storing token:', data.token);
+                localStorage.setItem('token', data.token);
+                console.log('Stored token:', localStorage.getItem('token'));
+                closeModal();
+                dashboard.classList.remove('hidden');
+                loadDashboard();
+            } else {
                 if (loginError) {
-                    loginError.textContent = 'Server error';
+                    loginError.textContent = data.message || 'Invalid credentials';
                     loginError.classList.remove('hidden');
                 }
-            } finally {
-                submitButton.disabled = false;
-                submitButton.innerHTML = 'Login';
             }
+        } catch (error) {
+            console.error('Login error:', error);
+            if (loginError) {
+                loginError.textContent = 'Server error';
+                loginError.classList.remove('hidden');
+            }
+        } finally {
+            submitButton.disabled = false;
+            submitButton.innerHTML = 'Login';
+        }
+    });
+}
+
+async function loadDashboard() {
+    pendingItems = [];
+    await Promise.all([
+        loadBookings(),
+        loadApplications(),
+        updateStats()
+    ]);
+    updatePendingMessages();
+}
+
+async function updateStats() {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error('No token found in localStorage');
+
+        // Get total models
+        const modelsResponse = await fetch('/api/models?page=1&limit=1', {
+            headers: { 'Authorization': `Bearer ${token}` }
         });
-    }
+        const modelsData = await modelsResponse.json();
+        const totalModelsElement = document.getElementById('total-models');
+        if (totalModelsElement) totalModelsElement.textContent = modelsData.total || 0;
 
-    async function loadDashboard() {
-        pendingItems = [];
-        await Promise.all([
-            loadBookings(),
-            loadApplications(),
-            updateStats()
-        ]);
-        updatePendingMessages();
-    }
+        // Get all bookings and filter for confirmed
+        const bookingsResponse = await fetch('/api/bookings', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const bookingsData = await bookingsResponse.json();
+        // Check if response is an array or has bookings property
+        const bookingsArray = Array.isArray(bookingsData) ? bookingsData : 
+                             (bookingsData.bookings || []);
+        const confirmedBookings = bookingsArray.filter(b => b.status === 'confirmed');
+        const activeBookingsElement = document.getElementById('active-bookings');
+        if (activeBookingsElement) activeBookingsElement.textContent = confirmedBookings.length;
 
-    async function updateStats() {
-        try {
-            const token = localStorage.getItem('token');
-            if (!token) throw new Error('No token found in localStorage');
+        // Get all applications and filter for pending
+        const applicationsResponse = await fetch('/api/applications', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const applicationsData = await applicationsResponse.json();
+        const applicationsArray = Array.isArray(applicationsData) ? applicationsData : [];
+        const pendingApplications = applicationsArray.filter(a => a.status === 'pending');
+        const pendingApplicationsElement = document.getElementById('pending-applications');
+        if (pendingApplicationsElement) pendingApplicationsElement.textContent = pendingApplications.length;
 
-            const modelsResponse = await fetch('/api/models?page=1&limit=1', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const modelsData = await modelsResponse.json();
-            const totalModelsElement = document.getElementById('total-models');
-            if (totalModelsElement) totalModelsElement.textContent = modelsData.total || 0;
+        // Get newsletter subscribers
+        const subscribersResponse = await fetch('/api/newsletter', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const subscribersData = await subscribersResponse.json();
+        const subscribersArray = Array.isArray(subscribersData) ? subscribersData : 
+                                (subscribersData.subscribers || []);
+        const newsletterSubscribersElement = document.getElementById('newsletter-subscribers');
+        if (newsletterSubscribersElement) newsletterSubscribersElement.textContent = subscribersArray.length;
 
-            const bookingsResponse = await fetch('/api/bookings?status=confirmed', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const bookingsData = await bookingsResponse.json();
-            const activeBookingsElement = document.getElementById('active-bookings');
-            if (activeBookingsElement) activeBookingsElement.textContent = bookingsData.length || 0;
-
-            const applicationsResponse = await fetch('/api/applications?status=pending', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const applicationsData = await applicationsResponse.json();
-            const pendingApplicationsElement = document.getElementById('pending-applications');
-            if (pendingApplicationsElement) pendingApplicationsElement.textContent = applicationsData.length || 0;
-
-            const subscribersResponse = await fetch('/api/newsletter', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const subscribersData = await subscribersResponse.json();
-            const newsletterSubscribersElement = document.getElementById('newsletter-subscribers');
-            if (newsletterSubscribersElement) newsletterSubscribersElement.textContent = subscribersData.length || 0;
-
-            await updateBookingsChart('month');
-            await updateCategoriesChart('revenue');
-        } catch (error) {
-            console.error('Error updating stats:', error);
-            const errorMessage = document.getElementById('error-message');
-            if (errorMessage) {
-                errorMessage.textContent = 'Error loading dashboard stats';
-                document.getElementById('error-alert').classList.remove('hidden');
-                setTimeout(() => document.getElementById('error-alert').classList.add('hidden'), 3000);
-            }
+        await updateBookingsChart('month');
+        await updateCategoriesChart('revenue');
+    } catch (error) {
+        console.error('Error updating stats:', error);
+        const errorMessage = document.getElementById('error-message');
+        if (errorMessage) {
+            errorMessage.textContent = 'Error loading dashboard stats';
+            document.getElementById('error-alert').classList.remove('hidden');
+            setTimeout(() => document.getElementById('error-alert').classList.add('hidden'), 3000);
         }
     }
+}
 
-    async function updateBookingsChart(timeframe) {
-        try {
-            const token = localStorage.getItem('token');
-            if (!token) throw new Error('No token found');
+async function updateBookingsChart(timeframe) {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error('No token found');
 
-            const bookingsChartContainer = document.getElementById('bookingsChart').parentElement;
-            bookingsChartContainer.innerHTML = '<div class="text-center text-xs py-3"><span class="spinner"></span> Loading...</div>';
+        const bookingsChartContainer = document.getElementById('bookingsChart').parentElement;
+        bookingsChartContainer.innerHTML = '<div class="text-center text-xs py-3"><span class="spinner"></span> Loading...</div>';
 
-            const response = await fetch(`/api/bookings?timeframe=${timeframe}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.message || `HTTP error: ${response.status}`);
-            }
-            const bookings = await response.json();
-            console.log('Bookings data:', bookings);
-
-            const { labels, data } = aggregateBookingsData(bookings, timeframe);
-            console.log('Bookings chart data:', { labels, data });
-
-            bookingsChartContainer.innerHTML = '<canvas id="bookingsChart"></canvas>';
-
-            if (bookingsChartInstance) {
-                bookingsChartInstance.data.labels = labels;
-                bookingsChartInstance.data.datasets[0].data = data;
-                bookingsChartInstance.update();
-            } else {
-                bookingsChartInstance = new Chart(document.getElementById('bookingsChart').getContext('2d'), {
-                    type: 'line',
-                    data: {
-                        labels,
-                        datasets: [{
-                            label: 'Bookings',
-                            data,
-                            borderColor: '#c8854a',
-                            backgroundColor: 'rgba(200, 133, 74, 0.2)',
-                            fill: true
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: { y: { beginAtZero: true } }
-                    }
-                });
-            }
-        } catch (error) {
-            console.error('Error updating bookings chart:', error);
-            const errorMessage = document.getElementById('error-message');
-            if (errorMessage) {
-                errorMessage.textContent = 'Error loading bookings chart';
-                document.getElementById('error-alert').classList.remove('hidden');
-                setTimeout(() => document.getElementById('error-alert').classList.add('hidden'), 3000);
-            }
-            const bookingsChartContainer = document.getElementById('bookingsChart').parentElement;
-            bookingsChartContainer.innerHTML = '<canvas id="bookingsChart"></canvas>';
+        const response = await fetch(`/api/bookings?timeframe=${timeframe}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.message || `HTTP error: ${response.status}`);
         }
-    }
+        const bookings = await response.json();
+        
+        // Handle response format
+        const bookingsArray = Array.isArray(bookings) ? bookings : 
+                             (bookings.bookings || []);
+        console.log('Bookings data:', bookingsArray);
 
-    async function updateCategoriesChart(metric) {
-        try {
-            const token = localStorage.getItem('token');
-            if (!token) throw new Error('No token found');
+        const { labels, data } = aggregateBookingsData(bookingsArray, timeframe);
+        console.log('Bookings chart data:', { labels, data });
 
-            const categoriesChartContainer = document.getElementById('categoriesChart').parentElement;
-            categoriesChartContainer.innerHTML = '<div class="text-center text-xs py-3"><span class="spinner"></span> Loading...</div>';
+        bookingsChartContainer.innerHTML = '<canvas id="bookingsChart"></canvas>';
 
-            let labels, data;
-            if (metric === 'count') {
-                const response = await fetch('/api/models', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
-                const models = await response.json();
-                console.log('Raw models data:', JSON.stringify(models, null, 2));
-                ({ labels, data } = aggregateModelCategories(models));
-            } else {
-                const response = await fetch('/api/bookings', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
-                const bookings = await response.json();
-                console.log('Raw bookings data for revenue:', JSON.stringify(bookings, null, 2));
-                ({ labels, data } = aggregateCategoryRevenue(bookings));
-            }
-            console.log('Categories chart data:', { labels, data });
-
-            if (!labels.length || !data.length) {
-                console.warn('Empty labels or data, using fallback');
-                labels = ['No Data'];
-                data = [1];
-            } else if (data.some(val => isNaN(val) || val === null || val === undefined)) {
-                console.warn('Invalid data values, filtering out');
-                const validPairs = labels.reduce((acc, label, i) => {
-                    if (!isNaN(data[i]) && data[i] !== null && data[i] !== undefined) {
-                        acc.labels.push(label);
-                        acc.data.push(Math.max(data[i], 0.1));
-                    }
-                    return acc;
-                }, { labels: [], data: [] });
-                labels = validPairs.labels.length ? validPairs.labels : ['No Data'];
-                data = validPairs.data.length ? validPairs.data : [1];
-            }
-
-            categoriesChartContainer.innerHTML = '<canvas id="categoriesChart"></canvas>';
-
-            const canvas = document.getElementById('categoriesChart');
-            canvas.style.display = 'block';
-            canvas.style.width = '100%';
-            canvas.style.height = '240px';
-
-            if (categoriesChartInstance) {
-                categoriesChartInstance.destroy();
-                categoriesChartInstance = null;
-            }
-
-            categoriesChartInstance = new Chart(canvas.getContext('2d'), {
-                type: 'pie',
+        if (bookingsChartInstance) {
+            bookingsChartInstance.data.labels = labels;
+            bookingsChartInstance.data.datasets[0].data = data;
+            bookingsChartInstance.update();
+        } else {
+            bookingsChartInstance = new Chart(document.getElementById('bookingsChart').getContext('2d'), {
+                type: 'line',
                 data: {
                     labels,
                     datasets: [{
+                        label: 'Bookings',
                         data,
-                        backgroundColor: ['#c8854a', '#ba6f3f', '#9b5835', '#7d4730', '#663b29', '#f5ede1', '#ebdbc3', '#dfc39d', '#d2a16d'],
-                        borderWidth: 1
+                        borderColor: '#c8854a',
+                        backgroundColor: 'rgba(200, 133, 74, 0.2)',
+                        fill: true,
+                        tension: 0.4
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    scales: { 
+                        y: { 
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        } 
+                    },
                     plugins: {
                         legend: {
-                            position: 'right',
-                            labels: {
-                                font: {
-                                    size: 12
-                                }
-                            }
+                            display: false
                         }
                     }
                 }
             });
-            console.log('Pie chart initialized:', categoriesChartInstance);
-        } catch (error) {
-            console.error('Error updating categories chart:', error);
-            const errorMessage = document.getElementById('error-message');
-            if (errorMessage) {
-                errorMessage.textContent = 'Error loading categories chart';
-                document.getElementById('error-alert').classList.remove('hidden');
-                setTimeout(() => document.getElementById('error-alert').classList.add('hidden'), 3000);
-            }
-            const categoriesChartContainer = document.getElementById('categoriesChart').parentElement;
-            categoriesChartContainer.innerHTML = '<canvas id="categoriesChart"></canvas>';
         }
+    } catch (error) {
+        console.error('Error updating bookings chart:', error);
+        const errorMessage = document.getElementById('error-message');
+        if (errorMessage) {
+            errorMessage.textContent = 'Error loading bookings chart';
+            document.getElementById('error-alert').classList.remove('hidden');
+            setTimeout(() => document.getElementById('error-alert').classList.add('hidden'), 3000);
+        }
+        const bookingsChartContainer = document.getElementById('bookingsChart').parentElement;
+        bookingsChartContainer.innerHTML = '<canvas id="bookingsChart"></canvas>';
     }
+}
 
-    function aggregateBookingsData(bookings, timeframe) {
-        let labels = [];
-        let data = [];
+async function updateCategoriesChart(metric) {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error('No token found');
 
+        const categoriesChartContainer = document.getElementById('categoriesChart').parentElement;
+        categoriesChartContainer.innerHTML = '<div class="text-center text-xs py-3"><span class="spinner"></span> Loading...</div>';
+
+        let labels, data;
+        if (metric === 'count') {
+            const response = await fetch('/api/models', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+            const modelsData = await response.json();
+            // Handle response format
+            const modelsArray = modelsData.models || (Array.isArray(modelsData) ? modelsData : []);
+            console.log('Raw models data:', modelsArray);
+            ({ labels, data } = aggregateModelCategories(modelsArray));
+        } else {
+            const response = await fetch('/api/bookings', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+            const bookingsData = await response.json();
+            // Handle response format
+            const bookingsArray = bookingsData.bookings || (Array.isArray(bookingsData) ? bookingsData : []);
+            console.log('Raw bookings data for revenue:', bookingsArray);
+            ({ labels, data } = aggregateCategoryRevenue(bookingsArray));
+        }
+        console.log('Categories chart data:', { labels, data });
+
+        if (!labels.length || !data.length) {
+            console.warn('Empty labels or data, using fallback');
+            labels = ['No Data'];
+            data = [1];
+        } else if (data.some(val => isNaN(val) || val === null || val === undefined)) {
+            console.warn('Invalid data values, filtering out');
+            const validPairs = labels.reduce((acc, label, i) => {
+                if (!isNaN(data[i]) && data[i] !== null && data[i] !== undefined) {
+                    acc.labels.push(label);
+                    acc.data.push(Math.max(data[i], 0.1));
+                }
+                return acc;
+            }, { labels: [], data: [] });
+            labels = validPairs.labels.length ? validPairs.labels : ['No Data'];
+            data = validPairs.data.length ? validPairs.data : [1];
+        }
+
+        categoriesChartContainer.innerHTML = '<canvas id="categoriesChart"></canvas>';
+
+        const canvas = document.getElementById('categoriesChart');
+        canvas.style.display = 'block';
+        canvas.style.width = '100%';
+        canvas.style.height = '240px';
+
+        if (categoriesChartInstance) {
+            categoriesChartInstance.destroy();
+            categoriesChartInstance = null;
+        }
+
+        categoriesChartInstance = new Chart(canvas.getContext('2d'), {
+            type: 'pie',
+            data: {
+                labels,
+                datasets: [{
+                    data,
+                    backgroundColor: ['#c8854a', '#ba6f3f', '#9b5835', '#7d4730', '#663b29', '#f5ede1', '#ebdbc3', '#dfc39d', '#d2a16d'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            font: {
+                                size: 10
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        console.log('Pie chart initialized:', categoriesChartInstance);
+    } catch (error) {
+        console.error('Error updating categories chart:', error);
+        const errorMessage = document.getElementById('error-message');
+        if (errorMessage) {
+            errorMessage.textContent = 'Error loading categories chart';
+            document.getElementById('error-alert').classList.remove('hidden');
+            setTimeout(() => document.getElementById('error-alert').classList.add('hidden'), 3000);
+        }
+        const categoriesChartContainer = document.getElementById('categoriesChart').parentElement;
+        categoriesChartContainer.innerHTML = '<canvas id="categoriesChart"></canvas>';
+    }
+}
+
+function aggregateBookingsData(bookings, timeframe) {
+    let labels = [];
+    let data = [];
+
+    if (!Array.isArray(bookings) || bookings.length === 0) {
         if (timeframe === 'week') {
             labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
             data = new Array(7).fill(0);
-            bookings.forEach(booking => {
+        } else if (timeframe === 'month') {
+            labels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+            data = new Array(4).fill(0);
+        } else if (timeframe === 'year') {
+            labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            data = new Array(12).fill(0);
+        }
+        return { labels, data };
+    }
+
+    if (timeframe === 'week') {
+        labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        data = new Array(7).fill(0);
+        bookings.forEach(booking => {
+            if (booking.bookingDateTime) {
                 const date = new Date(booking.bookingDateTime);
                 if (!isNaN(date.getTime())) {
                     const day = date.getDay();
                     data[day === 0 ? 6 : day - 1]++;
                 }
-            });
-        } else if (timeframe === 'month') {
-            labels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
-            data = new Array(4).fill(0);
-            bookings.forEach(booking => {
+            }
+        });
+    } else if (timeframe === 'month') {
+        labels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+        data = new Array(4).fill(0);
+        bookings.forEach(booking => {
+            if (booking.bookingDateTime) {
                 const date = new Date(booking.bookingDateTime);
                 if (!isNaN(date.getTime())) {
-                    const week = Math.floor(date.getDate() / 7);
-                    data[week]++;
+                    const week = Math.floor((date.getDate() - 1) / 7);
+                    if (week < 4) data[week]++;
                 }
-            });
-        } else if (timeframe === 'year') {
-            labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            data = new Array(12).fill(0);
-            bookings.forEach(booking => {
+            }
+        });
+    } else if (timeframe === 'year') {
+        labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        data = new Array(12).fill(0);
+        bookings.forEach(booking => {
+            if (booking.bookingDateTime) {
                 const date = new Date(booking.bookingDateTime);
                 if (!isNaN(date.getTime())) {
                     const month = date.getMonth();
                     data[month]++;
                 }
-            });
-        }
-
-        console.log('Bookings aggregation result:', { labels, data });
-        if (data.every(val => val === 0)) {
-            console.warn('All bookings data is zero, returning minimal data');
-            return { labels, data: new Array(labels.length).fill(0.1) };
-        }
-
-        return { labels, data };
-    }
-
-    function aggregateModelCategories(models) {
-        console.log('Aggregating model categories, input:', JSON.stringify(models, null, 2));
-        const categoryCounts = {};
-        (Array.isArray(models) ? models : []).forEach(model => {
-            const category = model && typeof model.category === 'string' ? model.category.trim() : 'Unknown';
-            if (category) {
-                categoryCounts[category] = (categoryCounts[category] || 0) + 1;
             }
         });
-        const labels = Object.keys(categoryCounts).length ? Object.keys(categoryCounts) : ['No Data'];
-        const data = Object.values(categoryCounts).length ? Object.values(categoryCounts) : [1];
-        console.log('Model categories aggregated:', { labels, data });
-        return { labels, data };
     }
 
-    function aggregateCategoryRevenue(bookings) {
-        console.log('Aggregating category revenue, input:', JSON.stringify(bookings, null, 2));
-        const categoryRevenue = {};
-        (Array.isArray(bookings) ? bookings : []).forEach(booking => {
-            const category = booking && typeof booking.shootType === 'string' ? booking.shootType.trim() : 'Unknown';
-            const revenue = Number(booking && booking.revenue) || 0;
-            if (category) {
-                categoryRevenue[category] = (categoryRevenue[category] || 0) + revenue;
-            }
-        });
-        const labels = Object.keys(categoryRevenue).length ? Object.keys(categoryRevenue) : ['No Data'];
-        const data = Object.values(categoryRevenue).length ? Object.values(categoryRevenue).map(val => Math.max(val, 0.1)) : [1];
-        console.log('Category revenue aggregated:', { labels, data });
-        return { labels, data };
-    }
+    return { labels, data };
+}
 
+function aggregateModelCategories(models) {
+    console.log('Aggregating model categories, input:', models);
+    const categoryCounts = {};
+    (Array.isArray(models) ? models : []).forEach(model => {
+        const category = model && typeof model.category === 'string' ? model.category.trim() : 'Unknown';
+        if (category) {
+            categoryCounts[category] = (categoryCounts[category] || 0) + 1;
+        }
+    });
+    const labels = Object.keys(categoryCounts).length ? Object.keys(categoryCounts) : ['No Data'];
+    const data = Object.values(categoryCounts).length ? Object.values(categoryCounts) : [1];
+    console.log('Model categories aggregated:', { labels, data });
+    return { labels, data };
+}
+
+function aggregateCategoryRevenue(bookings) {
+    console.log('Aggregating category revenue, input:', bookings);
+    const categoryRevenue = {};
+    (Array.isArray(bookings) ? bookings : []).forEach(booking => {
+        const category = booking && typeof booking.shootType === 'string' ? booking.shootType.trim() : 'Unknown';
+        const revenue = Number(booking && booking.revenue) || 0;
+        if (category) {
+            categoryRevenue[category] = (categoryRevenue[category] || 0) + revenue;
+        }
+    });
+    const labels = Object.keys(categoryRevenue).length ? Object.keys(categoryRevenue) : ['No Data'];
+    const data = Object.values(categoryRevenue).length ? Object.values(categoryRevenue).map(val => Math.max(val, 0.1)) : [1];
+    console.log('Category revenue aggregated:', { labels, data });
+    return { labels, data };
+}
+
+// Fix timeframe buttons
+setTimeout(() => {
     const timeframeButtons = document.querySelectorAll('#bookingsChart ~ div.flex.space-x-2 button');
     console.log('Found timeframe buttons:', timeframeButtons.length);
     timeframeButtons.forEach(button => {
@@ -1290,583 +1337,589 @@
             await updateCategoriesChart(metric);
         });
     });
+}, 1000);
 
-    async function loadBookings() {
-        if (bookingLoading) bookingLoading.classList.remove('hidden');
-        if (bookingError) bookingError.classList.add('hidden');
-        try {
-            const token = localStorage.getItem('token');
-            console.log('Sending request with token for bookings:', token);
-            if (!token) {
-                throw new Error('No token found in localStorage');
-            }
-            const response = await fetch('/api/bookings?limit=8&sort=-createdAt', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (!response.ok) {
-                const data = await response.json().catch(() => ({}));
-                if (response.status === 401) {
-                    console.log('Unauthorized request, clearing token');
-                    localStorage.removeItem('token');
-                    loginSection.classList.remove('hidden');
-                    loginSection.classList.add('modal-enter-active');
-                    setTimeout(() => loginSection.classList.remove('modal-enter-active'), 200);
-                    dashboard.classList.add('hidden');
-                    if (loginError) {
-                        loginError.textContent = 'Session expired. Please log in again.';
-                        loginError.classList.remove('hidden');
-                    }
-                    return;
-                }
-                throw new Error(data.message || `HTTP error: ${response.status}`);
-            }
-            const bookings = await response.json();
-            const bookingGrid = document.getElementById('booking-grid');
-            if (bookingGrid) {
-                bookingGrid.innerHTML = '';
-                bookings.slice(0, 8).forEach(booking => {
-                    if (booking.status === 'pending') {
-                        pendingItems.push({
-                            type: 'booking',
-                            id: booking._id,
-                            message: `New booking from ${booking.fullName || 'N/A'} for ${booking.shootType || 'N/A'} on ${booking.bookingDateTime ? new Date(booking.bookingDateTime).toLocaleString() : 'N/A'}`,
-                            navigateUrl: 'manage-bookings.html'
-                        });
-                    }
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>${booking.fullName || 'N/A'}</td>
-                        <td>${booking.modelDetails || 'N/A'}</td>
-                        <td>${booking.bookingDateTime ? new Date(booking.bookingDateTime).toLocaleString() : 'N/A'}</td>
-                        <td>${booking.shootType || 'N/A'}</td>
-                        <td><span class="badge badge-${booking.status}">${booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}</span></td>
-                        <td>
-                            <select id="status-${booking._id}" class="form-input px-2 py-1 text-xs" aria-label="Booking Status">
-                                <option value="pending" ${booking.status === 'pending' ? 'selected' : ''}>Pending</option>
-                                <option value="reviewed" ${booking.status === 'reviewed' ? 'selected' : ''}>Reviewed</option>
-                                <option value="confirmed" ${booking.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
-                                <option value="cancelled" ${booking.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
-                            </select>
-                            <button onclick="updateBookingStatus('${booking._id}')" class="text-blue-500 hover:text-blue-700 ml-1 tooltip" data-tooltip="Save Status" aria-label="Save Booking Status">
-                                <i class="fas fa-save text-xs"></i>
-                            </button>
-                            <button onclick="deleteBooking('${booking._id}')" class="text-red-500 hover:text-red-700 ml-1 tooltip" data-tooltip="Delete Booking" aria-label="Delete Booking">
-                                <i class="fas fa-trash text-xs"></i>
-                            </button>
-                        </td>
-                    `;
-                    bookingGrid.appendChild(tr);
-                });
-            } else {
-                console.error('Element with ID "booking-grid" not found');
-            }
-        } catch (error) {
-            if (bookingError) {
-                bookingError.textContent = error.message || 'Error loading bookings';
-                bookingError.classList.remove('hidden');
-            }
-            const errorMessage = document.getElementById('error-message');
-            if (errorMessage) {
-                errorMessage.textContent = error.message;
-                document.getElementById('error-alert').classList.remove('hidden');
-                setTimeout(() => document.getElementById('error-alert').classList.add('hidden'), 3000);
-            }
-        } finally {
-            if (bookingLoading) bookingLoading.classList.add('hidden');
+async function loadBookings() {
+    if (bookingLoading) bookingLoading.classList.remove('hidden');
+    if (bookingError) bookingError.classList.add('hidden');
+    try {
+        const token = localStorage.getItem('token');
+        console.log('Sending request with token for bookings:', token);
+        if (!token) {
+            throw new Error('No token found in localStorage');
         }
-    }
-
-    async function loadApplications() {
-        if (applicationLoading) applicationLoading.classList.remove('hidden');
-        if (applicationError) applicationError.classList.add('hidden');
-        try {
-            const token = localStorage.getItem('token');
-            console.log('Sending request with token for applications:', token);
-            if (!token) {
-                throw new Error('No token found in localStorage');
-            }
-            const response = await fetch('/api/applications?limit=8&sort=-submittedAt', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (!response.ok) {
-                const data = await response.json().catch(() => ({}));
-                if (response.status === 401) {
-                    console.log('Unauthorized request, clearing token');
-                    localStorage.removeItem('token');
-                    loginSection.classList.remove('hidden');
-                    loginSection.classList.add('modal-enter-active');
-                    setTimeout(() => loginSection.classList.remove('modal-enter-active'), 200);
-                    dashboard.classList.add('hidden');
-                    if (loginError) {
-                        loginError.textContent = 'Session expired. Please log in again.';
-                        loginError.classList.remove('hidden');
-                    }
-                    return;
-                }
-                throw new Error(data.message || `HTTP error: ${response.status}`);
-            }
-            const applications = await response.json();
-            const applicationGrid = document.getElementById('application-grid');
-            if (applicationGrid) {
-                applicationGrid.innerHTML = '';
-                applications.slice(0, 8).forEach(application => {
-                    if (application.status === 'pending') {
-                        pendingItems.push({
-                            type: 'application',
-                            id: application._id,
-                            message: `New application from ${application.fullName || 'N/A'} for ${application.category || 'N/A'} submitted on ${application.submittedAt ? new Date(application.submittedAt).toLocaleString() : 'N/A'}`,
-                            navigateUrl: 'manage-applications.html'
-                        });
-                    }
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>${application.fullName || 'N/A'}</td>
-                        <td>${application.email || 'N/A'}</td>
-                        <td>${application.category || 'N/A'}</td>
-                        <td>${application.submittedAt ? new Date(application.submittedAt).toLocaleString() : 'N/A'}</td>
-                        <td><span class="badge badge-${application.status}">${application.status.charAt(0).toUpperCase() + application.status.slice(1)}</span></td>
-                        <td>
-                            <select id="status-${application._id}" class="form-input px-2 py-1 text-xs" aria-label="Application Status">
-                                <option value="pending" ${application.status === 'pending' ? 'selected' : ''}>Pending</option>
-                                <option value="reviewed" ${application.status === 'reviewed' ? 'selected' : ''}>Reviewed</option>
-                                <option value="confirmed" ${application.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
-                                <option value="rejected" ${application.status === 'rejected' ? 'selected' : ''}>Rejected</option>
-                            </select>
-                            <button onclick="updateApplicationStatus('${application._id}')" class="text-blue-500 hover:text-blue-700 ml-1 tooltip" data-tooltip="Save Status" aria-label="Save Application Status">
-                                <i class="fas fa-save text-xs"></i>
-                            </button>
-                            <button onclick="deleteApplication('${application._id}')" class="text-red-500 hover:text-red-700 ml-1 tooltip" data-tooltip="Delete Application" aria-label="Delete Application">
-                                <i class="fas fa-trash text-xs"></i>
-                            </button>
-                        </td>
-                    `;
-                    applicationGrid.appendChild(tr);
-                });
-            } else {
-                console.error('Element with ID "application-grid" not found');
-            }
-        } catch (error) {
-            if (applicationError) {
-                applicationError.textContent = error.message || 'Error loading applications';
-                applicationError.classList.remove('hidden');
-            }
-            const errorMessage = document.getElementById('error-message');
-            if (errorMessage) {
-                errorMessage.textContent = error.message;
-                document.getElementById('error-alert').classList.remove('hidden');
-                setTimeout(() => document.getElementById('error-alert').classList.add('hidden'), 3000);
-            }
-        } finally {
-            if (applicationLoading) applicationLoading.classList.add('hidden');
-        }
-    }
-
-    async function updateBookingStatus(bookingId) {
-        const select = document.getElementById(`status-${bookingId}`);
-        const newStatus = select.value;
-        const saveButton = select.nextElementSibling;
-        saveButton.disabled = true;
-        saveButton.innerHTML = '<span class="spinner"></span>';
-        try {
-            const token = localStorage.getItem('token');
-            console.log('Updating booking status with token:', token);
-            if (!token) {
-                throw new Error('No token found in localStorage');
-            }
-            const response = await fetch(`/api/bookings/${bookingId}/status`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ status: newStatus })
-            });
-            if (!response.ok) {
-                const data = await response.json();
-                if (response.status === 401) {
-                    console.log('Unauthorized request, clearing token');
-                    localStorage.removeItem('token');
-                    loginSection.classList.remove('hidden');
-                    loginSection.classList.add('modal-enter-active');
-                    setTimeout(() => loginSection.classList.remove('modal-enter-active'), 200);
-                    dashboard.classList.add('hidden');
-                    if (loginError) {
-                        loginError.textContent = 'Session expired. Please log in again.';
-                        loginError.classList.remove('hidden');
-                    }
-                    return;
-                }
-                throw new Error(data.message || 'Error updating booking status');
-            }
-            loadBookings();
-            updateStats();
-            const successMessage = document.getElementById('success-message');
-            if (successMessage) {
-                successMessage.textContent = 'Booking status updated successfully!';
-                document.getElementById('success-alert').classList.remove('hidden');
-                setTimeout(() => document.getElementById('success-alert').classList.add('hidden'), 3000);
-            }
-        } catch (error) {
-            const errorMessage = document.getElementById('error-message');
-            if (errorMessage) {
-                errorMessage.textContent = error.message;
-                document.getElementById('error-alert').classList.remove('hidden');
-                setTimeout(() => document.getElementById('error-alert').classList.add('hidden'), 3000);
-            }
-        } finally {
-            saveButton.disabled = false;
-            saveButton.innerHTML = '<i class="fas fa-save text-xs"></i>';
-        }
-    }
-
-    async function deleteBooking(bookingId) {
-        const confirmationModal = document.getElementById('confirmation-modal');
-        const confirmButton = document.getElementById('confirm-action');
-        const cancelButton = document.getElementById('cancel-action');
-        const confirmationTitle = document.getElementById('confirmation-title');
-        const confirmationMessage = document.getElementById('confirmation-message');
-        if (confirmationTitle) confirmationTitle.textContent = 'Delete Booking';
-        if (confirmationMessage) confirmationMessage.textContent = 'Are you sure you want to delete this booking? This action cannot be undone.';
-        if (confirmationModal) {
-            confirmationModal.classList.remove('hidden');
-            confirmationModal.classList.add('modal-enter-active');
-            setTimeout(() => confirmationModal.classList.remove('modal-enter-active'), 200);
-        }
-
-        if (confirmButton) {
-            confirmButton.onclick = async () => {
-                try {
-                    const token = localStorage.getItem('token');
-                    console.log('Deleting booking with token:', token);
-                    if (!token) {
-                        throw new Error('No token found in localStorage');
-                    }
-                    const response = await fetch(`/api/bookings/${bookingId}`, {
-                        method: 'DELETE',
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
-                    if (!response.ok) {
-                        const data = await response.json();
-                        if (response.status === 401) {
-                            console.log('Unauthorized request, clearing token');
-                            localStorage.removeItem('token');
-                            loginSection.classList.remove('hidden');
-                            loginSection.classList.add('modal-enter-active');
-                            setTimeout(() => loginSection.classList.remove('modal-enter-active'), 200);
-                            dashboard.classList.add('hidden');
-                            if (loginError) {
-                                loginError.textContent = 'Session expired. Please log in again.';
-                                loginError.classList.remove('hidden');
-                            }
-                            return;
-                        }
-                        throw new Error(data.message || 'Error deleting booking');
-                    }
-                    loadBookings();
-                    updateStats();
-                    const successMessage = document.getElementById('success-message');
-                    if (successMessage) {
-                        successMessage.textContent = 'Booking deleted successfully!';
-                        document.getElementById('success-alert').classList.remove('hidden');
-                        setTimeout(() => document.getElementById('success-alert').classList.add('hidden'), 3000);
-                    }
-                } catch (error) {
-                    if (bookingError) {
-                        bookingError.textContent = error.message;
-                        bookingError.classList.remove('hidden');
-                    }
-                    const errorMessage = document.getElementById('error-message');
-                    if (errorMessage) {
-                        errorMessage.textContent = error.message;
-                        document.getElementById('error-alert').classList.remove('hidden');
-                        setTimeout(() => document.getElementById('error-alert').classList.add('hidden'), 3000);
-                    }
-                } finally {
-                    if (confirmationModal) {
-                        confirmationModal.classList.add('modal-exit-active');
-                        setTimeout(() => {
-                            confirmationModal.classList.add('hidden');
-                            confirmationModal.classList.remove('modal-exit-active');
-                        }, 200);
-                    }
-                }
-            };
-        }
-
-        if (cancelButton) {
-            cancelButton.onclick = () => {
-                if (confirmationModal) {
-                    confirmationModal.classList.add('modal-exit-active');
-                    setTimeout(() => {
-                        confirmationModal.classList.add('hidden');
-                        confirmationModal.classList.remove('modal-exit-active');
-                    }, 200);
-                }
-            };
-        }
-
-        if (confirmationModal) {
-            confirmationModal.addEventListener('click', (e) => {
-                if (e.target === confirmationModal) {
-                    confirmationModal.classList.add('modal-exit-active');
-                    setTimeout(() => {
-                        confirmationModal.classList.add('hidden');
-                        confirmationModal.classList.remove('modal-exit-active');
-                    }, 200);
-                }
-            });
-        }
-    }
-
-    async function updateApplicationStatus(applicationId) {
-        const select = document.getElementById(`status-${applicationId}`);
-        const newStatus = select.value;
-        const saveButton = select.nextElementSibling;
-        saveButton.disabled = true;
-        saveButton.innerHTML = '<span class="spinner"></span>';
-        try {
-            const token = localStorage.getItem('token');
-            console.log('Updating application status with token:', token);
-            if (!token) {
-                throw new Error('No token found in localStorage');
-            }
-            const response = await fetch(`/api/applications/${applicationId}/status`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ status: newStatus })
-            });
-            if (!response.ok) {
-                const data = await response.json();
-                if (response.status === 401) {
-                    console.log('Unauthorized request, clearing token');
-                    localStorage.removeItem('token');
-                    loginSection.classList.remove('hidden');
-                    loginSection.classList.add('modal-enter-active');
-                    setTimeout(() => loginSection.classList.remove('modal-enter-active'), 200);
-                    dashboard.classList.add('hidden');
-                    if (loginError) {
-                        loginError.textContent = 'Session expired. Please log in again.';
-                        loginError.classList.remove('hidden');
-                    }
-                    return;
-                }
-                throw new Error(data.message || 'Error updating application status');
-            }
-            loadApplications();
-            updateStats();
-            const successMessage = document.getElementById('success-message');
-            if (successMessage) {
-                successMessage.textContent = 'Application status updated successfully!';
-                document.getElementById('success-alert').classList.remove('hidden');
-                setTimeout(() => document.getElementById('success-alert').classList.add('hidden'), 3000);
-            }
-        } catch (error) {
-            const errorMessage = document.getElementById('error-message');
-            if (errorMessage) {
-                errorMessage.textContent = error.message;
-                document.getElementById('error-alert').classList.remove('hidden');
-                setTimeout(() => document.getElementById('error-alert').classList.add('hidden'), 3000);
-            }
-        } finally {
-            saveButton.disabled = false;
-            saveButton.innerHTML = '<i class="fas fa-save text-xs"></i>';
-        }
-    }
-
-    async function deleteApplication(applicationId) {
-        const confirmationModal = document.getElementById('confirmation-modal');
-        const confirmButton = document.getElementById('confirm-action');
-        const cancelButton = document.getElementById('cancel-action');
-        const confirmationTitle = document.getElementById('confirmation-title');
-        const confirmationMessage = document.getElementById('confirmation-message');
-        if (confirmationTitle) confirmationTitle.textContent = 'Delete Application';
-        if (confirmationMessage) confirmationMessage.textContent = 'Are you sure you want to delete this application? This action cannot be undone.';
-        if (confirmationModal) {
-            confirmationModal.classList.remove('hidden');
-            confirmationModal.classList.add('modal-enter-active');
-            setTimeout(() => confirmationModal.classList.remove('modal-enter-active'), 200);
-        }
-
-        if (confirmButton) {
-            confirmButton.onclick = async () => {
-                try {
-                    const token = localStorage.getItem('token');
-                    console.log('Deleting application with token:', token);
-                    if (!token) {
-                        throw new Error('No token found in localStorage');
-                    }
-                    const response = await fetch(`/api/applications/${applicationId}`, {
-                        method: 'DELETE',
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
-                    if (!response.ok) {
-                        const data = await response.json();
-                        if (response.status === 401) {
-                            console.log('Unauthorized request, clearing token');
-                            localStorage.removeItem('token');
-                            loginSection.classList.remove('hidden');
-                            loginSection.classList.add('modal-enter-active');
-                            setTimeout(() => loginSection.classList.remove('modal-enter-active'), 200);
-                            dashboard.classList.add('hidden');
-                            if (loginError) {
-                                loginError.textContent = 'Session expired. Please log in again.';
-                                loginError.classList.remove('hidden');
-                            }
-                            return;
-                        }
-                        throw new Error(data.message || 'Error deleting application');
-                    }
-                    loadApplications();
-                    updateStats();
-                    const successMessage = document.getElementById('success-message');
-                    if (successMessage) {
-                        successMessage.textContent = 'Application deleted successfully!';
-                        document.getElementById('success-alert').classList.remove('hidden');
-                        setTimeout(() => document.getElementById('success-alert').classList.add('hidden'), 3000);
-                    }
-                } catch (error) {
-                    if (applicationError) {
-                        applicationError.textContent = error.message;
-                        applicationError.classList.remove('hidden');
-                    }
-                    const errorMessage = document.getElementById('error-message');
-                    if (errorMessage) {
-                        errorMessage.textContent = error.message;
-                        document.getElementById('error-alert').classList.remove('hidden');
-                        setTimeout(() => document.getElementById('error-alert').classList.add('hidden'), 3000);
-                    }
-                } finally {
-                    if (confirmationModal) {
-                        confirmationModal.classList.add('modal-exit-active');
-                        setTimeout(() => {
-                            confirmationModal.classList.add('hidden');
-                            confirmationModal.classList.remove('modal-exit-active');
-                        }, 200);
-                    }
-                }
-            };
-        }
-
-        if (cancelButton) {
-            cancelButton.onclick = () => {
-                if (confirmationModal) {
-                    confirmationModal.classList.add('modal-exit-active');
-                    setTimeout(() => {
-                        confirmationModal.classList.add('hidden');
-                        confirmationModal.classList.remove('modal-exit-active');
-                    }, 200);
-                }
-            };
-        }
-
-        if (confirmationModal) {
-            confirmationModal.addEventListener('click', (e) => {
-                if (e.target === confirmationModal) {
-                    confirmationModal.classList.add('modal-exit-active');
-                    setTimeout(() => {
-                        confirmationModal.classList.add('hidden');
-                        confirmationModal.classList.remove('modal-exit-active');
-                    }, 200);
-                }
-            });
-        }
-    }
-
-    function updatePendingMessages() {
-        const pendingCount = document.getElementById('pending-count');
-        const messagesButton = document.getElementById('messages-button');
-        const messageModal = document.getElementById('message-modal');
-        const messageModalTitle = document.getElementById('message-modal-title');
-        const messageModalContent = document.getElementById('message-modal-content');
-        const messageModalNavigate = document.getElementById('message-modal-navigate');
-        const closeMessageModal = document.getElementById('close-message-modal');
-
-        if (pendingCount) {
-            pendingCount.textContent = pendingItems.length;
-            if (pendingItems.length > 0) {
-                pendingCount.classList.remove('hidden');
-            } else {
-                pendingCount.classList.add('hidden');
-            }
-        }
-
-        if (messagesButton) {
-            messagesButton.addEventListener('click', () => {
-                if (pendingItems.length > 0) {
-                    const item = pendingItems[0];
-                    if (messageModalTitle) messageModalTitle.textContent = item.type.charAt(0).toUpperCase() + item.type.slice(1) + ' Notification';
-                    if (messageModalContent) messageModalContent.textContent = item.message;
-                    if (messageModalNavigate) {
-                        messageModalNavigate.onclick = () => {
-                            window.location.href = item.navigateUrl;
-                        };
-                    }
-                    if (messageModal) {
-                        messageModal.classList.remove('hidden');
-                        messageModal.classList.add('modal-enter-active');
-                        setTimeout(() => messageModal.classList.remove('modal-enter-active'), 200);
-                    }
-                }
-            });
-        }
-
-        if (closeMessageModal) {
-            closeMessageModal.addEventListener('click', () => {
-                if (messageModal) {
-                    messageModal.classList.add('modal-exit-active');
-                    setTimeout(() => {
-                        messageModal.classList.add('hidden');
-                        messageModal.classList.remove('modal-exit-active');
-                    }, 200);
-                }
-            });
-        }
-
-        if (messageModal) {
-            messageModal.addEventListener('click', (e) => {
-                if (e.target === messageModal) {
-                    messageModal.classList.add('modal-exit-active');
-                    setTimeout(() => {
-                        messageModal.classList.add('hidden');
-                        messageModal.classList.remove('modal-exit-active');
-                    }, 200);
-                }
-            });
-        }
-    }
-
-    const closeSuccessAlert = document.getElementById('close-success-alert');
-    if (closeSuccessAlert) {
-        closeSuccessAlert.addEventListener('click', () => {
-            document.getElementById('success-alert').classList.add('hidden');
+        const response = await fetch('/api/bookings?limit=8&sort=-createdAt', {
+            headers: { 'Authorization': `Bearer ${token}` }
         });
-    }
-
-    const closeErrorAlert = document.getElementById('close-error-alert');
-    if (closeErrorAlert) {
-        closeErrorAlert.addEventListener('click', () => {
-            document.getElementById('error-alert').classList.add('hidden');
-        });
-    }
-
-    window.updateBookingStatus = updateBookingStatus;
-    window.deleteBooking = deleteBooking;
-    window.updateApplicationStatus = updateApplicationStatus;
-    window.deleteApplication = deleteApplication;
-
-    window.addEventListener('resize', () => {
-        if (window.innerWidth < 640) {
-            sidebar.classList.add('hidden');
-            contentArea.classList.remove('ml-56');
+        if (!response.ok) {
+            const data = await response.json().catch(() => ({}));
+            if (response.status === 401) {
+                console.log('Unauthorized request, clearing token');
+                localStorage.removeItem('token');
+                loginSection.classList.remove('hidden');
+                loginSection.classList.add('modal-enter-active');
+                setTimeout(() => loginSection.classList.remove('modal-enter-active'), 200);
+                dashboard.classList.add('hidden');
+                if (loginError) {
+                    loginError.textContent = 'Session expired. Please log in again.';
+                    loginError.classList.remove('hidden');
+                }
+                return;
+            }
+            throw new Error(data.message || `HTTP error: ${response.status}`);
+        }
+        const bookingsData = await response.json();
+        // Handle response format
+        const bookings = Array.isArray(bookingsData) ? bookingsData : 
+                        (bookingsData.bookings || []);
+        
+        const bookingGrid = document.getElementById('booking-grid');
+        if (bookingGrid) {
+            bookingGrid.innerHTML = '';
+            bookings.slice(0, 8).forEach(booking => {
+                if (booking.status === 'pending') {
+                    pendingItems.push({
+                        type: 'booking',
+                        id: booking._id,
+                        message: `New booking from ${booking.fullName || 'N/A'} for ${booking.shootType || 'N/A'} on ${booking.bookingDateTime ? new Date(booking.bookingDateTime).toLocaleString() : 'N/A'}`,
+                        navigateUrl: 'manage-bookings.html'
+                    });
+                }
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${booking.fullName || 'N/A'}</td>
+                    <td>${booking.modelName || 'N/A'}</td>
+                    <td>${booking.bookingDateTime ? new Date(booking.bookingDateTime).toLocaleString() : 'N/A'}</td>
+                    <td>${booking.shootType || 'N/A'}</td>
+                    <td><span class="badge badge-${booking.status}">${booking.status ? booking.status.charAt(0).toUpperCase() + booking.status.slice(1) : 'N/A'}</span></td>
+                    <td>
+                        <select id="status-${booking._id}" class="form-input px-2 py-1 text-xs" aria-label="Booking Status">
+                            <option value="pending" ${booking.status === 'pending' ? 'selected' : ''}>Pending</option>
+                            <option value="reviewed" ${booking.status === 'reviewed' ? 'selected' : ''}>Reviewed</option>
+                            <option value="confirmed" ${booking.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
+                            <option value="cancelled" ${booking.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                        </select>
+                        <button onclick="updateBookingStatus('${booking._id}')" class="text-blue-500 hover:text-blue-700 ml-1 tooltip" data-tooltip="Save Status" aria-label="Save Booking Status">
+                            <i class="fas fa-save text-xs"></i>
+                        </button>
+                        <button onclick="deleteBooking('${booking._id}')" class="text-red-500 hover:text-red-700 ml-1 tooltip" data-tooltip="Delete Booking" aria-label="Delete Booking">
+                            <i class="fas fa-trash text-xs"></i>
+                        </button>
+                    </td>
+                `;
+                bookingGrid.appendChild(tr);
+            });
         } else {
-            sidebar.classList.remove('hidden');
-            contentArea.classList.add('ml-56');
+            console.error('Element with ID "booking-grid" not found');
         }
-    });
+    } catch (error) {
+        if (bookingError) {
+            bookingError.textContent = error.message || 'Error loading bookings';
+            bookingError.classList.remove('hidden');
+        }
+        const errorMessage = document.getElementById('error-message');
+        if (errorMessage) {
+            errorMessage.textContent = error.message;
+            document.getElementById('error-alert').classList.remove('hidden');
+            setTimeout(() => document.getElementById('error-alert').classList.add('hidden'), 3000);
+        }
+    } finally {
+        if (bookingLoading) bookingLoading.classList.add('hidden');
+    }
+}
 
+async function loadApplications() {
+    if (applicationLoading) applicationLoading.classList.remove('hidden');
+    if (applicationError) applicationError.classList.add('hidden');
+    try {
+        const token = localStorage.getItem('token');
+        console.log('Sending request with token for applications:', token);
+        if (!token) {
+            throw new Error('No token found in localStorage');
+        }
+        const response = await fetch('/api/applications?limit=8&sort=-submittedAt', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) {
+            const data = await response.json().catch(() => ({}));
+            if (response.status === 401) {
+                console.log('Unauthorized request, clearing token');
+                localStorage.removeItem('token');
+                loginSection.classList.remove('hidden');
+                loginSection.classList.add('modal-enter-active');
+                setTimeout(() => loginSection.classList.remove('modal-enter-active'), 200);
+                dashboard.classList.add('hidden');
+                if (loginError) {
+                    loginError.textContent = 'Session expired. Please log in again.';
+                    loginError.classList.remove('hidden');
+                }
+                return;
+            }
+            throw new Error(data.message || `HTTP error: ${response.status}`);
+        }
+        const applicationsData = await response.json();
+        // Handle response format
+        const applications = Array.isArray(applicationsData) ? applicationsData : [];
+        
+        const applicationGrid = document.getElementById('application-grid');
+        if (applicationGrid) {
+            applicationGrid.innerHTML = '';
+            applications.slice(0, 8).forEach(application => {
+                if (application.status === 'pending') {
+                    pendingItems.push({
+                        type: 'application',
+                        id: application._id,
+                        message: `New application from ${application.fullName || application.firstName + ' ' + application.lastName || 'N/A'} for ${application.category || 'N/A'} submitted on ${application.submittedAt || application.createdAt ? new Date(application.submittedAt || application.createdAt).toLocaleString() : 'N/A'}`,
+                        navigateUrl: 'manage-applications.html'
+                    });
+                }
+                const fullName = application.fullName || 
+                                (application.firstName && application.lastName ? 
+                                `${application.firstName} ${application.lastName}` : 'N/A');
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${fullName}</td>
+                    <td>${application.email || 'N/A'}</td>
+                    <td>${application.category || application.shootType || 'N/A'}</td>
+                    <td>${application.submittedAt || application.createdAt ? new Date(application.submittedAt || application.createdAt).toLocaleString() : 'N/A'}</td>
+                    <td><span class="badge badge-${application.status}">${application.status ? application.status.charAt(0).toUpperCase() + application.status.slice(1) : 'N/A'}</span></td>
+                    <td>
+                        <select id="status-${application._id}" class="form-input px-2 py-1 text-xs" aria-label="Application Status">
+                            <option value="pending" ${application.status === 'pending' ? 'selected' : ''}>Pending</option>
+                            <option value="reviewed" ${application.status === 'reviewed' ? 'selected' : ''}>Reviewed</option>
+                            <option value="accepted" ${application.status === 'accepted' ? 'selected' : ''}>Accepted</option>
+                            <option value="rejected" ${application.status === 'rejected' ? 'selected' : ''}>Rejected</option>
+                        </select>
+                        <button onclick="updateApplicationStatus('${application._id}')" class="text-blue-500 hover:text-blue-700 ml-1 tooltip" data-tooltip="Save Status" aria-label="Save Application Status">
+                            <i class="fas fa-save text-xs"></i>
+                        </button>
+                        <button onclick="deleteApplication('${application._id}')" class="text-red-500 hover:text-red-700 ml-1 tooltip" data-tooltip="Delete Application" aria-label="Delete Application">
+                            <i class="fas fa-trash text-xs"></i>
+                        </button>
+                    </td>
+                `;
+                applicationGrid.appendChild(tr);
+            });
+        } else {
+            console.error('Element with ID "application-grid" not found');
+        }
+    } catch (error) {
+        if (applicationError) {
+            applicationError.textContent = error.message || 'Error loading applications';
+            applicationError.classList.remove('hidden');
+        }
+        const errorMessage = document.getElementById('error-message');
+        if (errorMessage) {
+            errorMessage.textContent = error.message;
+            document.getElementById('error-alert').classList.remove('hidden');
+            setTimeout(() => document.getElementById('error-alert').classList.add('hidden'), 3000);
+        }
+    } finally {
+        if (applicationLoading) applicationLoading.classList.add('hidden');
+    }
+}
+
+async function updateBookingStatus(bookingId) {
+    const select = document.getElementById(`status-${bookingId}`);
+    const newStatus = select.value;
+    const saveButton = select.nextElementSibling;
+    saveButton.disabled = true;
+    saveButton.innerHTML = '<span class="spinner"></span>';
+    try {
+        const token = localStorage.getItem('token');
+        console.log('Updating booking status with token:', token);
+        if (!token) {
+            throw new Error('No token found in localStorage');
+        }
+        const response = await fetch(`/api/bookings/${bookingId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ status: newStatus })
+        });
+        if (!response.ok) {
+            const data = await response.json();
+            if (response.status === 401) {
+                console.log('Unauthorized request, clearing token');
+                localStorage.removeItem('token');
+                loginSection.classList.remove('hidden');
+                loginSection.classList.add('modal-enter-active');
+                setTimeout(() => loginSection.classList.remove('modal-enter-active'), 200);
+                dashboard.classList.add('hidden');
+                if (loginError) {
+                    loginError.textContent = 'Session expired. Please log in again.';
+                    loginError.classList.remove('hidden');
+                }
+                return;
+            }
+            throw new Error(data.message || 'Error updating booking status');
+        }
+        await loadBookings();
+        await updateStats();
+        const successMessage = document.getElementById('success-message');
+        if (successMessage) {
+            successMessage.textContent = 'Booking status updated successfully!';
+            document.getElementById('success-alert').classList.remove('hidden');
+            setTimeout(() => document.getElementById('success-alert').classList.add('hidden'), 3000);
+        }
+    } catch (error) {
+        const errorMessage = document.getElementById('error-message');
+        if (errorMessage) {
+            errorMessage.textContent = error.message;
+            document.getElementById('error-alert').classList.remove('hidden');
+            setTimeout(() => document.getElementById('error-alert').classList.add('hidden'), 3000);
+        }
+    } finally {
+        saveButton.disabled = false;
+        saveButton.innerHTML = '<i class="fas fa-save text-xs"></i>';
+    }
+}
+
+async function deleteBooking(bookingId) {
+    const confirmationModal = document.getElementById('confirmation-modal');
+    const confirmButton = document.getElementById('confirm-action');
+    const cancelButton = document.getElementById('cancel-action');
+    const confirmationTitle = document.getElementById('confirmation-title');
+    const confirmationMessage = document.getElementById('confirmation-message');
+    if (confirmationTitle) confirmationTitle.textContent = 'Delete Booking';
+    if (confirmationMessage) confirmationMessage.textContent = 'Are you sure you want to delete this booking? This action cannot be undone.';
+    if (confirmationModal) {
+        confirmationModal.classList.remove('hidden');
+        confirmationModal.classList.add('modal-enter-active');
+        setTimeout(() => confirmationModal.classList.remove('modal-enter-active'), 200);
+    }
+
+    if (confirmButton) {
+        confirmButton.onclick = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                console.log('Deleting booking with token:', token);
+                if (!token) {
+                    throw new Error('No token found in localStorage');
+                }
+                const response = await fetch(`/api/bookings/${bookingId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!response.ok) {
+                    const data = await response.json();
+                    if (response.status === 401) {
+                        console.log('Unauthorized request, clearing token');
+                        localStorage.removeItem('token');
+                        loginSection.classList.remove('hidden');
+                        loginSection.classList.add('modal-enter-active');
+                        setTimeout(() => loginSection.classList.remove('modal-enter-active'), 200);
+                        dashboard.classList.add('hidden');
+                        if (loginError) {
+                            loginError.textContent = 'Session expired. Please log in again.';
+                            loginError.classList.remove('hidden');
+                        }
+                        return;
+                    }
+                    throw new Error(data.message || 'Error deleting booking');
+                }
+                await loadBookings();
+                await updateStats();
+                const successMessage = document.getElementById('success-message');
+                if (successMessage) {
+                    successMessage.textContent = 'Booking deleted successfully!';
+                    document.getElementById('success-alert').classList.remove('hidden');
+                    setTimeout(() => document.getElementById('success-alert').classList.add('hidden'), 3000);
+                }
+            } catch (error) {
+                if (bookingError) {
+                    bookingError.textContent = error.message;
+                    bookingError.classList.remove('hidden');
+                }
+                const errorMessage = document.getElementById('error-message');
+                if (errorMessage) {
+                    errorMessage.textContent = error.message;
+                    document.getElementById('error-alert').classList.remove('hidden');
+                    setTimeout(() => document.getElementById('error-alert').classList.add('hidden'), 3000);
+                }
+            } finally {
+                if (confirmationModal) {
+                    confirmationModal.classList.add('modal-exit-active');
+                    setTimeout(() => {
+                        confirmationModal.classList.add('hidden');
+                        confirmationModal.classList.remove('modal-exit-active');
+                    }, 200);
+                }
+            }
+        };
+    }
+
+    if (cancelButton) {
+        cancelButton.onclick = () => {
+            if (confirmationModal) {
+                confirmationModal.classList.add('modal-exit-active');
+                setTimeout(() => {
+                    confirmationModal.classList.add('hidden');
+                    confirmationModal.classList.remove('modal-exit-active');
+                }, 200);
+            }
+        };
+    }
+
+    if (confirmationModal) {
+        confirmationModal.addEventListener('click', (e) => {
+            if (e.target === confirmationModal) {
+                confirmationModal.classList.add('modal-exit-active');
+                setTimeout(() => {
+                    confirmationModal.classList.add('hidden');
+                    confirmationModal.classList.remove('modal-exit-active');
+                }, 200);
+            }
+        });
+    }
+}
+
+async function updateApplicationStatus(applicationId) {
+    const select = document.getElementById(`status-${applicationId}`);
+    const newStatus = select.value;
+    const saveButton = select.nextElementSibling;
+    saveButton.disabled = true;
+    saveButton.innerHTML = '<span class="spinner"></span>';
+    try {
+        const token = localStorage.getItem('token');
+        console.log('Updating application status with token:', token);
+        if (!token) {
+            throw new Error('No token found in localStorage');
+        }
+        const response = await fetch(`/api/applications/${applicationId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ status: newStatus })
+        });
+        if (!response.ok) {
+            const data = await response.json();
+            if (response.status === 401) {
+                console.log('Unauthorized request, clearing token');
+                localStorage.removeItem('token');
+                loginSection.classList.remove('hidden');
+                loginSection.classList.add('modal-enter-active');
+                setTimeout(() => loginSection.classList.remove('modal-enter-active'), 200);
+                dashboard.classList.add('hidden');
+                if (loginError) {
+                    loginError.textContent = 'Session expired. Please log in again.';
+                    loginError.classList.remove('hidden');
+                }
+                return;
+            }
+            throw new Error(data.message || 'Error updating application status');
+        }
+        await loadApplications();
+        await updateStats();
+        const successMessage = document.getElementById('success-message');
+        if (successMessage) {
+            successMessage.textContent = 'Application status updated successfully!';
+            document.getElementById('success-alert').classList.remove('hidden');
+            setTimeout(() => document.getElementById('success-alert').classList.add('hidden'), 3000);
+        }
+    } catch (error) {
+        const errorMessage = document.getElementById('error-message');
+        if (errorMessage) {
+            errorMessage.textContent = error.message;
+            document.getElementById('error-alert').classList.remove('hidden');
+            setTimeout(() => document.getElementById('error-alert').classList.add('hidden'), 3000);
+        }
+    } finally {
+        saveButton.disabled = false;
+        saveButton.innerHTML = '<i class="fas fa-save text-xs"></i>';
+    }
+}
+
+async function deleteApplication(applicationId) {
+    const confirmationModal = document.getElementById('confirmation-modal');
+    const confirmButton = document.getElementById('confirm-action');
+    const cancelButton = document.getElementById('cancel-action');
+    const confirmationTitle = document.getElementById('confirmation-title');
+    const confirmationMessage = document.getElementById('confirmation-message');
+    if (confirmationTitle) confirmationTitle.textContent = 'Delete Application';
+    if (confirmationMessage) confirmationMessage.textContent = 'Are you sure you want to delete this application? This action cannot be undone.';
+    if (confirmationModal) {
+        confirmationModal.classList.remove('hidden');
+        confirmationModal.classList.add('modal-enter-active');
+        setTimeout(() => confirmationModal.classList.remove('modal-enter-active'), 200);
+    }
+
+    if (confirmButton) {
+        confirmButton.onclick = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                console.log('Deleting application with token:', token);
+                if (!token) {
+                    throw new Error('No token found in localStorage');
+                }
+                const response = await fetch(`/api/applications/${applicationId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!response.ok) {
+                    const data = await response.json();
+                    if (response.status === 401) {
+                        console.log('Unauthorized request, clearing token');
+                        localStorage.removeItem('token');
+                        loginSection.classList.remove('hidden');
+                        loginSection.classList.add('modal-enter-active');
+                        setTimeout(() => loginSection.classList.remove('modal-enter-active'), 200);
+                        dashboard.classList.add('hidden');
+                        if (loginError) {
+                            loginError.textContent = 'Session expired. Please log in again.';
+                            loginError.classList.remove('hidden');
+                        }
+                        return;
+                    }
+                    throw new Error(data.message || 'Error deleting application');
+                }
+                await loadApplications();
+                await updateStats();
+                const successMessage = document.getElementById('success-message');
+                if (successMessage) {
+                    successMessage.textContent = 'Application deleted successfully!';
+                    document.getElementById('success-alert').classList.remove('hidden');
+                    setTimeout(() => document.getElementById('success-alert').classList.add('hidden'), 3000);
+                }
+            } catch (error) {
+                if (applicationError) {
+                    applicationError.textContent = error.message;
+                    applicationError.classList.remove('hidden');
+                }
+                const errorMessage = document.getElementById('error-message');
+                if (errorMessage) {
+                    errorMessage.textContent = error.message;
+                    document.getElementById('error-alert').classList.remove('hidden');
+                    setTimeout(() => document.getElementById('error-alert').classList.add('hidden'), 3000);
+                }
+            } finally {
+                if (confirmationModal) {
+                    confirmationModal.classList.add('modal-exit-active');
+                    setTimeout(() => {
+                        confirmationModal.classList.add('hidden');
+                        confirmationModal.classList.remove('modal-exit-active');
+                    }, 200);
+                }
+            }
+        };
+    }
+
+    if (cancelButton) {
+        cancelButton.onclick = () => {
+            if (confirmationModal) {
+                confirmationModal.classList.add('modal-exit-active');
+                setTimeout(() => {
+                    confirmationModal.classList.add('hidden');
+                    confirmationModal.classList.remove('modal-exit-active');
+                }, 200);
+            }
+        };
+    }
+
+    if (confirmationModal) {
+        confirmationModal.addEventListener('click', (e) => {
+            if (e.target === confirmationModal) {
+                confirmationModal.classList.add('modal-exit-active');
+                setTimeout(() => {
+                    confirmationModal.classList.add('hidden');
+                    confirmationModal.classList.remove('modal-exit-active');
+                }, 200);
+            }
+        });
+    }
+}
+
+function updatePendingMessages() {
+    const pendingCount = document.getElementById('pending-count');
+    const messagesButton = document.getElementById('messages-button');
+    const messageModal = document.getElementById('message-modal');
+    const messageModalTitle = document.getElementById('message-modal-title');
+    const messageModalContent = document.getElementById('message-modal-content');
+    const messageModalNavigate = document.getElementById('message-modal-navigate');
+    const closeMessageModal = document.getElementById('close-message-modal');
+
+    if (pendingCount) {
+        pendingCount.textContent = pendingItems.length;
+        if (pendingItems.length > 0) {
+            pendingCount.classList.remove('hidden');
+        } else {
+            pendingCount.classList.add('hidden');
+        }
+    }
+
+    if (messagesButton) {
+        // Remove existing listeners to avoid duplicates
+        const newMessagesButton = messagesButton.cloneNode(true);
+        messagesButton.parentNode.replaceChild(newMessagesButton, messagesButton);
+        
+        newMessagesButton.addEventListener('click', () => {
+            if (pendingItems.length > 0) {
+                const item = pendingItems[0];
+                if (messageModalTitle) messageModalTitle.textContent = item.type.charAt(0).toUpperCase() + item.type.slice(1) + ' Notification';
+                if (messageModalContent) messageModalContent.textContent = item.message;
+                if (messageModalNavigate) {
+                    messageModalNavigate.onclick = () => {
+                        window.location.href = item.navigateUrl;
+                    };
+                }
+                if (messageModal) {
+                    messageModal.classList.remove('hidden');
+                    messageModal.classList.add('modal-enter-active');
+                    setTimeout(() => messageModal.classList.remove('modal-enter-active'), 200);
+                }
+            }
+        });
+    }
+
+    if (closeMessageModal) {
+        closeMessageModal.addEventListener('click', () => {
+            if (messageModal) {
+                messageModal.classList.add('modal-exit-active');
+                setTimeout(() => {
+                    messageModal.classList.add('hidden');
+                    messageModal.classList.remove('modal-exit-active');
+                }, 200);
+            }
+        });
+    }
+
+    if (messageModal) {
+        messageModal.addEventListener('click', (e) => {
+            if (e.target === messageModal) {
+                messageModal.classList.add('modal-exit-active');
+                setTimeout(() => {
+                    messageModal.classList.add('hidden');
+                    messageModal.classList.remove('modal-exit-active');
+                }, 200);
+            }
+        });
+    }
+}
+
+const closeSuccessAlert = document.getElementById('close-success-alert');
+if (closeSuccessAlert) {
+    closeSuccessAlert.addEventListener('click', () => {
+        document.getElementById('success-alert').classList.add('hidden');
+    });
+}
+
+const closeErrorAlert = document.getElementById('close-error-alert');
+if (closeErrorAlert) {
+    closeErrorAlert.addEventListener('click', () => {
+        document.getElementById('error-alert').classList.add('hidden');
+    });
+}
+
+window.updateBookingStatus = updateBookingStatus;
+window.deleteBooking = deleteBooking;
+window.updateApplicationStatus = updateApplicationStatus;
+window.deleteApplication = deleteApplication;
+
+window.addEventListener('resize', () => {
     if (window.innerWidth < 640) {
         sidebar.classList.add('hidden');
         contentArea.classList.remove('ml-56');
@@ -1874,9 +1927,18 @@
         sidebar.classList.remove('hidden');
         contentArea.classList.add('ml-56');
     }
+});
 
-    // Run initial login state check after DOM is fully loaded
-    document.addEventListener('DOMContentLoaded', initializeLoginState);
+if (window.innerWidth < 640) {
+    sidebar.classList.add('hidden');
+    contentArea.classList.remove('ml-56');
+} else {
+    sidebar.classList.remove('hidden');
+    contentArea.classList.add('ml-56');
+}
+
+// Run initial login state check after DOM is fully loaded
+document.addEventListener('DOMContentLoaded', initializeLoginState);
 </script>
 </body>
 </html>
