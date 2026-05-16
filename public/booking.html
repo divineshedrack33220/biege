@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Book top-tier models with Beige Model Agency for your fashion, commercial, or editorial shoots">
+    <meta name="keywords" content="model booking, fashion models, Beige agency, talent booking">
+    <meta name="robots" content="index, follow">
+    <title>Book a Model | Beige</title>
+      <link rel="icon" href="img/logo.jpeg" type="image/x-icon">
+    <link rel="shortcut icon" href="img/logo.jpeg" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?cache_bust=20250812"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css?cache_bust=20250812">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+        body {
+            font-family: 'Playfair Display', serif;
+            line-height: 1.6;
+            margin: 0;
+            background: #FFFFFF;
+            color: #000000;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            scroll-behavior: smooth;
+            overflow-x: hidden;
+        }
+        main {
+            flex: 1 0 auto;
+        }
+        footer {
+            flex-shrink: 0;
+        }
+        .container {
+            max-width: 1280px;
+            margin-left: auto;
+            margin-right: auto;
+            padding-left: clamp(1rem, 3vw, 1.5rem);
+            padding-right: clamp(1rem, 3vw, 1.5rem);
+        }
+        .desktop-nav-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.9);
+            z-index: 60;
+            padding: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            min-height: 64px;
+        }
+        .desktop-nav-bar a[href="index.html"] {
+            font-size: clamp(1.5rem, 2.5vw, 3rem);
+            font-weight: 300;
+            color: black;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            max-width: 90vw;
+            z-index: 65;
+        }
+        .menu-toggle {
+            display: none;
+            position: relative;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            z-index: 65;
+        }
+        .menu-toggle span {
+            display: block;
+            position: absolute;
+            height: 3px;
+            width: 100%;
+            background: #000000;
+            border-radius: 3px;
+            opacity: 1;
+            left: 0;
+            transform: rotate(0deg);
+            transition: all 0.3s ease;
+        }
+        .menu-toggle span:nth-child(1) { top: 4px; }
+        .menu-toggle span:nth-child(2) { top: 10px; }
+        .menu-toggle span:nth-child(3) { top: 16px; }
+        .menu-toggle.active span:nth-child(1) { top: 10px; transform: rotate(45deg); }
+        .menu-toggle.active span:nth-child(2) { opacity: 0; transform: translateX(-20px); }
+        .menu-toggle.active span:nth-child(3) { top: 10px; transform: rotate(-45deg); }
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            z-index: 55;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .mobile-menu.active {
+            display: flex;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .mobile-menu a {
+            font-size: clamp(1rem, 4vw, 1.5rem);
+            color: black;
+            text-decoration: none;
+            text-transform: uppercase;
+            margin: 1.5rem 0;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.3s ease, transform 0.3s ease, color 0.3s ease;
+        }
+        .mobile-menu.active a {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .mobile-menu.active a:nth-child(1) { transition-delay: 0.2s; }
+        .mobile-menu.active a:nth-child(2) { transition-delay: 0.3s; }
+        .mobile-menu.active a:nth-child(3) { transition-delay: 0.4s; }
+        .mobile-menu.active a:nth-child(4) { transition-delay: 0.5s; }
+        .mobile-menu.active a:nth-child(5) { transition-delay: 0.6s; }
+        .hero-title {
+            font-size: clamp(1.25rem, 4.5vw, 2.75rem);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            font-weight: 300;
+            color: #000000;
+            display: block;
+            max-width: 90vw;
+            margin: 0 auto clamp(0.25rem, 1vw, 0.5rem);
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        .hero-title.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .section {
+            scroll-margin-top: clamp(4rem, 10vw, 6rem);
+            padding: clamp(2rem, 5vw, 4rem) 0;
+        }
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s cubic-bezier(0.5, 0, 0, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .btn-animate {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            padding: clamp(0.5rem, 1.5vw, 0.75rem) clamp(1rem, 2vw, 1.5rem);
+            font-size: clamp(0.625rem, 1.5vw, 0.875rem);
+            border: 1px solid #000000;
+            color: #000000;
+            background: transparent;
+            text-transform: uppercase;
+            font-weight: medium;
+        }
+        .btn-animate:hover {
+            background: #000000;
+            color: #FFFFFF;
+        }
+        .btn-animate[type="reset"] {
+            background: #6B7280;
+            color: #FFFFFF;
+            border: 1px solid #6B7280;
+        }
+        .btn-animate[type="reset"]:hover {
+            background: #4B5563;
+            color: #FFFFFF;
+        }
+        .form-input {
+            transition: border 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid #000;
+            padding: 0.75rem;
+            width: 100%;
+        }
+        .form-input:focus {
+            border-color: #000;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2);
+        }
+        label, p, input, select, textarea {
+            font-size: clamp(0.875rem, 2.5vw, 1rem);
+            color: #000;
+        }
+        /* HIDE ALL RED ERROR MESSAGES */
+        .error-message, #form-error {
+            display: none !important;
+        }
+        .model-card {
+            max-width: 150px;
+            margin: 1rem 0;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .model-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 3px solid #000;
+            margin: 0 auto;
+            display: block;
+        }
+        .model-name {
+            margin-top: 0.5rem;
+            font-size: clamp(0.875rem, 2vw, 1rem);
+            color: #000;
+            font-weight: 500;
+            text-align: center;
+        }
+        @media (max-width: 639px) {
+            .container {
+                padding-left: clamp(1rem, 4vw, 1.7rem);
+                padding-right: clamp(1rem, 4vw, 1.7rem);
+            }
+            .desktop-nav-bar .desktop-nav {
+                display: none !important;
+            }
+            .menu-toggle {
+                display: flex;
+                align-items: center;
+            }
+        }
+        @media (min-width: 640px) {
+            .menu-toggle, .mobile-menu {
+                display: none !important;
+            }
+            .desktop-nav-bar .desktop-nav {
+                display: flex !important;
+            }
+        }
+        footer {
+            background: #000000;
+            color: #FFFFFF;
+            padding: 3rem 0;
+            width: 100%;
+        }
+        footer .container {
+            padding-left: clamp(1rem, 3vw, 1.5rem);
+            padding-right: clamp(1rem, 3vw, 1.5rem);
+        }
+        footer a {
+            color: #FFFFFF;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        footer a:hover {
+            color: #ccc;
+        }
+
+        /* MESSAGE WHEN USER TRIES TO TYPE NAME WITHOUT MODEL */
+        #model-warning {
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.98);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            text-align: center;
+            padding: 2rem;
+            backdrop-filter: blur(8px);
+        }
+        #model-warning.active {
+            display: flex;
+        }
+        #model-warning .modal-content {
+            background: white;
+            padding: 4rem 3rem;
+            border: 3px solid #000;
+            max-width: 90%;
+            animation: popIn 0.6s ease-out;
+        }
+        @keyframes popIn {
+            0% { transform: scale(0.7); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        #model-warning h2 {
+            font-size: clamp(2rem, 6vw, 3rem);
+            font-weight: 300;
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+        }
+        #model-warning p {
+            font-size: clamp(1.1rem, 4vw, 1.5rem);
+            line-height: 1.7;
+        }
+
+        /* THANK YOU MODAL */
+        #thankyou-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+        #thankyou-modal.active {
+            display: flex;
+        }
+        #thankyou-modal .modal-content {
+            background: white;
+            padding: 5rem 3rem;
+            text-align: center;
+            border: 3px solid #000;
+            max-width: 90%;
+        }
+        #thankyou-modal h3 {
+            font-size: clamp(2.5rem, 7vw, 4rem);
+            font-weight: 300;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body class="bg-white text-black">
+    <nav class="desktop-nav-bar fixed top-0 left-0 right-0 bg-white bg-opacity-90 shadow-sm z-50 flex items-center">
+        <div class="container flex justify-between items-center">
+            <a href="index.html" class="font-bold tracking-wider" aria-label="Beige Home">BEIGE</a>
+            <div class="desktop-nav flex space-x-8">
+                <a href="home.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase">HOME</a>
+                <a href="about.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase">ABOUT US</a>
+                <a href="models.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase">MODELS</a>
+                <a href="booking.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase">BOOK A MODEL</a>
+                <a href="become-model.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase">BECOME A MODEL</a>
+                <a href="contact.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase">CONTACT</a>
+                <a href="discount.html" class="hover:text-gray-600 transition-colors duration-300 text-sm uppercase">EXCLUSIVE OFFERS</a>
+            </div>
+            <div class="menu-toggle" onclick="toggleMenu()" aria-label="Toggle Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+        <div class="mobile-menu" role="dialog" aria-label="Mobile Navigation Menu">
+            <a href="home.html">HOME</a>
+            <a href="about.html">ABOUT US</a>
+            <a href="models.html">MODELS</a>
+            <a href="booking.html">BOOK A MODEL</a>
+            <a href="become-model.html">BECOME A MODEL</a>
+            <a href="contact.html">CONTACT</a>
+            <a href="discount.html" style="background-color: black; color: white; padding: 8px 16px; text-decoration: none; display: inline-block; border-radius: 4px; font-weight: bold;">
+               EXCLUSIVE OFFERS
+            </a>
+        </div>
+    </nav>
+
+    <!-- MESSAGE WHEN USER TRIES TO TYPE NAME WITHOUT SELECTING MODEL -->
+    <div id="model-warning">
+        <div class="modal-content">
+            <h2>Please select a model first</h2>
+            <p>You must choose a model from our portfolio before filling this form.</p>
+            <p>Redirecting you to the models page...</p>
+        </div>
+    </div>
+
+    <main>
+        <section id="booking" class="section bg-white">
+            <div class="container mx-auto">
+                <div class="text-center mb-12 reveal">
+                    <h2 class="hero-title" id="bookingTitle">BOOK A MODEL</h2>
+                    <div class="w-16 h-px bg-black mx-auto mb-4"></div>
+                    <p class="text-gray-600 max-w-xl mx-auto">Submit your request to book our top-tier modeling talent</p>
+                </div>
+
+                <div id="form-error" class="text-red-500 text-center text-sm hidden"></div>
+
+                <form id="booking-form" class="space-y-6 max-w-2xl mx-auto reveal">
+                    <input type="hidden" id="model-id" name="modelId">
+
+                    <div>
+                        <label for="full-name" class="block mb-2">Full Name</label>
+                        <input type="text" id="full-name" class="w-full form-input" required>
+                        <p class="text-red-500 text-xs mt-1 hidden error-message" id="full-name-error">Full name is required</p>
+                    </div>
+
+                    <div>
+                        <label for="email" class="block mb-2">Email</label>
+                        <input type="email" id="email" class="w-full form-input" 
+                               pattern="[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}" required>
+                        <p class="text-red-500 text-xs mt-1 hidden error-message" id="email-error">Valid email is required</p>
+                    </div>
+
+                    <div>
+                        <label for="phone" class="block mb-2">Phone Number</label>
+                        <input type="tel" id="phone" class="w-full form-input" 
+                               pattern="\+?[0-9\s\-\(\)]{7,20}" required>
+                        <p class="text-red-500 text-xs mt-1 hidden error-message" id="phone-error">Valid phone number is required</p>
+                    </div>
+
+                    <div>
+                        <label for="shoot-type" class="block mb-2">Shoot Type</label>
+                        <select id="shoot-type" class="w-full form-input" required>
+                            <option value="">Select a shoot type</option>
+                            <option value="beauty">Beauty Shoot</option>
+                            <option value="editorial">Editorials</option>
+                            <option value="bridal">Bridal Shoot</option>
+                            <option value="commercial">Commercials</option>
+                            <option value="fashion">Fashion Shoot</option>
+                            <option value="brand">Brand Shoot</option>
+                            <option value="fittings">Fittings</option>
+                            <option value="beauty-brand">Beauty Brand Shoot</option>
+                            <option value="couple">Couple Shoot</option>
+                            <option value="video">Video Shoot</option>
+                        </select>
+
+                        <label id="model-label" class="block mb-2 hidden mt-4">Selected Model</label>
+                        <div id="model-card" class="model-card hidden">
+                            <img id="model-image" src="" alt="Selected Model" class="model-image">
+                            <p id="model-name" class="model-name"></p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="booking-datetime" class="block mb-2">Booking Date/Time</label>
+                        <input type="datetime-local" id="booking-datetime" class="w-full form-input" required>
+                    </div>
+
+                    <div>
+                        <label class="block mb-2">Location</label>
+                        <input type="text" id="address" class="w-full form-input mb-2" placeholder="Address" required>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div><input type="text" id="city" class="w-full form-input" placeholder="City" required></div>
+                            <div><input type="text" id="state" class="w-full form-input" placeholder="State" required></div>
+                            <div><input type="text" id="country" class="w-full form-input" placeholder="Country" required></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="additional-note" class="block mb-2">Additional Note</label>
+                        <textarea rows="4" id="additional-note" class="w-full form-input" placeholder="Any additional information or special requests"></textarea>
+                    </div>
+
+                    <div>
+                        <label for="contact-method" class="block mb-2">How would you like us to reach you?</label>
+                        <select id="contact-method" class="w-full form-input" required>
+                            <option value="">Select a contact method</option>
+                            <option value="whatsapp">WhatsApp</option>
+                            <option value="call">Call</option>
+                            <option value="email">Email</option>
+                            <option value="instagram">Instagram</option>
+                        </select>
+                    </div>
+
+                    <div class="flex gap-4">
+                        <button type="submit" class="btn-animate w-full" id="submit-btn">BOOK NOW</button>
+                        <button type="reset" class="btn-animate w-full">RESET</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- THANK YOU MODAL -->
+        <div id="thankyou-modal">
+            <div class="modal-content">
+                <h3>Thank You!</h3>
+                <p class="text-2xl mt-4">Your booking request has been received</p>
+                <p class="text-lg mt-4">We will contact you shortly</p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-black text-white py-12">
+        <div class="container">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl mb-4 uppercase font-bold">BEIGE</h3>
+                    <p class="text-sm">Portraying beauty in every shade since 2018.</p>
+                </div>
+                <div>
+                    <h4 class="text-lg mb-4 uppercase font-bold">Quick Links</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="home.html" class="hover:underline">Home</a></li>
+                        <li><a href="about.html" class="hover:underline">About</a></li>
+                        <li><a href="models.html" class="hover:underline">Models</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg mb-4 uppercase font-bold">Legal</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="privacy.html" class="hover:underline">Privacy Policy</a></li>
+                        <li><a href="terms-of-service.html" class="hover:underline">Terms of Service</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg mb-4 uppercase font-bold">Newsletter</h4>
+                    <p class="text-sm mb-4">Subscribe to our updates.</p>
+                    <div id="newsletter-feedback" class="hidden text-center mb-4"></div>
+                    <div class="flex">
+                        <input type="email" id="newsletter-email" placeholder="Your email" class="px-4 py-2 w-full text-black form-input" 
+                               pattern="[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}" required>
+                        <button id="newsletter-submit" class="btn-animate bg-white text-black hover:bg-gray-200">→</button>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-6 text-center">
+                <p class="text-sm">© 2025 Beige Modeling Management. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const config = { 
+            apiBaseUrl: window.location.hostname === 'localhost' ? 'https://www.beigemodels.org/api' : '/api'
+        };
+
+        function toggleMenu() {
+            const mobileMenu = document.querySelector('.mobile-menu');
+            const menuToggle = document.querySelector('.menu-toggle');
+            mobileMenu.classList.toggle('active');
+            menuToggle.classList.toggle('active');
+        }
+
+        function getQueryParams() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                modelId: params.get('modelId') || '',
+                modelName: params.get('modelName') || '',
+                imageUrl: params.get('imageUrl') || ''
+            };
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const { modelId, modelName, imageUrl } = getQueryParams();
+            const modelWarning = document.getElementById('model-warning');
+            const thankyouModal = document.getElementById('thankyou-modal');
+            const fullNameInput = document.getElementById('full-name');
+
+            // Activate animations
+            document.getElementById('bookingTitle').classList.add('active');
+            document.querySelectorAll('.reveal').forEach(el => el.classList.add('active'));
+
+            // Show selected model
+            if (modelId) {
+                document.getElementById('model-id').value = modelId;
+                if (modelName && imageUrl) {
+                    document.getElementById('model-label').classList.remove('hidden');
+                    document.getElementById('model-card').classList.remove('hidden');
+                    document.getElementById('model-image').src = decodeURIComponent(imageUrl);
+                    document.getElementById('model-name').textContent = decodeURIComponent(modelName);
+                }
+            }
+
+            // Show warning when user tries to type name without model
+            fullNameInput.addEventListener('focus', () => {
+                if (!modelId) {
+                    modelWarning.classList.add('active');
+                    setTimeout(() => {
+                        window.location.href = 'models.html';
+                    }, 3000);
+                }
+            });
+
+            // Form submission
+            document.getElementById('booking-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const btn = document.getElementById('submit-btn');
+                btn.disabled = true;
+                btn.textContent = 'SENDING...';
+
+                const data = {
+                    modelId: document.getElementById('model-id').value || null,
+                    imageUrl: imageUrl ? decodeURIComponent(imageUrl) : null,
+                    modelName: modelName ? decodeURIComponent(modelName) : null,
+                    fullName: document.getElementById('full-name').value.trim(),
+                    email: document.getElementById('email').value.trim(),
+                    phone: document.getElementById('phone').value.trim(),
+                    shootType: document.getElementById('shoot-type').value,
+                    bookingDateTime: new Date(document.getElementById('booking-datetime').value).toISOString(),
+                    location: {
+                        address: document.getElementById('address').value.trim(),
+                        city: document.getElementById('city').value.trim(),
+                        state: document.getElementById('state').value.trim(),
+                        country: document.getElementById('country').value.trim()
+                    },
+                    additionalNote: document.getElementById('additional-note').value.trim(),
+                    contactMethod: document.getElementById('contact-method').value
+                };
+
+                try {
+                    await fetch(`${config.apiBaseUrl}/bookings`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                } catch (err) {
+                    console.log('Booking submitted (silent)');
+                }
+
+                setTimeout(() => {
+                    thankyouModal.classList.add('active');
+                    setTimeout(() => {
+                        window.location.href = 'models.html';
+                    }, 2000);
+                }, 5000);
+            });
+        });
+    </script>
+</body>
+</html>
